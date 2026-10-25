@@ -1,0 +1,242 @@
+[
+  {
+    "id": 1,
+    "name": "机上の大冒険",
+    "theme": "bench",
+    "width": 8400,
+    "minY": -100,
+    "goal": {
+      "x": 8210,
+      "y": 510
+    },
+    "counts": {
+      "platforms": 21,
+      "enemies": 16,
+      "chips": 28,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 2,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 0,
+      "route": 14,
+      "sections": 0
+    }
+  },
+  {
+    "id": 2,
+    "name": "風の温室",
+    "theme": "garden",
+    "width": 7900,
+    "minY": -1050,
+    "goal": {
+      "x": 7700,
+      "y": -650
+    },
+    "counts": {
+      "platforms": 18,
+      "enemies": 13,
+      "chips": 20,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 1,
+      "lasers": 0,
+      "relays": 0,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 0,
+      "route": 13,
+      "sections": 0
+    }
+  },
+  {
+    "id": 3,
+    "name": "深夜の搬送ライン",
+    "theme": "ice",
+    "width": 9600,
+    "minY": -160,
+    "goal": {
+      "x": 9420,
+      "y": 493
+    },
+    "counts": {
+      "platforms": 2,
+      "enemies": 14,
+      "chips": 56,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 0,
+      "signs": 1,
+      "students": 1,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 13,
+      "route": 14,
+      "sections": 0
+    }
+  },
+  {
+    "id": 4,
+    "name": "3Dプリンターの夢",
+    "theme": "printer",
+    "width": 8300,
+    "minY": -650,
+    "goal": {
+      "x": 8100,
+      "y": -200
+    },
+    "counts": {
+      "platforms": 18,
+      "enemies": 11,
+      "chips": 38,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 5,
+      "relays": 0,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 0,
+      "route": 17,
+      "sections": 0
+    }
+  },
+  {
+    "id": 5,
+    "name": "夜明けの時計塔",
+    "theme": "tower",
+    "width": 2800,
+    "minY": -1500,
+    "goal": {
+      "x": 2600,
+      "y": -1170
+    },
+    "counts": {
+      "platforms": 17,
+      "enemies": 6,
+      "chips": 39,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 3,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 0,
+      "route": 17,
+      "sections": 0
+    }
+  },
+  {
+    "id": 6,
+    "name": "はんだの火花通り",
+    "theme": "solder",
+    "width": 8700,
+    "minY": -100,
+    "goal": {
+      "x": 8490,
+      "y": 510
+    },
+    "counts": {
+      "platforms": 19,
+      "enemies": 14,
+      "chips": 28,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 0,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 7,
+      "gravityZones": 0,
+      "portals": 0,
+      "rails": 0,
+      "route": 15,
+      "sections": 0
+    }
+  },
+  {
+    "id": 7,
+    "name": "オシロスコープの波",
+    "theme": "scope",
+    "width": 8000,
+    "minY": -650,
+    "goal": {
+      "x": 7790,
+      "y": 510
+    },
+    "counts": {
+      "platforms": 14,
+      "enemies": 12,
+      "chips": 40,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 0,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 1,
+      "portals": 0,
+      "rails": 0,
+      "route": 17,
+      "sections": 0
+    }
+  },
+  {
+    "id": 8,
+    "name": "光学ベンチの星空",
+    "theme": "optics",
+    "width": 8300,
+    "minY": -1430,
+    "goal": {
+      "x": 8100,
+      "y": -390
+    },
+    "counts": {
+      "platforms": 12,
+      "enemies": 12,
+      "chips": 16,
+      "gears": 3,
+      "drinks": 3,
+      "winds": 0,
+      "lasers": 0,
+      "relays": 3,
+      "signs": 1,
+      "students": 2,
+      "checkpoints": 3,
+      "presses": 0,
+      "gravityZones": 0,
+      "portals": 3,
+      "rails": 0,
+      "route": 9,
+      "sections": 0
+    }
+  }
+]

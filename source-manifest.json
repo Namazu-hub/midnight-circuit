@@ -1,0 +1,106 @@
+{
+  "source_commit": "655e9b5c91b349ff1fb2af380b019279a0e4573a",
+  "version": 3,
+  "files": [
+    {
+      "path": ".openai/hosting.json",
+      "bytes": 106,
+      "sha256": "3ab46455c6a26c15b1b071b1934ee6bbf61e2a173f251dd162147c0f535881d0"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5627,
+      "sha256": "35b82089c7e4f0f4accacf36e9d7c7728c87688a094bdc468c5dbbd46d094a55"
+    },
+    {
+      "path": "dist/awakening.mjs",
+      "bytes": 3976,
+      "sha256": "64e354d684fd845b6fefdb1b8c25798b83bfca8f0fc2ccb230758e1923ecd47d"
+    },
+    {
+      "path": "dist/enemies.mjs",
+      "bytes": 3338,
+      "sha256": "272ca3a40a79dde4efe4ec65db8266dd36763eb247c1e7d2b37542556884b422"
+    },
+    {
+      "path": "dist/engine.mjs",
+      "bytes": 9829,
+      "sha256": "42e73a3d04cbbfc9c7b98ec83266d2314f8d6c6c005ad471459914af78ad6dd7"
+    },
+    {
+      "path": "dist/fever.mjs",
+      "bytes": 10320,
+      "sha256": "3359cd159aa3c2355429c526338ce5dae7f99316e1616b3ac33ec47326f38be2"
+    },
+    {
+      "path": "dist/game.mjs",
+      "bytes": 29844,
+      "sha256": "bfac062ae6c03138ef25e70f978d3ef18ba5d43090305fe2ea4e8968f83062be"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 11491,
+      "sha256": "63dadb604ac46f9d4261abaa54f0bf13a0b00c891367ba9be0ca58811af3e742"
+    },
+    {
+      "path": "dist/levels.mjs",
+      "bytes": 15071,
+      "sha256": "f66f920bca231e6a5342a89d52fa968487fde0cf555573fd86b4d79244f6179a"
+    },
+    {
+      "path": "dist/progress.mjs",
+      "bytes": 1901,
+      "sha256": "e209d1786dc41cb0bc8aecbcbcf86c70838d1105721871b738d077da4c8a17a5"
+    },
+    {
+      "path": "dist/rail.mjs",
+      "bytes": 1480,
+      "sha256": "eb521bcec13860464ebe258412b5343b7840ac1bb3123bccde856e410c029579"
+    },
+    {
+      "path": "dist/render.mjs",
+      "bytes": 31597,
+      "sha256": "2bddea829ac0e514b3aa59055b7ba4f8889afd07151f1dad391693e0a802deef"
+    },
+    {
+      "path": "dist/style.css",
+      "bytes": 24921,
+      "sha256": "3aee8ebb6f558eb6b654a6a1484e762aba645196ff1659cf9b1029d4d53e384f"
+    },
+    {
+      "path": "dist/world.mjs",
+      "bytes": 218,
+      "sha256": "580fb459c0efdc26cca1f16c322258bbfd0eb860c7bc033070731dfc5313dc13"
+    },
+    {
+      "path": "docs/777-preview.jpg",
+      "bytes": 92116,
+      "sha256": "739c92405e9a1a268cd78788446b36dfeda727a2f9925f7882d1ebe260ecf5bc"
+    },
+    {
+      "path": "docs/design-v3.md",
+      "bytes": 6439,
+      "sha256": "ba3ddb916947a09b6bc6b3fae9d6cbc4e15d0dc0ada125527f94fc7783556736"
+    },
+    {
+      "path": "docs/fever-v3.jpg",
+      "bytes": 108917,
+      "sha256": "8c5032456a4bd0ae17d6cd8c2615417aac3e57d24070e95254950e86aa55737c"
+    },
+    {
+      "path": "docs/world-map-v2.jpg",
+      "bytes": 66793,
+      "sha256": "2b55b10ca7c79ec0b5c2cc322a4f97b0bfc769990f05bf557378a4a431974793"
+    },
+    {
+      "path": "tests/engine.test.mjs",
+      "bytes": 8777,
+      "sha256": "d8a18135a670d3cc336cbefac590c63154b67b2c409e478bcc4cffe3a7816432"
+    },
+    {
+      "path": "tests/routes.mjs",
+      "bytes": 2746,
+      "sha256": "d4ca052d92750e6fbaacf6d760c173efe3eecade44e2d730964c95ed9a32b49e"
+    }
+  ]
+}
