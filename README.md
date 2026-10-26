@@ -6,6 +6,10 @@
 
 ## 起動
 
+通常は[ゲームを開く](https://namazu-hub.github.io/midnight-circuit/)だけで遊べます。パソコン・スマートフォンとも同じURLです。公開処理の状態は[GitHub Actions](https://github.com/Namazu-hub/midnight-circuit/actions/workflows/deploy.yml)で確認できます。
+
+### 手元で開発する場合
+
 ビルドやnpmパッケージのインストールは不要です。Python 3がある環境で、このフォルダーから実行します。
 
 ~~~sh
@@ -63,8 +67,18 @@ npm run verify:baseline
 
 ## 移行の状態
 
-GitHub連携は未接続のため、リポジトリ作成・push・Pages公開は未実施です。このフォルダーの中身を新しいPrivateリポジトリに登録してください。元のWork側サイトは変更していません。
+ソースは公開リポジトリ[Namazu-hub/midnight-circuit](https://github.com/Namazu-hub/midnight-circuit)で管理しています。2026-10-25にフォルダー構造を復元し、ゲーム本体の内容を変えずに保存しました。復元前の状態は`backup/before-folder-repair-2026-10-25-584a637`ブランチに残しています。元のWork側サイトは変更していません。
+
+GitHub PagesのSourceはGitHub Actionsを選択します。`.github/workflows/deploy.yml`がmainへのpush時に構文・参照チェックとゲームの自動テストを実行し、両方成功するとdist/のみを公開します。ビルドや依存パッケージのインストールは不要です。テスト失敗時は公開せず、直前の公開版が維持されます。
+
+今後の改造は変更内容を実装・確認してmainへ保存（またはプルリクエストをマージ）すると、同じ公開URLへ自動反映されます。Actionsの実行が成功してからブラウザを再読み込みしてください。手動の再公開はActions → Deploy to GitHub Pages → Run workflowから実行できます。
 
 セーブはブラウザのlocalStorageに保存され、別URLへ自動では引き継がれません。ソースのバックアップと各ブラウザのセーブデータは別です。
 
 外部のゲーム用画像・音声ファイルは現版にはなく、Canvas/SVGとWeb Audio合成を使用しています。docsのJPEGは元からある画面記録です。公開ライセンスは今回新たに設定していません。
+
+## GitHub Pages公開時の確認
+
+2026-10-25の初回公開処理は成功しました（[実行記録](https://github.com/Namazu-hub/midnight-circuit/actions/runs/40192123218)）。ローカルの構文・参照チェック、既存15テスト、元版との一致検査も成功しています。
+
+公開URLではブラウザでタイトル、8ステージの選択画面、ステージ1開始、HP6・残機3の表示、一時停止画面を確認しました。スマートフォン実機での操作・性能、および公開版の全ステージ通しプレイは未検証です。全8コースの経路確認は自動入力による物理テストです。
