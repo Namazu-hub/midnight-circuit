@@ -1,3 +1,4 @@
+import {bindTouchControls} from './touch-input.mjs';
 import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs';
 import {drawHome,drawWorld,drawThumbnail} from './render.mjs';
 import {blankProgress,readProgress,recordClear} from './progress.mjs';
@@ -13,10 +14,11 @@ function save(){try{localStorage.setItem(STORAGE,JSON.stringify(progress));}catc
 let selectedStage=0,savedNormal=null,feverAge=0,feverDemo=false,pauseMode='playing',lastFeverSave=0;
 function checkpointFever(){if(game?.fever&&!feverDemo&&progress.pending){progress.pending.snapshot=feverSnapshot(game);progress.pending.phase=mode==='feverIntro'?'intro':'playing';save();}}
 let mode='home',game=null,previousMode='home',bonus=null,particles=[],lastTime=0,accumulator=0,worldTime=0,toastUntil=0;
+let touchController=null;
 const pressed=new Set(),touch=new Set();let jumpEdge=false,pulseEdge=false,jumpRelease=false;
 const jumpCodes=['Space','KeyZ','ArrowUp','KeyW'];
 const movementCodes=['ArrowLeft','ArrowRight','KeyA','KeyD',...jumpCodes,'KeyX','ShiftLeft','ShiftRight'];
-function clearInput(){pressed.clear();touch.clear();jumpEdge=false;pulseEdge=false;jumpRelease=false;document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('pressed'));}
+function clearInput(){touchController?.clear();pressed.clear();touch.clear();jumpEdge=false;pulseEdge=false;jumpRelease=false;document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('pressed'));}
 function input(){return {left:pressed.has('ArrowLeft')||pressed.has('KeyA')||touch.has('left'),right:pressed.has('ArrowRight')||pressed.has('KeyD')||touch.has('right'),laneUp:pressed.has('KeyQ')||touch.has('laneUp'),laneDown:pressed.has('KeyE')||touch.has('laneDown'),jump:jumpEdge,jumpRelease,pulse:pulseEdge};}
 class Synth{
   constructor(){this.context=null;this.master=null;this.enabled=progress.sound;this.nextBeat=0;this.step=0;}
@@ -69,7 +71,7 @@ const audio=new Synth();
 function syncSound(){$('sound-label').textContent=progress.sound?'ON':'OFF';$('sound-btn').setAttribute('aria-label',progress.sound?'音をオフにする':'音をオンにする');$('sound-btn').setAttribute('aria-pressed',String(progress.sound));$('footer-sound').textContent=progress.sound?'♪ 音をオフ':'♪ 音をオン';audio.enabled=progress.sound;}
 function toggleSound(){progress.sound=!progress.sound;if(progress.sound)audio.init();syncSound();save();if(progress.sound)audio.sound('chip');}
 $('sound-btn').addEventListener('click',toggleSound);$('footer-sound').addEventListener('click',toggleSound);
-function resize(){const r=$('viewport').getBoundingClientRect();VIEW.w=Math.max(600,Math.round(r.width/r.height*600));canvas.width=VIEW.w;canvas.height=600;ctx.imageSmoothingEnabled=false;}
+function resize(){const r=$('viewport').getBoundingClientRect();if(r.width<=0||r.height<=0)return;VIEW.w=Math.max(600,Math.round(r.width/r.height*600));canvas.width=VIEW.w;canvas.height=600;ctx.imageSmoothingEnabled=false;}
 new ResizeObserver(resize).observe($('viewport'));resize();
 function toast(text,seconds=3.6){$('toast').textContent=text;$('toast').classList.add('visible');toastUntil=worldTime+seconds;}
 function renderCards(){
@@ -114,6 +116,8 @@ function syncUI(){
   else if(game){$('screen-status').innerHTML=`<i></i> ${game.level.location} · ${mode==='playing'?'NIGHT SHIFT ACTIVE':mode==='bonus'?'REPAIR BONUS':'STANDBY'}`;}
   $('retry-btn').textContent=game?.fever?'フィーバーを最初からやり直す':'1機使ってチェックポイントから再開';
   document.body.dataset.mode=mode;
+  if(mode!=='playing')clearInput();
+  document.body.classList.toggle('play-session',!!game&&!['home','map'].includes(mode)&&!(mode==='help'&&['home','map'].includes(previousMode)));
 }
 function startLevel(i){
   if(progress.runLives<=0){mode='gameover';syncUI();return;}if(progress.pending){resumePendingFever();return;}selectedStage=i;clearInput();game=createGame(i);game.lives=progress.runLives;particles=[];mode='playing';bonus=null;accumulator=0;
@@ -219,11 +223,17 @@ document.addEventListener('keydown',e=>{
   if(jumpCodes.includes(e.code))jumpEdge=true;if(['KeyX','ShiftLeft','ShiftRight'].includes(e.code))pulseEdge=true;if(e.code==='KeyR'&&!game.fever){e.preventDefault();respawn(game);processEvents();}
   pressed.add(e.code);
 });
-document.addEventListener('keyup',e=>{pressed.delete(e.code);if(jumpCodes.includes(e.code)&&!jumpCodes.some(k=>pressed.has(k)))jumpRelease=true;});
-for(const b of document.querySelectorAll('[data-control]')){
-  const key=b.dataset.control;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('pressed');touch.add(key);if(key==='jump')jumpEdge=true;if(key==='pulse')pulseEdge=true;if(progress.sound)audio.init();});
-  const release=e=>{e.preventDefault();touch.delete(key);b.classList.remove('pressed');if(key==='jump')jumpRelease=true;};b.addEventListener('pointerup',release);b.addEventListener('pointercancel',release);b.addEventListener('lostpointercapture',()=>{touch.delete(key);b.classList.remove('pressed');});
-}
+document.addEventListener('keyup',e=>{pressed.delete(e.code);if(jumpCodes.includes(e.code)&&!jumpCodes.some(k=>pressed.has(k))&&!touch.has('jump'))jumpRelease=true;});
+touchController=bindTouchControls({
+  buttons:[...document.querySelectorAll('[data-control]')],root:$('touch-controls'),doc:document,win:window,
+  isPlaying:()=>mode==='playing',onStart:()=>{if(progress.sound)audio.init();},
+  onChange:(key,down)=>{
+    if(down){touch.add(key);if(key==='jump')jumpEdge=true;if(key==='pulse')pulseEdge=true;}
+    else{touch.delete(key);if(key==='jump'&&!jumpCodes.some(k=>pressed.has(k)))jumpRelease=true;}
+  }
+});
+const orientation=matchMedia('(orientation: landscape)');
+orientation.addEventListener('change',()=>{clearInput();pause();requestAnimationFrame(resize);});
 window.addEventListener('pagehide',checkpointFever);
 window.addEventListener('blur',()=>{clearInput();if(['playing','feverIntro','feverOutro'].includes(mode))pause();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInput();if(['playing','feverIntro','feverOutro'].includes(mode))pause();}else lastTime=0;});

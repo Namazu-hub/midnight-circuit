@@ -21,3 +21,67 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 /* Lane controls stay compact alongside the original two-thumb layout. */
 .touch-controls [data-control^="lane"]{width:42px;font-size:11px;background:#203c57;color:#bde6ff}
 @media(max-width:440px){.touch-controls>div{gap:4px}.touch-controls button{min-width:38px;width:38px}.touch-controls .touch-jump{width:64px}.touch-controls .touch-pulse{width:54px}.touch-controls [data-control^="lane"]{width:36px;min-width:36px}}
+
+/* Touch controls are game surfaces, never selectable text or callout targets. */
+.touch-controls,.touch-controls *{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  -webkit-user-drag:none;touch-action:none;-webkit-tap-highlight-color:transparent;
+}
+.touch-controls{overscroll-behavior:contain}
+.touch-controls button{padding:0;display:grid;place-items:center;min-height:56px}
+.direction-icon{display:block;width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;pointer-events:none}
+.direction-left{border-right:15px solid currentColor}
+.direction-right{border-left:15px solid currentColor}
+@media (pointer:coarse),(max-width:680px){
+  .touch-controls{padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));gap:8px}
+  .touch-controls [data-control=left],.touch-controls [data-control=right]{width:58px;min-width:48px}
+  .touch-controls .touch-jump{width:76px;min-width:60px}
+  .touch-controls .touch-pulse{width:60px;min-width:48px}
+  .touch-controls>div:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .touch-controls [data-control^=lane]{height:38px;min-height:38px;width:100%;min-width:0}
+}
+/* Browser fullscreen is not required: Safari can use this on rotation too. */
+@media (orientation:landscape) and (pointer:coarse),(orientation:landscape) and (max-height:600px) and (max-width:1400px){
+  body.play-session{height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}
+  body.play-session .site-header,body.play-session .above-game,body.play-session .stage-section,
+  body.play-session .controls-strip,body.play-session footer,body.play-session .game-bottom{display:none}
+  body.play-session main{padding:0;margin:0;max-width:none}
+  body.play-session .game-shell,body.play-session .game-shell:fullscreen{
+    position:fixed;inset:0;z-index:30;width:100%;height:100vh;height:100dvh;
+    border:0;border-radius:0;display:grid;grid-template-rows:38px minmax(0,1fr) auto;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background:#0b1421;box-shadow:none;
+  }
+  body.play-session .screen-top{display:flex;height:38px;font-size:8px;flex-shrink:0}
+  body.play-session .screen-actions button{min-width:44px;min-height:36px;font-size:22px}
+  body.play-session .viewport,body.play-session .game-shell:fullscreen .viewport{
+    min-height:0;max-height:none;max-width:none;width:100%;height:100%;aspect-ratio:auto;margin:0;
+  }
+  body.play-session canvas#game{object-fit:fill}
+  body.play-session .touch-controls,body.play-session .game-shell:fullscreen .touch-controls{
+    position:static;display:flex;visibility:visible;z-index:4;pointer-events:auto;background:#111e2d;
+    padding:6px 16px;gap:16px;border-top:1px solid #314657;align-items:end;
+  }
+  body.play-session .touch-controls>div:first-child{display:flex;gap:8px;align-items:end}
+  body.play-session .touch-controls>div:last-child{gap:10px}
+  body.play-session .touch-controls button{height:54px;min-height:54px;width:66px;min-width:54px;opacity:1;font-size:12px;transform:none}
+  body.play-session .touch-controls button.pressed{background:#53748d;box-shadow:inset 0 0 0 2px #92efd7}
+  body.play-session .touch-controls [data-control^=lane]{width:48px;min-width:44px;height:44px;min-height:44px;font-size:11px}
+  body.play-session .touch-controls .touch-jump{width:94px}
+  body.play-session .touch-controls .touch-pulse{width:76px}
+  body.play-session .hud{top:8px;left:12px;right:12px}
+  body.play-session .hud-stage small{display:none}
+  body.play-session .hud-stage strong{font-size:10px}
+  body.play-session .hud-stage>span{width:28px;height:28px;font-size:12px}
+  body.play-session .hud-stats{padding:6px 8px;gap:8px;font-size:10px}
+  body.play-session #hearts{font-size:10px}
+  body.play-session .pulse-hud{top:auto;bottom:8px;left:12px;padding:4px 7px}
+  body.play-session .pulse-hud>kbd{display:none}
+  body.play-session .toast{top:auto;bottom:8px;max-width:68%;padding:6px 9px;font-size:10px}
+  body.play-session .modal-overlay{position:fixed;inset:0;z-index:50;padding:10px;touch-action:pan-y}
+  body.play-session .dialog{transform:none;max-height:90vh;max-height:90dvh;overflow-y:auto;padding:16px 24px}
+  body.play-session .dialog h2{margin:8px 0;font-size:22px}
+  body.play-session .touch-controls{pointer-events:none}
+  body[data-mode=playing].play-session .touch-controls button{pointer-events:auto}
+  body.play-session:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:none}
+}
