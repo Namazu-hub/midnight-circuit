@@ -1,4 +1,4 @@
-import {overlap,clamp} from './world.mjs?v=4.1a';
+import {overlap,clamp} from './world.mjs?v=4.2a';
 export const LAB_RULES={repairCooldown:.65,bossHP:6,bossImmunity:1.1,magnetCooldown:3,stickyDuration:12};
 export function expandRooms(rooms){
  const kinds=[['spring','coil'],['mouse-hop','silicone-a','silicone-b'],[],['silicone-a','silicone-b','coil'],['spring','mouse-erratic'],['mouse-dash','coil'],['coil','mouse-chase'],['mouse-chase','spring']];
@@ -21,7 +21,7 @@ export function expandRooms(rooms){
 export function repairPhase(g,r){return (g.time*.42+(r.x%7)*.1)%1;}
 export function tickLab(g,input,activated,dt,hit){
  const L=g.level,p=g.player;
- for(const r of L.relays){if(!r.mode||r.on)continue;if(activated&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<110){if(r.mode==='sequence'){r.step++;r.on=r.step>=3;}if(r.mode==='titration'){r.amount=clamp((r.amount||0)+2,0,6);r.on=r.amount===6;}if(r.mode==='timing')r.on=repairPhase(g,r)>=.35&&repairPhase(g,r)<=.7;g.cooldown=LAB_RULES.repairCooldown;if(r.on){p.hp=Math.min(6,p.hp+1);g.respawn={x:p.x,y:p.y};g.checkpoint=true;}g.events.push({type:r.on?'relay':'repairStep',x:r.x,y:r.y,text:r.mode==='timing'?'緑の帯でX！':r.mode==='titration'?`pH ${1+r.amount} → 目標7`:`接続 ${r.step}/3`});}}
+ for(const r of L.relays){if(!r.mode||r.on||r.puzzleType)continue;if(activated&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<110){if(r.mode==='sequence'){r.step++;r.on=r.step>=3;}if(r.mode==='titration'){r.amount=clamp((r.amount||0)+2,0,6);r.on=r.amount===6;}if(r.mode==='timing')r.on=repairPhase(g,r)>=.35&&repairPhase(g,r)<=.7;g.cooldown=LAB_RULES.repairCooldown;if(r.on){p.hp=Math.min(6,p.hp+1);g.respawn={x:p.x,y:p.y};g.checkpoint=true;}g.events.push({type:r.on?'relay':'repairStep',x:r.x,y:r.y,text:r.mode==='timing'?'緑の帯でX！':r.mode==='titration'?`pH ${1+r.amount} → 目標7`:`接続 ${r.step}/3`});}}
  for(const z of L.rain||[]){if(Math.abs(p.x-(z.x+z.w/2))>800)continue;const old=z.clock;z.clock+=dt;z.phase=z.clock%2.6;if(Math.floor(old/2.6)!==Math.floor(z.clock/2.6)&&g.pulse<=0)for(let j=0;j<4;j++)g.projectiles.push({kind:'screw',x:z.x+50+j*135,y:z.y-520,w:12,h:22,vx:0,vy:340,life:1.6});}
  for(const wall of L.sticky||[]){wall.life-=dt;if(g.pulse>0&&Math.abs(p.x-wall.x)<200)wall.life=0;if(wall.life>0&&overlap(p,wall)){p.vx*=.15;p.x=p.x+14<wall.x+wall.w/2?wall.x-p.w:wall.x+wall.w;}}L.sticky=(L.sticky||[]).filter(w=>w.life>0);
  const b=L.boss;if(!b||b.repaired)return;b.invul=Math.max(0,b.invul-dt);const ctl=L.bossConsole;ctl.cooldown=Math.max(0,ctl.cooldown-dt);if(p.x<7100)return;
@@ -33,6 +33,7 @@ export function tickLab(g,input,activated,dt,hit){
 }
 export function drawLab(c,g){const L=g.level;c.save();c.textAlign='center';
  for(const r of L.relays){if(!r.mode||Math.abs(r.x-g.player.x)>550)continue;c.fillStyle='#102334';c.fillRect(r.x-105,r.y-115,210,68);c.font='12px sans-serif';c.fillStyle=r.on?'#82ffd1':'#fff0bd';c.fillText(r.on?'✓ 修理完了':r.label,r.x,r.y-96);
+ if(r.puzzleType){c.fillStyle='#bddce2';c.fillText(r.on?r.repairResult:r.optional?'C または「修理」で調整':'X または「修理」で調整',r.x,r.y-70);continue;}
  if(r.mode==='titration'){
   c.strokeStyle='#c8e6f6';c.lineWidth=3;c.strokeRect(r.x+35,r.y-40,47,62);c.fillStyle=r.on?'#81e9bb':'#f4a8c9';c.fillRect(r.x+38,r.y-5-(r.amount||0)*3,41,24+(r.amount||0)*3);c.strokeRect(r.x+52,r.y-155,9,98);c.fillStyle='#91caff';c.fillRect(r.x+54,r.y-150,5,52-(r.amount||0)*5);c.fillRect(r.x+48,r.y-60,18,4);c.beginPath();c.arc(r.x+57,r.y-45+(g.time*35%30),3,0,Math.PI*2);c.fill();
  }

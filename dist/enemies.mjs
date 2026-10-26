@@ -1,4 +1,4 @@
-import {clamp,overlap} from './world.mjs?v=4.1a';
+import {clamp,overlap} from './world.mjs?v=4.2a';
 export const ENEMY_GUIDE=[
  ['spring','横伸びバネ','縮んで予告した後、左右に伸びる。上から踏むかパルス。'],
  ['coil','電磁コイル','充電中は引き寄せ、放電中は押し戻す。パルスで停止。'],
@@ -44,6 +44,7 @@ export function tickEnemies(g,dt,hit){
      if(e.state==='patrol')patrol(e,dt,24);
      if(e.state==='discharge'&&Math.hypot(p.x+p.w/2-(e.x+16),p.y+p.h/2-(e.y+14))<78)hit(g,e.x+16);
    }else if(e.kind==='chip'){
+     if(g.level.defenceDisabled){e.state='recover';e.aim=null;continue;}
      const phase=e.clock%3.3;e.state=phase<1.8?'patrol':phase<2.55?'aim':'recover';
      if(e.state==='aim'&&!e.aim){const d=Math.max(1,Math.hypot(dx,dy));e.aim={x:dx/d,y:dy/d};}
      if(e.state==='recover'&&e.aim){g.projectiles.push({kind:'bolt',x:e.x+12,y:e.y+8,w:9,h:9,vx:e.aim.x*235,vy:e.aim.y*235,life:3.6});e.aim=null;g.events.push({type:'enemyShot',x:e.x,y:e.y});}

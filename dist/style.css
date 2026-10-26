@@ -87,3 +87,20 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 }
 
 .shop-open{position:absolute;right:14px;bottom:14px;z-index:8;min-height:44px}.shop-dialog{max-height:90dvh;overflow:auto}.shop-dialog .secondary-btn{min-height:44px;width:100%;margin:6px 0}.shop-dialog button:disabled{opacity:.4}.shop-dialog p{line-height:1.5}
+
+/* Equipment service UI: scrolls independently, including small landscape screens. */
+.repair-open{position:absolute;right:14px;bottom:68px;z-index:4;min-height:44px;padding:8px 14px;background:#1a3e47;border:1px solid #75efce;border-radius:6px}
+#repair-overlay{position:fixed;inset:0;z-index:60;touch-action:pan-y;padding:12px;overscroll-behavior:contain}
+.repair-dialog{width:900px;max-height:calc(100dvh - 24px);overflow:auto;padding:20px;text-align:left;overscroll-behavior:contain}
+.repair-dialog header{display:flex;align-items:center;justify-content:space-between;gap:15px}.repair-dialog h2{font-size:24px;margin:10px 0}.repair-dialog header button{min-height:44px;padding:8px}
+.repair-dialog p{font-size:13px;line-height:1.6;margin:8px 0}.repair-dialog .repair-safety{color:#75efce;font-size:12px}
+.repair-workspace{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(230px,1fr);gap:18px;align-items:start}
+#repair-board{display:block;width:100%;height:auto;border:1px solid #36576a;border-radius:8px;object-fit:contain}
+.repair-field{display:block;margin:0 0 10px;color:#d4e8eb;font-size:13px}.repair-field label,.repair-field>span{display:block;margin-bottom:4px}.repair-field output{float:right;color:#75efce;font-variant-numeric:tabular-nums}
+.repair-field select{width:100%;min-height:44px;background:#21394c;color:#f1f8fa;border:1px solid #658494;border-radius:5px;padding:8px;font:14px sans-serif}
+.repair-range{display:flex;align-items:center;gap:8px}.repair-range input{min-width:0;width:100%;min-height:44px;accent-color:#75efce;touch-action:pan-y}.repair-range button,.repair-dose button{min-height:44px;min-width:44px;background:#29465b;color:#edf8f7;border:1px solid #668a9d;border-radius:5px;font-size:14px;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.repair-dose{display:grid;grid-template-columns:1fr 1fr;gap:8px}.repair-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 0;padding:0;border:0}.repair-actions button.secondary-btn,.repair-actions button.primary-btn{margin:0;min-height:48px;padding:8px;font-size:12px;width:100%;justify-content:center}.repair-actions .primary-btn{background:#75efce;color:#0b2632}
+#repair-readout{color:#ffdc8d;background:#263340;padding:10px;border-radius:5px}#repair-feedback{min-height:2em;color:#c8e5e9}#repair-table table{width:100%;font-size:13px;border-collapse:collapse;text-align:center;margin-top:10px}#repair-table td,#repair-table th{padding:4px;border-bottom:1px solid #344e62}#repair-table .correct{color:#75efce}#repair-table .incorrect{color:#ffa28f}
+.repair-dialog button:focus-visible,.repair-dialog select:focus-visible,.repair-dialog input:focus-visible{outline:3px solid #ffd887;outline-offset:2px}
+@media(max-width:640px){.repair-workspace{grid-template-columns:1fr}.repair-dialog{padding:14px}.repair-dialog h2{font-size:20px}.repair-actions{grid-template-columns:1fr 1fr}.repair-dialog header .dialog-kicker{font-size:7px}}
+@media(max-height:450px) and (orientation:landscape){.repair-workspace{grid-template-columns:minmax(0,1fr) minmax(220px,1fr)}.repair-dialog h2{font-size:18px}.repair-dialog{padding:10px 18px}.repair-actions{grid-template-columns:repeat(4,1fr)}}

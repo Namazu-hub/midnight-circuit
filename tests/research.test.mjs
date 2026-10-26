@@ -10,7 +10,7 @@ test('grants for enemies, pickups and repairs occur once per attempt and survive
 });
 test('repair creates solid optional stairs; pulse cannot unlock them early',()=>{
  const g=createGame(0),r=g.level.relays.find(r=>r.researchLink.length),a=g.level.platforms[r.researchLink[0]];
- g.pulse=3;assert.equal(platformSolid(g,a),false);r.on=true;tickResearch(g);assert.equal(platformSolid(g,a),true);
+ g.pulse=3;assert.equal(platformSolid(g,a),false);r.on=true;r.repairRank=2;tickResearch(g);assert.equal(platformSolid(g,a),true);
  const box=g.level.researchCaches.find(c=>c.device===r.id);g.player.x=box.x-14;g.player.y=box.y-20;tickResearch(g);const paid=g.research.funds;
  tickResearch(g);assert.equal(g.research.funds,paid);assert.equal(g.research.caches,1);respawn(g);assert.equal(platformSolid(g,a),true);
 });

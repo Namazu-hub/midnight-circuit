@@ -1,14 +1,16 @@
+import {solveSession} from './repair-inputs.mjs';
 import {createGame,updateGame,platformSolid} from '../dist/engine.mjs';
 export function traverse(index,{limit=180,trace=false}={}){
  const g=createGame(index);let wp=0,maxY=0,oldDeaths=0,stuck=0,lastWP=0;
  for(let f=0;f<120*limit&&!g.finished;f++){
+  if(g.repairSession)solveSession(g);
   const p=g.player,L=g.level;const target=L.route[wp]||L.goal;let dx=target.x-(p.x+14),dy=target.y-(p.y+40);
   if(g.deaths!==oldDeaths){oldDeaths=g.deaths;let closest=0,d=Infinity;for(let i=0;i<L.route.length;i++){const r=L.route[i],dd=Math.hypot(r.x-p.x,r.y-p.y-40);if(dd<d){d=dd;closest=i;}}wp=closest;}
   if((!target.portal&&Math.abs(dx)<65&&(target.service||index===4||index===7&&wp>=2&&wp<=9||index===6&&wp>=2&&wp<=9||index===3&&wp>=4&&wp<=9?p.onGround&&Math.abs(dy)<45:dy>-100))||(target.portal&&L.portals.find(r=>r.id===target.portal).on)){wp=Math.min(wp+1,L.route.length);}
   let left=dx<-22,right=dx>22,jump=false,pulse=false;
-  const service=L.relays.find(r=>r.mode&&!r.on&&Math.abs(r.x-p.x)<450&&Math.abs(r.y-p.y-20)<80);
+  const service=L.relays.find(r=>!r.optional&&r.mode&&!r.on&&Math.abs(r.x-p.x)<450&&Math.abs(r.y-p.y-20)<80);
   if(service){dx=service.x-p.x-14;left=dx<-18;right=dx>18;}
-  const nearbyRelay=L.relays.find(r=>!r.on&&!r.portal&&Math.hypot(r.x-p.x,r.y-p.y-20)<(r.mode?90:150));
+  const nearbyRelay=L.relays.find(r=>!r.optional&&!r.on&&!r.portal&&Math.hypot(r.x-p.x,r.y-p.y-20)<(r.mode?90:150));
   if(nearbyRelay){left=right=false;pulse=g.cooldown<=0;}
   const portal=target.portal&&L.portals.find(r=>r.id===target.portal);
   if(portal&&Math.abs(dx)<60){left=right=false;pulse=g.cooldown<=0;}

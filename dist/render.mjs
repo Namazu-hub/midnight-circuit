@@ -1,6 +1,6 @@
-import {drawResearch} from './research.mjs?v=4.1a';
-import {drawLab} from './laboratory.mjs?v=4.1a';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.1a';
+import {drawResearch} from './research.mjs?v=4.2a';
+import {drawLab} from './laboratory.mjs?v=4.2a';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.2a';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -143,12 +143,12 @@ function checkpoint(c,cp,active,t){
   const col=active?'#7ef2ce':'#728b9e';rect(c,cp.x+2,cp.y-81,30,22,col);rect(c,cp.x+29,cp.y-77+Math.sin(t*3)*2,8,17,col);rect(c,cp.x+9,cp.y-75,4,10,'#23484e');rect(c,cp.x+6,cp.y-72,10,4,'#23484e');if(active)glow(c,cp.x+13,cp.y-70,70,'#75efce17');
 }
 function goal(c,g,t){
-  const {x,y}=g.level.goal,ready=g.level.relays.every(r=>r.on)&&(!g.level.boss||g.level.boss.repaired),col=ready?g.level.color:'#8c7d9e';glow(c,x,y-50,110,col+'20');
+  const {x,y}=g.level.goal,ready=g.level.relays.every(r=>r.optional||r.on)&&(!g.level.boss||g.level.boss.repaired),col=ready?g.level.color:'#8c7d9e';glow(c,x,y-50,110,col+'20');
   rect(c,x-31,y-102,62,102,'#101e31');rect(c,x-36,y-105,72,9,'#6a8895');rect(c,x-32,y-96,5,96,'#82aaa9');rect(c,x+27,y-96,5,96,'#82aaa9');rect(c,x-23,y-91,46,85,'#233d4f');
   rect(c,x-18,y-86,36,50,col+'44');rect(c,x-15,y-82,30,40,'#163140');
   const wave=Math.sin(t*4)*4;line(c,x-11,y-60,x-5,y-60,col,2);line(c,x-5,y-60,x,y-69-wave,col,2);line(c,x,y-69-wave,x+5,y-52+wave,col,2);line(c,x+5,y-52+wave,x+12,y-60,col,2);
   rect(c,x-20,y-29,40,4,col);rect(c,x-17,y-18,6,6,col);rect(c,x+11,y-18,6,6,col);rect(c,x-39,y-5,78,5,'#9ab7bc');
-  c.font='9px monospace';c.textAlign='center';c.fillStyle=col;c.fillText(ready?'RESTORE':`${g.level.relays.length} RELAYS`,x,y-120);c.textAlign='left';
+  c.font='9px monospace';c.textAlign='center';c.fillStyle=col;c.fillText(ready?'RESTORE':`${g.level.relays.filter(r=>!r.optional&&!r.on).length} TO REPAIR`,x,y-120);c.textAlign='left';
 }
 export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=PALETTES[g.level.theme];background(c,g.level.theme,g.camera,t);

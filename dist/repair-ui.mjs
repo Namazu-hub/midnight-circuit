@@ -1,0 +1,54 @@
+import {REPAIR_NAMES,createPuzzle,changePuzzle,assessPuzzle,puzzleHint,gearRatio,titrationPH,jointPoints,signalAt,sensorResults,truthTable} from './repairs.mjs?v=4.2a';
+
+// The overlay is rendered with native inputs for touch, keyboard and screen readers.
+export function createRepairUI(host,callbacks){
+ const overlay=document.createElement('div');overlay.id='repair-overlay';overlay.className='modal-overlay';overlay.hidden=true;
+ overlay.innerHTML=`<section class="dialog repair-dialog" role="dialog" aria-modal="true" aria-labelledby="repair-title">
+ <header><span class="dialog-kicker">RESEARCH EQUIPMENT / SERVICE MODE</span><button type="button" class="text-btn" id="repair-close">中断して戻る</button></header>
+ <h2 id="repair-title"></h2><p id="repair-goal"></p><p class="repair-safety">修理中は時間が止まります。失敗しても無料で再挑戦できます。</p>
+ <div class="repair-workspace"><div class="repair-visual"><canvas width="600" height="260" id="repair-board" aria-label="修理装置の現在値と目標。数値は操作欄と判定欄にも表示します"></canvas><div id="repair-table"></div></div><div id="repair-controls"></div></div>
+ <p id="repair-readout" role="status"></p><p id="repair-feedback" aria-live="polite"></p>
+ <footer class="repair-actions"><button type="button" class="secondary-btn" id="repair-reset">調整をリセット</button><button type="button" class="secondary-btn" id="repair-hint">詳しいヒント ¥10</button><button type="button" class="secondary-btn" id="repair-assist">応急自動補助 ¥80</button><button type="button" class="primary-btn" id="repair-confirm">判定して復旧</button></footer></section>`;
+ host.append(overlay);const $=id=>overlay.querySelector('#'+id),board=$('repair-board'),ctx=board.getContext('2d');let s=null,game=null;
+ const text=(id,value)=>$(id).textContent=value;
+ const feedback=value=>text('repair-feedback',value);
+ $('repair-close').onclick=()=>callbacks.close();
+ $('repair-confirm').onclick=()=>{const result=callbacks.commit();if(!result.ok)feedback('まだ復旧できません。'+result.detail);};
+ $('repair-reset').onclick=()=>{const r=game.level.relays.find(r=>r.id===game.repairSession.id);r.puzzle=createPuzzle(s.type,s.difficulty);s=r.puzzle;game.repairSession.puzzle=s;renderControls();feedback('調整値を初期状態に戻しました。');refresh();};
+ $('repair-hint').onclick=()=>{if(s.hint){feedback(puzzleHint(s));return;}if(callbacks.spend(10)){s.hint=true;feedback(puzzleHint(s));refresh();}else feedback('科研費が足りません。目標と基本操作は上の説明を確認してください。');};
+ $('repair-assist').onclick=()=>callbacks.assist();
+ function button(parent,label,click){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=click;parent.append(b);return b;}
+ function select(label,options,value,key,index=0){const row=document.createElement('label');row.className='repair-field';const caption=document.createElement('span');caption.textContent=label;const input=document.createElement('select');input.setAttribute('aria-label',label);for(const [v,name] of options){const o=document.createElement('option');o.value=v;o.textContent=name;input.append(o);}input.value=value;input.onchange=()=>{changePuzzle(s,key,input.value,index);refresh();if(s.type==='wiring'){renderControls();$('repair-controls').querySelectorAll('select')[index].focus();}};row.append(caption,input);$('repair-controls').append(row);}
+ function range(label,key,value,min,max,step,index=0){const row=document.createElement('div');row.className='repair-field';const caption=document.createElement('label'),id=`repair-${key}-${index}`,out=document.createElement('output');caption.htmlFor=id;caption.textContent=label+' ';out.textContent=String(value);caption.append(out);const input=document.createElement('input');Object.assign(input,{id,type:'range',min,max,step,value});input.setAttribute('aria-label',label);const change=v=>{input.value=v;changePuzzle(s,key,Number(input.value),index);out.textContent=input.value;refresh();};input.oninput=()=>change(input.value);const controls=document.createElement('div');controls.className='repair-range';button(controls,'−',()=>change(+input.value-step)).setAttribute('aria-label',label+'を減らす');controls.append(input);button(controls,'＋',()=>change(+input.value+step)).setAttribute('aria-label',label+'を増やす');row.append(caption,controls);$('repair-controls').append(row);}
+ function renderControls(){
+  $('repair-controls').replaceChildren();
+  if(s.type==='wiring')s.labels.forEach((label,i)=>select(label+' の接続先',[[-1,'未接続'],...s.outputs.map((o,j)=>[j,`${j+1}: ${o}`])],s.connections[i],'wire',i));
+  if(s.type==='gears'){select('出力歯車の歯数',[[12,'12歯'],[24,'24歯'],[48,'48歯']],s.output,'output');select('中間歯車の数',Array.from({length:4},(_,i)=>[i,`${i}個`]),s.idlers,'idlers');}
+  if(s.type==='titration'){const row=document.createElement('div');row.className='repair-dose';for(const amount of [5,1,.1,.01])button(row,`塩基 +${amount}mL`,()=>{changePuzzle(s,'base',amount);refresh();});button(row,'酸 +0.1mL',()=>{changePuzzle(s,'acid',.1);refresh();});$('repair-controls').append(row);}
+  if(s.type==='joints')s.angles.forEach((a,i)=>range(`関節${i+1} [°]`,'angle',a,-120,120,1,i));
+  if(s.type==='signal'){range('位相 [°]','phase',s.phase,0,360,5);if(s.difficulty>1)range('周波数 [Hz]','frequency',s.frequency,.5,2,.05);if(s.difficulty>2)range('振幅','amplitude',s.amplitude,.5,1.5,.05);}
+  if(s.type==='sensor'){s.thresholds.forEach((v,i)=>range(`センサ${i+1} 閾値`,'threshold',v,0,1.5,.01,i));if(s.difficulty>1)range('感度','gain',s.gain,.5,1.5,.05);}
+  if(s.type==='logic'){s.gates.slice(0,s.difficulty===1?1:2).forEach((v,i)=>select(`ゲート${i+1}`,['AND','OR','XOR'].map(v=>[v,v]),v,'gate',i));select('最終出力',[[0,'そのまま'],[1,'NOTで反転']],Number(s.invert),'invert');}
+ }
+ function refresh(){
+  const result=assessPuzzle(s);text('repair-readout',result.detail+' ／ '+(result.rank?result.label+'が可能':'調整中'));
+  $('repair-confirm').textContent=result.rank?result.label+'で復旧':'判定して復旧';
+  $('repair-hint').textContent=s.hint?'ヒントを再表示（購入済）':'詳しいヒント ¥10';
+  const table=$('repair-table');table.replaceChildren();
+  if(s.type==='logic'){const values=truthTable(s,s.difficulty),t=document.createElement('table');t.innerHTML='<thead><tr><th>A</th><th>B</th>'+(s.difficulty>1?'<th>C</th>':'')+'<th>目標</th><th>出力</th></tr></thead>';const body=document.createElement('tbody');values.forEach((v,i)=>{const row=document.createElement('tr');row.className=v===s.target[i]?'correct':'incorrect';[i&1,(i>>1)&1,...(s.difficulty>1?[(i>>2)&1]:[]),s.target[i],v].forEach(value=>{const td=document.createElement('td');td.textContent=value;row.append(td);});body.append(row);});t.append(body);table.append(t);}
+  draw(0);
+ }
+ function draw(ms){
+  if(!s||overlay.hidden)return;const c=ctx;c.clearRect(0,0,600,260);c.fillStyle='#0a1725';c.fillRect(0,0,600,260);c.font='16px sans-serif';c.textAlign='center';c.lineCap='round';
+  const label=(text,x,y,color='#dcece9')=>{c.fillStyle=color;c.fillText(text,x,y);};
+  const line=(points,color,width=3)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();};
+  if(s.type==='wiring'){const spacing=210/s.labels.length;s.labels.forEach((v,i)=>{const y=35+i*spacing;label(v,65,y+5);label(s.outputs[i],530,y+5);const dest=s.connections[i];if(dest>=0)line([{x:125,y},{x:475,y:35+dest*spacing}],s.outputs[dest]===v?'#75efce':'#ff9b84',5);c.fillStyle='#a8c3d2';c.beginPath();c.arc(125,y,6,0,Math.PI*2);c.arc(475,y,6,0,Math.PI*2);c.fill();});}
+  if(s.type==='gears'){const gears=[24,...Array(s.idlers).fill(24),s.output],radii=gears.map(z=>z*.8),total=radii.reduce((a,b)=>a+2*b,0);let x=(600-total)/2;gears.forEach((z,i)=>{const r=radii[i];x+=r;const angle=ms/1000*(i%2?-1:1)*24/z;c.save();c.translate(x,120);c.rotate(angle);c.strokeStyle=i===gears.length-1?'#ffd57e':'#8fd7d4';c.fillStyle='#243c50';c.lineWidth=3;c.beginPath();for(let j=0;j<z*4;j++){const a=j/(z*4)*Math.PI*2,rr=r+(j%4<2?3:-3);j?c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):c.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();c.stroke();line([{x:0,y:0},{x:r-8,y:0}],'#ecf6ed',3);c.restore();label(z+'歯',x,185);x+=r;});label(`目標 ${s.targetRatio}倍 ／ 現在 ${gearRatio(s.input,s.output,s.idlers)}倍`,300,230);}
+  if(s.type==='titration'){const ph=titrationPH(s),limit=60,points=[];for(let i=0;i<=240;i++)points.push({x:60+i*2,y:225-titrationPH(s,i*limit/240)*14});line([{x:60,y:20},{x:60,y:225},{x:555,y:225}],'#607c90');line(points,'#75efce',3);const x=60+Math.min(limit,s.baseVolume)*8,y=225-ph*14;c.fillStyle='#ffd57e';c.beginPath();c.arc(x,y,7,0,Math.PI*2);c.fill();label(`塩基 ${s.baseVolume.toFixed(2)}mL ／ pH ${ph.toFixed(3)}`,330,28);label('0',55,248);label('塩基の投入体積 [mL] → 60',360,248);label('pH',28,34);label('14',28,55);label('0',30,225);}
+  if(s.type==='joints'){const scale=180/s.angles.length,plot=(angles,color,dash)=>{c.setLineDash(dash);const points=jointPoints(angles).map(p=>({x:120+p.x*scale,y:140+p.y*scale}));line(points,color,12);c.setLineDash([]);for(const p of points){c.fillStyle=color;c.beginPath();c.arc(p.x,p.y,9,0,Math.PI*2);c.fill();}return points.at(-1);};plot(s.target,'#607d8c',[5,8]);plot(s.angles,'#75efce',[]);label('点線：目標姿勢 ／ 緑：現在の姿勢',300,242);}
+  if(s.type==='signal'){line([{x:30,y:130},{x:570,y:130}],'#435e71',1);for(const [wave,color] of [[s.target,'#7e96a6'],[s,'#75efce']])line(Array.from({length:241},(_,i)=>({x:30+i*2.25,y:130-signalAt(wave,i/120)*65})),color,3);label('灰：基準信号 ／ 緑：制御信号',300,25);label('0秒',35,247);label('2秒',560,247);}
+  if(s.type==='sensor'){const results=sensorResults(s);for(const [i,row] of results.entries()){const x=55+i*44;for(let j=0;j<row.values.length;j++){const y=225-row.values[j]*s.gain*125;c.fillStyle=row.target?'#75efce':'#8a9cad';c.beginPath();c.arc(x+j*10,y,6,0,Math.PI*2);c.fill();}label(row.correct?'✓':'×',x,250,row.correct?'#75efce':'#ff9b84');}s.thresholds.forEach((t,i)=>{c.setLineDash([5,5]);line([{x:35,y:225-t*125},{x:570,y:225-t*125}],i?'#ffd57e':'#ffb2d0',2);c.setLineDash([]);});label('緑：物体あり ／ 灰：なし ／ 点線：検知閾値',300,25);}
+  if(s.type==='logic'){label(s.difficulty===1?`A・B → ${s.gates[0]} → ${s.invert?'NOT → ':''}出力`:`A・B → ${s.gates[0]} → Cと${s.gates[1]} → ${s.invert?'NOT → ':''}出力`,300,120);label('各ゲートを切り替え、下の全行を一致させよう',300,180);}
+ }
+ return {overlay,feedback,draw,show(g){game=g;s=g.repairSession.puzzle;overlay.hidden=false;text('repair-title',REPAIR_NAMES[s.type]+` · Lv.${s.difficulty}`);const goals={wiring:'端子の名前を読んで接続先を選択。誤接続は選び直せます。',gears:`目標：出力/入力 ${s.targetRatio}倍。完全修理は中間歯車${s.maxIdlers}個以下。入力は時計回り。`,titration:`酸 ${s.acidConcentration}mol/L × ${s.acidVolume}mL に、塩基 ${s.baseConcentration}mol/L を投入。目標pH7。`,joints:'関節を調整して点線の姿勢へ。角度は各節の相対角です。',signal:'灰色の基準波形に緑色を重ねる。横ずれは位相、間隔は周波数、高さは振幅。',sensor:'物体ありだけ検知する閾値へ調整。複数センサの場合はAND判定。',logic:'真理値表の目標出力と全行一致させる。ANDは両方、ORはどちらか、XORは片方だけ1。'};text('repair-goal',goals[s.type]+' 復旧効果：'+(g.level.relays.find(r=>r.id===g.repairSession.id).effectText||'接続装置を再起動。'));feedback('無料で調整できます。科研費 ¥'+g.research.funds);renderControls();refresh();$('repair-close').focus({preventScroll:true});},hide(){overlay.hidden=true;}};
+}

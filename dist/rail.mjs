@@ -1,4 +1,4 @@
-import {clamp,approach} from './world.mjs?v=4.1a';
+import {clamp,approach} from './world.mjs?v=4.2a';
 export function railAt(level,x,lane=1){
  const r=level.rails.find(r=>(r.lane??1)===lane&&x>=r.x1&&x<=r.x2);
  return r?{y:r.y1+(r.y2-r.y1)*(x-r.x1)/(r.x2-r.x1),slope:(r.y2-r.y1)/(r.x2-r.x1)}:null;
@@ -13,7 +13,7 @@ export function tickRail(g,input,dt){
  const request=input.laneUp||input.laneDown;
  if(request&&!c.laneLatch&&g.level.branch&&c.x>=g.level.branch.start&&c.x<=g.level.branch.end&&c.onRail){const next=clamp(c.lane+(input.laneUp?-1:1),0,2);if(railAt(g.level,c.x,next)){c.lane=next;c.switching=.45;}}
  c.laneLatch=!!request;if(g.level.branch&&c.x>g.level.branch.end)c.lane=1;
- const target=(input.left?145:input.right?275:210)*(p.boost>0?1.25:1);
+ const target=(input.left?(g.level.brakeRestored?0:145):input.right?275:210)*(p.boost>0?1.25:1);
  c.speed=approach(c.speed,target,220*dt);c.buffer=input.jump?.15:Math.max(0,c.buffer-dt);
  if(c.buffer>0&&c.onRail){c.vy=-600;c.onRail=false;c.buffer=0;g.events.push({type:'jump',x:c.x,y:c.y});}
  const oldY=c.y,oldRail=railAt(g.level,c.x,c.lane);c.x=clamp(c.x+c.speed*dt,70,g.level.width-80);

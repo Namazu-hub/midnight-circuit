@@ -1,3 +1,5 @@
+import {solveSession} from './repair-inputs.mjs';
+import {changePuzzle} from '../dist/repairs.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {LEVELS,RULES,createGame,updateGame,respawn,laserActive,lifeNotice,platformSolid,pressState,railAt} from '../dist/engine.mjs';
@@ -28,14 +30,13 @@ test('final room never awards fever; other rooms guarantee one draw in any order
  assert.equal(recordClear(blankProgress(1),0,()=>0),false);
 });
 test('repairs require fresh local input, persist after falling and gate the exit',()=>{
- const g=createGame(0),r=g.level.relays.at(-1);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.pulse=2;step(g);assert.equal(r.step,0);
- for(let n=0;n<3;n++){Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.cooldown=0;step(g,{pulse:true});assert.equal(r.step,n+1);}
+ const g=createGame(0),r=g.level.relays.find(r=>r.puzzleType);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.pulse=2;step(g);assert.equal(g.repairSession,undefined);
+ g.cooldown=0;step(g,{pulse:true});assert.ok(g.repairSession);assert.equal(r.on,false);solveSession(g);
  assert.equal(r.on,true);respawn(g,'fall');assert.equal(r.on,true);
  const locked=createGame(7);locked.level.relays.forEach(r=>r.on=true);Object.assign(locked.player,{x:locked.level.goal.x-14,y:locked.level.goal.y-40});step(locked);assert.equal(locked.finished,false);
 });
-test('titration and phase alignment have distinct completion conditions',()=>{
- const t=createGame(1),r=t.level.relays.at(-1);for(let n=0;n<3;n++){Object.assign(t.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});t.cooldown=0;step(t,{pulse:true});assert.equal(r.amount,(n+1)*2);}assert.equal(r.on,true);
- const g=createGame(3),a=g.level.relays.at(-1);const pulseAt=phase=>{g.time=(phase-(a.x%7)*.1+7)/.42;g.cooldown=0;Object.assign(g.player,{x:a.x-14,y:a.y-20,vx:0,vy:0});step(g,{pulse:true});};pulseAt(.1);assert.equal(a.on,false);pulseAt(.5);assert.equal(a.on,true);
+test('titration and waveform repairs start with distinct controls and need valid adjustment',()=>{
+ for(const [i,type] of [[1,'titration'],[3,'signal']]){const g=createGame(i),r=g.level.relays.find(r=>r.puzzleType===type);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});step(g,{pulse:true});assert.equal(g.repairSession.puzzle.type,type);assert.equal(r.on,false);solveSession(g);assert.equal(r.on,true);}
 });
 test('spring extends, coil changes velocity and all mouse variants move distinctly',()=>{
  for(const kind of ['spring','coil','mouse-dash','mouse-hop','mouse-erratic','mouse-chase']){const g=createGame(),base=g.level.enemies[0];g.level.enemies=[{...base,kind,x:300,y:482,baseY:482,min:230,max:550}];g.player.x=420;g.player.y=470;let positions=new Set(),states=new Set(),hit=0;for(let i=0;i<500;i++){tickEnemies(g,1/120,()=>hit++);const e=g.level.enemies[0];states.add(e.state);positions.add(`${Math.round(e.x)},${Math.round(e.y)}`);}if(kind==='spring')assert.ok(states.has('extend'));else if(kind==='coil')assert.notEqual(g.player.vx,0);else assert.ok(positions.size>15,kind);}
