@@ -34,10 +34,10 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 .direction-right{border-left:15px solid currentColor}
 @media (pointer:coarse),(max-width:680px){
   .touch-controls{padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));gap:8px}
-  .touch-controls [data-control=left],.touch-controls [data-control=right]{width:58px;min-width:48px}
+  .touch-controls [data-control=left],.touch-controls [data-control=right]{width:100%;min-width:48px}
   .touch-controls .touch-jump{width:76px;min-width:60px}
   .touch-controls .touch-pulse{width:60px;min-width:48px}
-  .touch-controls>div:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .touch-controls>div:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:122px;min-width:102px;gap:6px}
   .touch-controls [data-control^=lane]{height:38px;min-height:38px;width:100%;min-width:0}
 }
 /* Browser fullscreen is not required: Safari can use this on rotation too. */
@@ -62,11 +62,11 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
     position:static;display:flex;visibility:visible;z-index:4;pointer-events:auto;background:#111e2d;
     padding:6px 16px;gap:16px;border-top:1px solid #314657;align-items:end;
   }
-  body.play-session .touch-controls>div:first-child{display:flex;gap:8px;align-items:end}
+  body.play-session .touch-controls>div:first-child{display:flex;width:auto;min-width:0;gap:8px;align-items:end}
   body.play-session .touch-controls>div:last-child{gap:10px}
   body.play-session .touch-controls button{height:54px;min-height:54px;width:66px;min-width:54px;opacity:1;font-size:12px;transform:none}
   body.play-session .touch-controls button.pressed{background:#53748d;box-shadow:inset 0 0 0 2px #92efd7}
-  body.play-session .touch-controls [data-control^=lane]{width:48px;min-width:44px;height:44px;min-height:44px;font-size:11px}
+  body.play-session .touch-controls [data-control^=lane]{order:1;width:48px;min-width:44px;height:44px;min-height:44px;font-size:11px}
   body.play-session .touch-controls .touch-jump{width:94px}
   body.play-session .touch-controls .touch-pulse{width:76px}
   body.play-session .hud{top:8px;left:12px;right:12px}
