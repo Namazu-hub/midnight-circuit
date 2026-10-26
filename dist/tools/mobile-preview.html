@@ -2,7 +2,7 @@
 <style>body{background:#131c2b;color:#e9f3f5;font:14px system-ui;margin:20px}button{padding:10px 16px;margin:0 8px 12px 0;cursor:pointer}iframe{display:block;border:2px solid #75efce;width:844px;height:390px;box-sizing:content-box}p{max-width:850px;line-height:1.6}#size{font-variant-numeric:tabular-nums}</style>
 <h1>画面サイズ確認</h1><p>実際のゲームを指定サイズで表示します。スマートフォンのタッチやSafariの再現ではありません。セーブは通常のゲームと共通です。</p>
 <button data-size="844,390">横 844 × 390</button><button data-size="667,375">横 667 × 375</button><button data-size="568,320">横 568 × 320</button><button data-size="390,844">縦 390 × 844</button><button data-size="320,568">縦 320 × 568</button><span id="size">844 × 390</span>
-<iframe id="preview" title="ゲームの画面サイズ確認" src="../index.html"></iframe>
+<iframe id="preview" title="ゲームの画面サイズ確認" src="../index.html?v=4.0.1"></iframe>
 <script>
 for(const b of document.querySelectorAll('[data-size]'))b.addEventListener('click',()=>{
  const [w,h]=b.dataset.size.split(',');const frame=document.getElementById('preview');

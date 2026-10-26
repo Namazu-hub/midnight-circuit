@@ -14,7 +14,7 @@ for(const f of files){
 const html=await readFile(resolve(root,'dist/index.html'),'utf8');
 for(const m of html.matchAll(/(?:src|href)=["']([^"']+)["']/g)){
  const ref=m[1];if(ref.startsWith('#')||/^(?:https?:|data:)/.test(ref))continue;
- await readFile(resolve(root,'dist',ref));
+ await readFile(resolve(root,'dist',ref.split(/[?#]/)[0]));
 }
 console.log(`PASS: ${files.length} runtime modules parse; imports and HTML assets resolve.`);
 if(process.argv.includes('--baseline')){
