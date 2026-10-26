@@ -17,7 +17,7 @@ const pressed=new Set(),touch=new Set();let jumpEdge=false,pulseEdge=false,jumpR
 const jumpCodes=['Space','KeyZ','ArrowUp','KeyW'];
 const movementCodes=['ArrowLeft','ArrowRight','KeyA','KeyD',...jumpCodes,'KeyX','ShiftLeft','ShiftRight'];
 function clearInput(){pressed.clear();touch.clear();jumpEdge=false;pulseEdge=false;jumpRelease=false;document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('pressed'));}
-function input(){return {left:pressed.has('ArrowLeft')||pressed.has('KeyA')||touch.has('left'),right:pressed.has('ArrowRight')||pressed.has('KeyD')||touch.has('right'),jump:jumpEdge,jumpRelease,pulse:pulseEdge};}
+function input(){return {left:pressed.has('ArrowLeft')||pressed.has('KeyA')||touch.has('left'),right:pressed.has('ArrowRight')||pressed.has('KeyD')||touch.has('right'),laneUp:pressed.has('KeyQ')||touch.has('laneUp'),laneDown:pressed.has('KeyE')||touch.has('laneDown'),jump:jumpEdge,jumpRelease,pulse:pulseEdge};}
 class Synth{
   constructor(){this.context=null;this.master=null;this.enabled=progress.sound;this.nextBeat=0;this.step=0;}
   init(){try{if(!this.context){this.context=new (window.AudioContext||window.webkitAudioContext)();this.master=this.context.createGain();this.master.gain.value=.14;this.master.connect(this.context.destination);}if(this.context.state==='suspended')this.context.resume();}catch{this.enabled=false;progress.sound=false;syncSound();}}
@@ -149,7 +149,7 @@ function showResult(){mode='result';const all=progress.completed.every(Boolean),
   $('result-gears').textContent=`${game.gears}/3`;$('result-chips').textContent=String(game.chips).padStart(2,'0');$('result-time').textContent=timeLabel(game.elapsed);
   $('next-btn').innerHTML=(final?'もう一度、夜の冒険へ':'次の部屋へ')+' <span>→</span>';syncUI();$('next-btn').focus({preventScroll:true});
 }
-function updateHUD(){if(!game)return;const g=game;document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('chip-count').textContent=String(g.chips).padStart(2,'0');$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>r.on).length}/${g.level.relays.length}</b>`;
+function updateHUD(){if(!game)return;const g=game;document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('chip-count').textContent=String(g.chips).padStart(2,'0');$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>r.on).length}/${g.level.relays.length}</b>`;
   const active=g.pulse>0,ready=g.cooldown<=0;$('pulse-status').textContent=active?'ACTIVE':ready?'READY':`${g.cooldown.toFixed(1)}s`;$('pulse-fill').style.width=(active?g.pulse/(g.fever?.pulseDuration||RULES.pulse):ready?1:1-g.cooldown/(g.fever?.attackCooldown||RULES.cooldown))*100+'%';$('pulse-fill').style.background=active?'#c7ffe8':ready?'#75efce':'#698c9e';$('progress-fill').style.width=g.progress*100+'%';
 }
 function burst(x,y,color,count=14){if(progress.reduced)count=Math.min(count,5);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=30+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,size:2+Math.random()*3,color,life:.4+Math.random()*.45,max:.85});}}
@@ -171,7 +171,8 @@ function processEvents(){
     if(e.type==='lifeLost'){progress.runLives=game.lives;save();toast(`残機 ${game.lives}。もう一度、挑戦！`,3);}
     if(e.type==='gameOver'){progress.runLives=0;save();mode='gameover';clearInput();syncUI();$('restart-run').focus({preventScroll:true});}
     if(e.type==='docked')toast('終点です！ 右へ進んで修理装置にタッチ。',5);
-    if(e.type==='locked')toast('まだ眠っている装置がある。光る装置の近くで X！',4.5);
+    if(e.type==='repairStep')toast(e.text,2);
+    if(e.type==='locked')toast(game.level.boss&&!game.level.boss.repaired?'暴走ロボを止め、近くでXで再起動しよう！':'未修理の装置がある。高所の制御盤も確認しよう！',4.5);
     if(e.type==='finish')finish();
   }game.events=[];
 }

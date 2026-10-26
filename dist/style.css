@@ -17,3 +17,7 @@
 body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:none}
 
 .help-dialog{max-height:94%;overflow-y:auto}.enemy-guide{font-size:11px;text-align:left;margin-top:13px;border-top:1px solid #334b5c;padding-top:10px}.enemy-guide summary{cursor:pointer;color:#b7e4d3}.enemy-guide b{color:#e3d8b7}.controls-strip #fever-demo-btn{color:#ffda87}.map-node strong{max-width:130px}.map-heading h2{font-size:20px}@media(max-width:680px){.map-node{min-width:70px}.map-node strong{max-width:76px;font-size:7px}.map-island{width:45px;height:36px}.map-node svg{width:32px;height:32px}.map-heading h2{font-size:16px}.map-landscape{min-height:180px}.help-dialog{max-height:90dvh}.controls-strip{gap:10px;flex-wrap:wrap}}
+
+/* Lane controls stay compact alongside the original two-thumb layout. */
+.touch-controls [data-control^="lane"]{width:42px;font-size:11px;background:#203c57;color:#bde6ff}
+@media(max-width:440px){.touch-controls>div{gap:4px}.touch-controls button{min-width:38px;width:38px}.touch-controls .touch-jump{width:64px}.touch-controls .touch-pulse{width:54px}.touch-controls [data-control^="lane"]{width:36px;min-width:36px}}

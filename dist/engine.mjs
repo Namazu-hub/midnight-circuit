@@ -1,3 +1,4 @@
+import {tickLab} from './laboratory.mjs';
 import {LEVELS} from './levels.mjs';
 import {clamp,overlap,approach} from './world.mjs';
 import {tickEnemies} from './enemies.mjs';
@@ -34,18 +35,20 @@ function damage(g,x){
 }
 export function lifeNotice(p){return p.hurtTimer>0?{from:p.hurtFrom,to:p.hurtTo,value:p.hurtTimer>1.95?p.hurtFrom:p.hurtTo,alpha:clamp(p.hurtTimer/.35,0,1),fraction:clamp(p.displayHP/6,0,1)}:null;}
 export function laserPhase(g,l){return (g.time+(l.phase||0))%3.8;}
-export function laserActive(g,l){const phase=laserPhase(g,l);return g.pulse<=0&&phase>=.65&&phase<2.2;}
+export function laserActive(g,l){const phase=laserPhase(g,l);return !g.level.relays.some(r=>r.mode==='timing'&&r.on)&&g.pulse<=0&&phase>=.65&&phase<2.2;}
 export function printedPhase(a){return (a.clock+(a.phase||0))%(a.period||4.8);}
 export function platformSolid(g,a){
  if(a.type==='ghost')return g.pulse>0||!!(a.group&&g.level.relays.find(r=>r.id===a.group)?.on);
+ if(a.type==='printed'&&g.level.relays.some(r=>r.mode==='timing'&&r.on))return true;
  if(a.type==='printed')return g.pulse>0||g.spawnGrace>0||printedPhase(a)>=1.4;
  if(a.type==='leaf')return a.missing<=0;
  return true;
 }
 export function pressState(g,h){
+ if(g.level.relays.some(r=>r.mode==='sequence'&&r.on))return {warning:false,active:false,x:h.x,y:h.y,w:h.w,h:h.h};
  const phase=(h.clock??g.time)+(h.phase||0),v=phase%(h.period||3.8);
  const extension=v<.8?0:v<1.05?(v-.8)/.25:v<1.65?1:v<2.25?1-(v-1.65)/.6:0;
- return {warning:v<.8,active:v>=.8&&v<2.25&&g.pulse<=0,x:h.x,y:h.y,w:h.w,h:h.h+(h.floorY-h.y-h.h)*extension};
+ return {warning:v<.8,active:v>=.8&&v<2.25&&g.pulse<=0&&!g.level.relays.some(r=>r.mode==='sequence'&&r.on),x:h.x,y:h.y,w:h.w,h:h.h+(h.floorY-h.y-h.h)*extension};
 }
 function updateMachinery(g,dt){
  const p=g.player,frozen=g.pulse>0;
@@ -88,11 +91,11 @@ function interactions(g,activated){
  for(const c of L.chips)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<30){c.got=true;g.chips++;emit(g,'chip',c);}
  for(const c of L.drinks)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<36){c.got=true;p.boost=9;emit(g,'boost',c);}
  for(const c of L.gears)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<34){c.got=true;g.gears++;emit(g,'gear',c);}
- for(const r of L.relays)if(!r.portal&&!r.on&&g.pulse>0&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<190){r.on=true;emit(g,'relay',r);}
+ for(const r of L.relays)if(!r.portal&&!r.mode&&!r.on&&g.pulse>0&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<190){r.on=true;emit(g,'relay',r);}
  if(activated){const portal=L.portals.find(r=>Math.hypot(p.x+14-r.x,p.y+20-r.y)<115);if(portal){portal.on=true;L.relays.find(r=>r.id===portal.id).on=true;p.x=portal.toX;p.y=portal.toY;p.vx=0;p.vy=0;p.onGround=false;p.standing=null;p.invul=1.5;g.respawn={x:p.x,y:p.y};g.checkpoint=true;g.warp=.6;g.camera=clamp(p.x-VIEW.w*.32,0,L.width-VIEW.w);g.cameraY=clamp(p.y-310,L.minY,0);emit(g,'portal',{x:p.x+14,y:p.y+20});}}
  for(const c of L.checkpoints)if(!c.active&&Math.abs(p.x-c.x)<60&&Math.abs(p.y+p.h-c.y)<70){c.active=true;g.checkpoint=true;g.respawn={x:c.x,y:c.y-40};p.hp=6;p.displayHP=6;p.hurtTimer=0;if(g.cart)g.cartCheckpoint=c.x;emit(g,'checkpoint',{x:c.x,y:c.y-50});}
  for(let i=0;i<L.route.length;i++){const r=L.route[i];if(Math.hypot(p.x+14-r.x,p.y+40-r.y)<150)g.progress=Math.max(g.progress,(i+1)/(L.route.length+1));}
- const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.on)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
+ const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.on)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
 }
 export function updateGame(g,input={},dt=1/120){
  if(g.finished||g.gameOver)return;const p=g.player;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
@@ -102,6 +105,8 @@ export function updateGame(g,input={},dt=1/120){
  updateMachinery(g,dt);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else walk(g,input,dt);
  tickEnemies(g,dt,damage);
+ tickLab(g,input,activated,dt,damage);
+ if(g.cart)for(const e of g.level.enemies)if(e.alive&&overlap({x:g.cart.x-g.cart.w/2,y:g.cart.y-32,w:g.cart.w,h:60},e)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  for(const e of g.level.enemies){if(!e.alive||!overlap(p,e))continue;if(g.fever){e.alive=false;emit(g,'feverKill',{x:e.x+16,y:e.y+14});continue;}
   if(p.vy>50&&p.oldBottom<=e.y+14&&(e.state!=='discharge'||g.pulse>0)){e.alive=false;if(g.cart){g.cart.vy=-360;g.cart.onRail=false;}else{p.vy=-440;p.jumps=1;}emit(g,'stomp',{x:e.x+16,y:e.y+14});}
   else if(g.pulse<=0)damage(g,e.x+16);

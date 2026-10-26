@@ -17,8 +17,45 @@ test('cart physically traverses slopes, brakes, jumps gaps and restores at check
 test('energy drink boosts for nine seconds and returns to normal speed',()=>{const g=createGame();g.level.enemies=[];g.level.drinks=[{x:104,y:490}];step(g);assert.ok(g.player.boost>8);step(g,{right:true},60);assert.equal(g.player.vx,RULES.speed*RULES.boostSpeed);g.player.boost=.01;step(g,{right:true},10);assert.equal(g.player.vx,RULES.speed);});
 test('portals require a fresh nearby pulse and repair distinct receivers',()=>{const g=createGame(7),a=g.level.portals[0];Object.assign(g.player,{x:a.x-14,y:a.y-20});step(g,{pulse:true});assert.equal(a.on,true);assert.ok(g.player.x>=a.toX-1);assert.ok(g.cameraY<0);assert.equal(g.level.relays.filter(r=>r.on).length,1);assert.ok(Math.abs(g.respawn.x-a.toX)<20);});
 test('v1 five-stage save migrates without losing records',()=>{const p=readProgress({completed:[true,false,true,false,true],gears:[3,2,1,0,2],best:[32,null,40,null,27],sound:true},8);assert.equal(p.completed.length,8);assert.deepEqual(p.completed.slice(0,5),[true,false,true,false,true]);assert.equal(p.best[4],27);assert.equal(p.gears[5],0);assert.equal(p.sound,true);});
-test('lottery is one per lap, repeat-proof, order independent and guaranteed at final eligible clear',()=>{for(const n of [1,3,5,8,12]){const p=blankProgress(n);let wins=0;for(let i=n-1;i>=0;i--){wins+=recordClear(p,i,()=>.999999);if(i>0)assert.equal(recordClear(p,i,()=>0),false);}assert.equal(wins,1);assert.equal(p.lap.won,true);recordClear(p,0,()=>0);assert.equal(p.lap.number,2);}assert.ok(drawChance(7,8)>drawChance(2,8));const p=blankProgress(8);assert.equal(recordClear(p,0,()=>0),true);for(let i=1;i<8;i++)assert.equal(recordClear(p,i,()=>0),false);});
+test('lottery is one per lap, repeat-proof, order independent and guaranteed at final eligible clear',()=>{for(const n of [3,5,8,12]){const p=blankProgress(n);let wins=0;for(let i=n-1;i>=0;i--){wins+=recordClear(p,i,()=>.999999);if(i>0)assert.equal(recordClear(p,i,()=>0),false);}assert.equal(wins,1);assert.equal(p.lap.won,true);recordClear(p,0,()=>0);assert.equal(p.lap.number,2);}assert.ok(drawChance(7,8)>drawChance(2,8));const p=blankProgress(8);assert.equal(recordClear(p,0,()=>0),true);for(let i=1;i<8;i++)assert.equal(recordClear(p,i,()=>0),false);});
 test('fever requires movement, is invulnerable, supports combos and restores snapshots',()=>{const g=createFever();for(let i=0;i<1200;i++){updateFever(g,{},1/120);g.events=[];}assert.equal(g.finished,false);assert.ok(g.player.x<110);for(let i=0;i<120*50&&!g.finished;i++){updateFever(g,{right:true,pulse:i%20===0},1/120);g.events=[];}assert.equal(g.finished,true);assert.equal(g.player.hp,6);assert.ok(g.fever.kills>65);assert.ok(g.fever.best>30);const replay=createFever(feverSnapshot(g));assert.equal(replay.fever.kills,g.fever.kills);assert.equal(replay.level.enemies.filter(e=>!e.alive).length,g.level.enemies.filter(e=>!e.alive).length);const normal=createGame();assert.equal(normal.fever,undefined);step(normal,{right:true},80);assert.ok(normal.player.vx<=RULES.speed);assert.ok(FEVER_CONFIG.speed>RULES.speed*2);});
 test('fever combo expires, pulse is faster than normal, pending survives JSON roundtrip',()=>{const g=createFever();g.fever.combo=10;g.fever.comboTimer=.01;updateFever(g,{pulse:true},1/60);g.events=[];assert.equal(g.fever.combo,0);assert.ok(g.cooldown<1);const p=blankProgress(8);p.pending={index:2,result:{elapsed:35,chips:14,gears:1},phase:'playing',snapshot:feverSnapshot(g)};p.lap.won=true;const restored=readProgress(JSON.parse(JSON.stringify(p)),8);assert.deepEqual(restored.pending,p.pending);assert.equal(restored.lap.won,true);});
 
 test('fall consumes HP, zero HP consumes one life; zero lives stops play',()=>{const g=createGame();g.player.y=900;step(g);assert.equal(g.player.hp,5);assert.equal(g.lives,3);assert.equal(lifeNotice(g.player).from,6);assert.equal(lifeNotice(g.player).to,5);for(let i=0;i<5;i++){g.player.y=900;step(g);}assert.equal(g.lives,2);assert.equal(g.player.hp,6);for(let i=0;i<12;i++){g.player.y=900;step(g);}assert.equal(g.lives,0);assert.equal(g.gameOver,true);const x=g.player.x;step(g,{right:true},60);assert.equal(g.player.x,x);});
+
+test('final room never awards fever; other rooms guarantee one draw in any order',()=>{
+ for(const order of [[0,1,2,3,4,5,6,7],[7,0,2,4,6,1,3,5],[3,7,2,6,0,5,1,4]]){const p=blankProgress(8);let wins=0;for(const i of order){const w=recordClear(p,i,()=>.999999);if(i===7)assert.equal(w,false);wins+=w;}assert.equal(wins,1);}
+ assert.equal(recordClear(blankProgress(1),0,()=>0),false);
+});
+test('repairs require fresh local input, persist after falling and gate the exit',()=>{
+ const g=createGame(0),r=g.level.relays.at(-1);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.pulse=2;step(g);assert.equal(r.step,0);
+ for(let n=0;n<3;n++){Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.cooldown=0;step(g,{pulse:true});assert.equal(r.step,n+1);}
+ assert.equal(r.on,true);respawn(g,'fall');assert.equal(r.on,true);
+ const locked=createGame(7);locked.level.relays.forEach(r=>r.on=true);Object.assign(locked.player,{x:locked.level.goal.x-14,y:locked.level.goal.y-40});step(locked);assert.equal(locked.finished,false);
+});
+test('titration and phase alignment have distinct completion conditions',()=>{
+ const t=createGame(1),r=t.level.relays.at(-1);for(let n=0;n<3;n++){Object.assign(t.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});t.cooldown=0;step(t,{pulse:true});assert.equal(r.amount,(n+1)*2);}assert.equal(r.on,true);
+ const g=createGame(3),a=g.level.relays.at(-1);const pulseAt=phase=>{g.time=(phase-(a.x%7)*.1+7)/.42;g.cooldown=0;Object.assign(g.player,{x:a.x-14,y:a.y-20,vx:0,vy:0});step(g,{pulse:true});};pulseAt(.1);assert.equal(a.on,false);pulseAt(.5);assert.equal(a.on,true);
+});
+test('spring extends, coil changes velocity and all mouse variants move distinctly',()=>{
+ for(const kind of ['spring','coil','mouse-dash','mouse-hop','mouse-erratic','mouse-chase']){const g=createGame(),base=g.level.enemies[0];g.level.enemies=[{...base,kind,x:300,y:482,baseY:482,min:230,max:550}];g.player.x=420;g.player.y=470;let positions=new Set(),states=new Set(),hit=0;for(let i=0;i<500;i++){tickEnemies(g,1/120,()=>hit++);const e=g.level.enemies[0];states.add(e.state);positions.add(`${Math.round(e.x)},${Math.round(e.y)}`);}if(kind==='spring')assert.ok(states.has('extend'));else if(kind==='coil')assert.notEqual(g.player.vx,0);else assert.ok(positions.size>15,kind);}
+});
+test('two silicone components form a blocking wall which pulse removes',()=>{
+ const g=createGame();const base=g.level.enemies[0];g.level.enemies=['silicone-a','silicone-b'].map(kind=>({...base,kind,x:300,y:482,baseY:482,min:290,max:350}));g.player.x=290;g.player.y=470;tickEnemies(g,1/120,()=>{});assert.equal(g.level.sticky.length,1);assert.ok(g.level.enemies.every(e=>!e.alive));step(g,{pulse:true});assert.equal(g.level.sticky.length,0);
+});
+test('rail branches stay reachable on all three tracks and cart contact defeats enemies',()=>{
+ for(const lane of [0,1,2]){const g=createGame(2);g.cartCheckpoint=3500;respawn(g);g.lives=3;let pressed=false;
+ for(let f=0;f<120*22&&g.cart.x<6400;f++){const c=g.cart,r=g.level.rails.find(r=>r.lane===c.lane&&c.x>=r.x1&&c.x<=r.x2);const gap=r&&!g.level.rails.some(a=>a.lane===c.lane&&a.x1===r.x2);const input={laneUp:lane===0&&!pressed,laneDown:lane===2&&!pressed,jump:c.onRail&&gap&&r.x2-c.x<65,pulse:g.cooldown<=0};updateGame(g,input);pressed=true;}
+ assert.ok(g.cart.x>6300,`lane ${lane}`);assert.equal(g.cart.lane,1);assert.equal(g.deaths,1);}
+ const g=createGame(2),c=g.cart;g.level.enemies=[{...g.level.enemies[0],x:c.x+40,y:c.y-25,baseY:c.y-25,min:c.x+40,max:c.x+40}];step(g);assert.equal(g.level.enemies[0].alive,false);
+});
+test('boss takes stomp and machine damage, requires restart and unlocks goal',()=>{
+ const g=createGame(7),b=g.level.boss,ctl=g.level.bossConsole;g.level.enemies=[];g.level.relays.forEach(r=>r.on=true);
+ b.clock=3;Object.assign(g.player,{x:b.x+10,y:b.y-41,vy:200});step(g);assert.equal(b.hp,5);
+ for(let n=0;n<5;n++){b.invul=0;ctl.cooldown=0;g.cooldown=0;Object.assign(g.player,{x:ctl.x-14,y:ctl.y-20,vx:0,vy:0});step(g,{pulse:true});}assert.equal(b.hp,0);assert.equal(b.repaired,false);
+ g.cooldown=0;Object.assign(g.player,{x:b.x+4,y:b.y,vx:0,vy:0});step(g,{pulse:true});assert.equal(b.repaired,true);Object.assign(g.player,{x:g.level.goal.x-14,y:g.level.goal.y-40});step(g);assert.equal(g.finished,true);
+});
+test('screw rain warns before damaging projectiles and new dialogue remains present',()=>{
+ const g=createGame(5);const z=g.level.rain[0];Object.assign(g.player,{x:z.x+50,y:z.y-40});step(g,{},230);assert.ok(z.phase>1.7);assert.equal(g.projectiles.filter(q=>q.kind==='screw').length,0);step(g,{},85);assert.ok(g.projectiles.some(q=>q.kind==='screw'));
+ const lines=LEVELS.flatMap(l=>l.students.flatMap(s=>s.lines));for(const q of ['完璧なコードを書けばデバックはいらない！','見ろ！これが俺のカルノー図だ！','今から深夜徒歩しません？'])assert.ok(lines.includes(q));
+});

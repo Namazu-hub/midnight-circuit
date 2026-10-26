@@ -4,9 +4,11 @@ export function traverse(index,{limit=180,trace=false}={}){
  for(let f=0;f<120*limit&&!g.finished;f++){
   const p=g.player,L=g.level;const target=L.route[wp]||L.goal;let dx=target.x-(p.x+14),dy=target.y-(p.y+40);
   if(g.deaths!==oldDeaths){oldDeaths=g.deaths;let closest=0,d=Infinity;for(let i=0;i<L.route.length;i++){const r=L.route[i],dd=Math.hypot(r.x-p.x,r.y-p.y-40);if(dd<d){d=dd;closest=i;}}wp=closest;}
-  if((!target.portal&&Math.abs(dx)<65&&(index===4||index===7&&wp>=2&&wp<=9||index===6&&wp>=2&&wp<=9||index===3&&wp>=4&&wp<=9?p.onGround&&Math.abs(dy)<45:dy>-100))||(target.portal&&L.portals.find(r=>r.id===target.portal).on)){wp=Math.min(wp+1,L.route.length);}
+  if((!target.portal&&Math.abs(dx)<65&&(target.service||index===4||index===7&&wp>=2&&wp<=9||index===6&&wp>=2&&wp<=9||index===3&&wp>=4&&wp<=9?p.onGround&&Math.abs(dy)<45:dy>-100))||(target.portal&&L.portals.find(r=>r.id===target.portal).on)){wp=Math.min(wp+1,L.route.length);}
   let left=dx<-22,right=dx>22,jump=false,pulse=false;
-  const nearbyRelay=L.relays.find(r=>!r.on&&!r.portal&&Math.hypot(r.x-p.x,r.y-p.y-20)<150);
+  const service=L.relays.find(r=>r.mode&&!r.on&&Math.abs(r.x-p.x)<450&&Math.abs(r.y-p.y-20)<80);
+  if(service){dx=service.x-p.x-14;left=dx<-18;right=dx>18;}
+  const nearbyRelay=L.relays.find(r=>!r.on&&!r.portal&&Math.hypot(r.x-p.x,r.y-p.y-20)<(r.mode?90:150));
   if(nearbyRelay){left=right=false;pulse=g.cooldown<=0;}
   const portal=target.portal&&L.portals.find(r=>r.id===target.portal);
   if(portal&&Math.abs(dx)<60){left=right=false;pulse=g.cooldown<=0;}
@@ -20,6 +22,7 @@ export function traverse(index,{limit=180,trace=false}={}){
    // Wind column: steer into it at ground level, then hold its center while rising.
    if(index===1&&wp===5){left=p.x+14>2968;right=p.x+14<2952;jump=p.onGround;}
   }
+  if(L.boss&&!L.boss.repaired&&p.x>7120){const b=L.boss,tx=b.hp>0?L.bossConsole.x:b.x+20;left=p.x+14>tx+15;right=p.x+14<tx-15;pulse=g.cooldown<=0;jump=b.hp>0&&b.state==='rush'&&Math.abs(b.x-p.x)<180&&p.onGround;}
   updateGame(g,{left,right,jump,pulse},1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(wp===lastWP)stuck++;else{lastWP=wp;stuck=0;}
   if(trace&&f%1200===0)console.log(index+1,(f/120).toFixed(0),wp,Math.round(p.x),Math.round(p.y),p.hp,g.deaths,'target',target.x,target.y);

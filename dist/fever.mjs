@@ -1,4 +1,5 @@
 import {createGame,updateGame,VIEW,clamp} from './engine.mjs';
+export const SUCCESS_MESSAGES=['進捗が生まれた！','完璧なコードを書いた！','実験が想定通り100パーセントの結果で出た！','一発で論文が採択された！','締切前にレポートが完成した！'];
 export const FEVER_CONFIG={intro:4.4,outro:4.8,speed:610,attackCooldown:.7,pulseDuration:.22,attackRadius:230,comboWindow:4,effectScale:1,width:15400};
 export function createFever(snapshot=null){
  const width=FEVER_CONFIG.width,L={id:9,name:'虹色オーバードライブ',en:'FEVER OVERDRIVE',theme:'fever',color:'#ffda80',location:'777 / FEVER OVERDRIVE',tagline:'無敵の夜勤！ 走って、跳んで、Xで一気に撃破。',tip:'無敵！ ← → で移動、SPACE で二段ジャンプ、X で連射パルス。自分の操作でゴールへ！',width,minY:-120,killY:800,spawn:{x:100,y:470},platforms:[{x:0,y:510,w:width,h:180,type:'ground'}],enemies:[],chips:[],gears:[],drinks:[],winds:[],lasers:[],relays:[],signs:[],students:[],checkpoints:[],presses:[],gravityZones:[],portals:[],rails:[],route:[],goal:{x:width-170,y:510}};
@@ -13,7 +14,7 @@ export function updateFever(g,input,dt){
  const f=g.fever;f.labelTimer=Math.max(0,f.labelTimer-dt);f.impact=Math.max(0,f.impact-dt);f.comboTimer=Math.max(0,f.comboTimer-dt);if(f.comboTimer===0)f.combo=0;
  const fire=input.pulse&&g.cooldown<=0;updateGame(g,input,dt);
  if(fire)for(const e of g.level.enemies)if(e.alive&&Math.hypot(e.x-g.player.x,e.y-g.player.y)<f.attackRadius){e.alive=false;g.events.push({type:'feverKill',x:e.x+16,y:e.y+14});}
- for(const e of g.events)if(e.type==='feverKill'){f.combo++;f.kills++;f.best=Math.max(f.best,f.combo);f.comboTimer=f.comboWindow;f.impact=.3;if(f.combo%5===0||f.combo===1){f.label=['GREAT!!','SUPER!!','EXCELLENT!!','FEVER!!','大当たり!!'][Math.min(4,Math.floor(f.combo/10))];f.labelTimer=.9;g.events.push({type:'feverMilestone',combo:f.combo});}}
+ for(const e of g.events)if(e.type==='feverKill'){f.combo++;f.kills++;f.best=Math.max(f.best,f.combo);f.comboTimer=f.comboWindow;f.impact=.3;if(f.combo%5===0||f.combo===1){f.label=['GREAT!!','SUPER!!','EXCELLENT!!','FEVER!!','大当たり!!'][Math.min(4,Math.floor(f.combo/10))];f.success=SUCCESS_MESSAGES[Math.floor(f.kills/5)%SUCCESS_MESSAGES.length];f.labelTimer=1.5;g.events.push({type:'feverMilestone',combo:f.combo});}}
  f.trail.push({x:g.player.x,y:g.player.y,life:.22});for(const p of f.trail)p.life-=dt;f.trail=f.trail.filter(p=>p.life>0).slice(-12);
 }
 const logos=new Map();
@@ -42,5 +43,5 @@ export function drawFeverFX(c,g,t,reduced){const f=g.fever,w=VIEW.w,power=Math.m
  c.save();c.translate(-g.camera,-g.cameraY);if(!reduced){for(const a of f.trail){c.fillStyle=`hsla(${t*160+a.x},100%,65%,${a.life*.6})`;c.fillRect(a.x-5,a.y+5,32,32);}for(let i=0;i<12;i++){c.strokeStyle=`hsla(${i*30+t*50},100%,75%,.25)`;c.beginPath();const x=g.camera+(i*137-t*600)%w;c.moveTo(x,180+i*24);c.lineTo(x+80+power*10,180+i*24);c.stroke();}}c.restore();
  for(let i=0;i<Math.ceil(w/28);i++){c.fillStyle=`hsl(${i*20+(reduced?0:t*50)},95%,${50+Math.sin(i+t*3)*10}%)`;c.fillRect(i*28,3,18,4);c.fillRect(i*28,590,18,4);}for(let y=20;y<590;y+=28){c.fillStyle=y%56?'#ffd892':'#fbd4ff';c.fillRect(3,y,4,18);c.fillRect(w-7,y,4,18);}
  c.textAlign='right';c.fillStyle='#ffdf90';c.font='900 30px sans-serif';c.fillText(`${f.combo} COMBO`,w-30,130);c.fillStyle='#fff2cc';c.font='11px monospace';c.fillText(`BEST ${f.best}  /  ${f.kills} KOs`,w-32,152);c.fillStyle='#ffd48c';c.fillRect(w-175,163,145*f.comboTimer/f.comboWindow,3);
- if(f.labelTimer>0){const a=Math.min(1,f.labelTimer*4),size=Math.min(w*.66,650)*(reduced?1:1+(1-f.labelTimer)*.05*power);drawMetalText(c,f.label,w/2,200,size,t,a);}
+ if(f.labelTimer>0){const a=Math.min(1,f.labelTimer*4),size=Math.min(w*.66,650)*(reduced?1:1+(1-f.labelTimer)*.05*power);drawMetalText(c,f.label,w/2,190,size,t,a);c.textAlign='center';c.font='bold 19px sans-serif';c.fillStyle='#fff3bd';c.fillText(f.success||SUCCESS_MESSAGES[0],w/2,250,w*.9);}
 }
