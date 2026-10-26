@@ -1,4 +1,4 @@
-import {createGame,updateGame,VIEW,clamp} from './engine.mjs';
+import {createGame,updateGame,VIEW,clamp} from './engine.mjs?v=4.1a';
 export const SUCCESS_MESSAGES=['進捗が生まれた！','完璧なコードを書いた！','実験が想定通り100パーセントの結果で出た！','一発で論文が採択された！','締切前にレポートが完成した！'];
 export const FEVER_CONFIG={intro:4.4,outro:4.8,speed:610,attackCooldown:.7,pulseDuration:.22,attackRadius:230,comboWindow:4,effectScale:1,width:15400};
 export function createFever(snapshot=null){

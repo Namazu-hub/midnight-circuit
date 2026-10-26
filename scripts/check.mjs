@@ -9,7 +9,7 @@ for(const f of files){
  const path=resolve(root,'dist',f), result=spawnSync(process.execPath,['--check',path],{encoding:'utf8'});
  if(result.status!==0)throw new Error(result.stderr||`Syntax check failed: ${f}`);
  const source=await readFile(path,'utf8');
- for(const m of source.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g))await readFile(resolve(dirname(path),m[1]));
+ for(const m of source.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g))await readFile(resolve(dirname(path),m[1].split(/[?#]/)[0]));
 }
 const html=await readFile(resolve(root,'dist/index.html'),'utf8');
 for(const m of html.matchAll(/(?:src|href)=["']([^"']+)["']/g)){

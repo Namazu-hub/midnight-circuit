@@ -88,3 +88,9 @@ GitHub PagesのSourceはGitHub Actionsを選択します。`.github/workflows/de
 詳細は[v4仕様と検証記録](docs/EXPANSION-v4.md)を参照してください。
 
 モバイル操作の変更・検証範囲は[docs/MOBILE-CONTROLS.md](docs/MOBILE-CONTROLS.md)を参照。画面幅の手動確認には `dist/tools/mobile-preview.html` をHTTPで開いてください（実機の代用ではありません）。
+
+## 研究棟改修・第1段階（v4.1）
+
+科研費（拾得¥5・撃破¥15・修理¥40）、研究支援自販機、修理で出現する任意の高所ボックス（¥75）を追加。自販機は開始地点とチェックポイントにあり、近づくと「¥ 自販機」ボタンが表示されます。修理は無料、買い物中は時間が止まります。科研費残高はブラウザに保存し、残機0から再挑戦するとリセットします。
+
+**大規模改修は未完了です。** 8面の再設計、7種の本格ミニゲーム、OROCHIと3フェーズ最終ボスは未実装。[実装範囲と続きの計画](docs/RESEARCH-OVERHAUL.md)を参照。

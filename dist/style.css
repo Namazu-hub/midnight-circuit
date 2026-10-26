@@ -85,3 +85,5 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
   body[data-mode=playing].play-session .touch-controls button{pointer-events:auto}
   body.play-session:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:none}
 }
+
+.shop-open{position:absolute;right:14px;bottom:14px;z-index:8;min-height:44px}.shop-dialog{max-height:90dvh;overflow:auto}.shop-dialog .secondary-btn{min-height:44px;width:100%;margin:6px 0}.shop-dialog button:disabled{opacity:.4}.shop-dialog p{line-height:1.5}

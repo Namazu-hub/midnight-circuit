@@ -1,5 +1,6 @@
-import {drawLab} from './laboratory.mjs';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs';
+import {drawResearch} from './research.mjs?v=4.1a';
+import {drawLab} from './laboratory.mjs?v=4.1a';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.1a';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -198,7 +199,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   }
   for(const d of g.level.drinks){if(d.got)continue;const yy=d.y+Math.sin(t*3)*3;glow(c,d.x,yy,36,'#aaff4328');rect(c,d.x-10,yy-18,20,35,'#0a171e');rect(c,d.x-9,yy-20,18,3,'#b7c5bd');rect(c,d.x-9,yy+16,18,3,'#809e8c');c.font='bold 18px monospace';c.fillStyle='#b0ff63';c.textAlign='center';c.fillText('M',d.x,yy+5);c.font='7px monospace';c.fillText('ENA',d.x,yy+13);c.textAlign='left';}
   for(const l of g.level.lasers){if(l.nozzle){rect(c,l.x-25,l.y-52,62,38,'#dde5e4');rect(c,l.x-15,l.y-46,40,19,'#263f52');rect(c,l.x-5,l.y-27,22,20,'#bf875b');line(c,l.baseX-85,l.y-55,l.baseX+110,l.y-55,'#819ba5',7);}rect(c,l.x-8,l.y-11,28,12,'#706276');rect(c,l.x-8,l.y+l.h-1,28,10,'#706276');if(laserActive(g,l)){glow(c,l.x+6,l.y+l.h/2,100,'#ff665a12');rect(c,l.x-5,l.y,22,l.h,'#ff646026');rect(c,l.x+2,l.y,8,l.h,'#ff8676');rect(c,l.x+5,l.y,2,l.h,'#ffdbbc');}else{const warning=g.pulse<=0&&laserPhase(g,l)<.65;for(let y=l.y;y<l.y+l.h;y+=16)rect(c,l.x+5,y,warning?4:2,5,warning?'#ffd88caa':'#90edc740');if(warning){c.font='bold 18px monospace';c.fillStyle='#ffd88c';c.fillText('!',l.x-5,l.y-20);}}}
-  drawLab(c,g);
+  drawLab(c,g);drawResearch(c,g);
   const p=g.player;
   if(p.boost>0){
     for(let i=reduced?1:6;i>0;i--){c.save();c.globalAlpha=.07+(6-i)*.025;c.filter=`hue-rotate(${(t*95+i*45)%360}deg)`;robot(c,p.x-3-p.face*i*9,p.y-3,2,p.walk*.018,true,p.face,!p.onGround);c.restore();}
