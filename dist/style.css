@@ -33,12 +33,12 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 .direction-left{border-right:15px solid currentColor}
 .direction-right{border-left:15px solid currentColor}
 @media (pointer:coarse),(max-width:680px){
-  .touch-controls{padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));gap:8px}
+  .touch-controls{align-items:end;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));gap:8px}
   .touch-controls [data-control=left],.touch-controls [data-control=right]{width:100%;min-width:48px}
   .touch-controls .touch-jump{width:76px;min-width:60px}
   .touch-controls .touch-pulse{width:60px;min-width:48px}
   .touch-controls>div:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:122px;min-width:102px;gap:6px}
-  .touch-controls [data-control^=lane]{height:38px;min-height:38px;width:100%;min-width:0}
+  .touch-controls [data-control^=lane]{height:44px;min-height:44px;width:100%;min-width:0}
 }
 /* Browser fullscreen is not required: Safari can use this on rotation too. */
 @media (orientation:landscape) and (pointer:coarse),(orientation:landscape) and (max-height:600px) and (max-width:1400px){
