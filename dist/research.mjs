@@ -1,4 +1,4 @@
-import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.3a';
+import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.4a';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
 export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 9秒加速',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80}];
@@ -9,7 +9,7 @@ export function setupResearch(g){
  g.level.researchCaches=[];
  for(const [i,r] of g.level.relays.entries()){
   r.id??=`device-${g.index}-${i}`;r.rewardPaid=false;r.repairResult??=r.on?'restored':'broken';r.researchLink=[];
-  if(g.level.cart||r.portal||!r.mode)continue;
+  if(g.level.printer||g.level.cart||r.portal||!r.mode)continue;
   // One-way service stairs are optional; they never gate the existing main route.
   for(let k=0;k<3;k++){
    const x=Math.max(10,Math.min(g.level.width-170,r.x-350+k*95)),y=r.y-45-k*65;
@@ -41,6 +41,7 @@ export function purchase(g,id){
  if(['hint','assist'].includes(id)&&!nearest)return {ok:false,text:'対象の未修理装置はありません'};
  if(id==='assist'&&Math.hypot(g.player.x-nearest.x,g.player.y-nearest.y)>800)return {ok:false,text:'装置が遠すぎます。近くの自販機へ進んでください'};
  if(id==='assist'&&nearest.actionRepair?.assisted)return {ok:false,text:'このハンドの補助は導入済みです'};
+ if(id==='assist'&&nearest.worldRepair)return {ok:false,text:'この設備はPICOで操作します。位置ヒントを利用できます'};
  g.research.funds-=item.cost;let text='購入しました';
  if(id==='heal'){g.player.hp=Math.min(6,g.player.hp+3);g.player.displayHP=g.player.hp;text='応急補修完了！';}
  if(id==='battery'){g.lives++;text='予備バッテリーを追加！';}

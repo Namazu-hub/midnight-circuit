@@ -47,3 +47,5 @@ v4の追加仕様・検証はdocs/EXPANSION-v4.mdも読む。旧仕様書はv3�
 修理専用画面はrepair-ui.mjs、判定モデルはrepairs.mjs、既存8面への配置と効果はrepair-stations.mjs。docs/REPAIRS-v4.2.mdを読む。任意装置はoptionalで主経路のクリア条件から除外する。パルスXは戦闘を維持し、任意修理はCまたは専用ボタン。全経路テストは修理の操作APIも利用し、画面の操作性を保証しない。
 
 v4.3のステージ4ハンドはaction-repairs.mjsでステージ内応急修理を行う。精密画面は応急修理後のみ。購入補助でこれを迂回しない。docs/ACTION-REPAIRS-v4.3.mdと入力経路試験を維持する。
+
+v4.4のステージ4はprinter-level / printer / printer-artの3モジュール。旧v4.3のハンド試作は現行面に配置しない。docs/PRINTER-v4.4.mdを読む。専用入力ドライバーとボス再試行・報酬重複・敵製造上限・代替重りの試験を保持する。

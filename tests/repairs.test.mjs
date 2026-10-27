@@ -46,7 +46,7 @@ test('complete repair rewards and grades persist through death and cannot pay tw
  beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);respawn(g,'fall');tickResearch(g);assert.equal(r.repairRank,2);assert.equal(g.research.funds,70);
 });
 test('hand repair builds a bridge; lift calibration is idempotent; press and turret controls work',()=>{
- for(const [index,type] of [[3,'joints'],[4,'sensor'],[5,'joints'],[7,'logic']]){
+ for(const [index,type] of [[4,'sensor'],[5,'joints'],[7,'logic']]){
   const g=createGame(index),r=g.level.relays.find(r=>r.puzzleType===type),p=g.level.platforms.find(p=>p.type==='moving');const range=p?.range;
   const bridge=g.level.platforms.find(p=>p.group===r.id);if(bridge)assert.equal(platformSolid(g,bridge),false);
   if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);tickResearch(g);
@@ -63,7 +63,7 @@ test('every repair family is placed in a course; repairs work with zero funds',(
  assert.deepEqual([...types].sort(),Object.keys(REPAIR_NAMES).sort());
 });
 test('emergency repair upgrades once; full-repair cache stays locked until upgraded',()=>{
- const g=createGame(3),r=g.level.relays.find(r=>r.puzzleType==='joints');completeHand(g,r);assert.equal(r.repairRank,1);tickResearch(g);assert.equal(g.research.funds,40);
+ const g=createGame(5),r=g.level.relays.find(r=>r.puzzleType==='joints');approach(g,r);beginRepair(g,r);solvePuzzle(r.puzzle);changePuzzle(r.puzzle,'angle',r.puzzle.target[0]+8,0);assert.equal(commitRepair(g).rank,1);tickResearch(g);assert.equal(g.research.funds,40);
  const box=g.level.researchCaches.find(b=>b.device===r.id);approach(g,box);tickResearch(g);assert.equal(box.got,false);
  approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);assert.equal(g.research.repairs,1);assert.equal(g.research.fullRepairs,1);
  approach(g,box);tickResearch(g);assert.equal(box.got,true);assert.equal(g.research.funds,145);tickResearch(g);assert.equal(g.research.funds,145);

@@ -1,10 +1,10 @@
-import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.3a';
-import {REPAIR_NAMES} from './repairs.mjs?v=4.3a';
+import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.4a';
+import {REPAIR_NAMES} from './repairs.mjs?v=4.4a';
 
 // Incremental integration with the existing eight courses. Room order is kept
 // compatible with old saves; a full five-section redesign is a separate change.
 export function setupRepairStations(g){
- const L=g.level;
+ const L=g.level;if(L.printer)return;
  for(const r of L.relays){
   if(r.mode==='sequence')r.puzzleType='wiring';
   if(r.mode==='titration')r.puzzleType='titration';

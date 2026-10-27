@@ -1,4 +1,5 @@
-import {expandRooms} from './laboratory.mjs?v=4.3a';
+import {redesignPrinter} from './printer-level.mjs?v=4.4a';
+import {expandRooms} from './laboratory.mjs?v=4.4a';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],
@@ -126,4 +127,5 @@ for(const L of rooms){
 const studentQuotes=[['アノードカソード逆につけちゃった！','ネジの箱ひっくり返しちゃった'],['起きたら15時だったんだよね'],['俺って夜が1番集中できっからさ'],['AIが無くなったら研究どうしよう'],['大丈夫！レポート提出までのこり10時間もある！'],['ここからは魂のヤスリがけだ'],['なんでうちの大学はクリスマスも授業あるんだろう'],['酒を飲んで進捗出すぞ〜']];
 rooms.forEach((L,i)=>studentQuotes[i].forEach((line,j)=>L.students[j%L.students.length].lines.unshift(line)));
 expandRooms(rooms);
+redesignPrinter(rooms[3]);
 export const LEVELS=rooms;

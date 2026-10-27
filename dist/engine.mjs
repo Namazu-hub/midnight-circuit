@@ -1,12 +1,13 @@
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.3a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.3a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.3a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.3a';
-import {tickLab} from './laboratory.mjs?v=4.3a';
-import {LEVELS} from './levels.mjs?v=4.3a';
-import {clamp,overlap,approach} from './world.mjs?v=4.3a';
-import {tickEnemies} from './enemies.mjs?v=4.3a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.3a';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.4a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.4a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.4a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.4a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.4a';
+import {tickLab} from './laboratory.mjs?v=4.4a';
+import {LEVELS} from './levels.mjs?v=4.4a';
+import {clamp,overlap,approach} from './world.mjs?v=4.4a';
+import {tickEnemies} from './enemies.mjs?v=4.4a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.4a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -16,12 +17,12 @@ export function createGame(index=0,customLevel=null){
  level.platforms.forEach((a,i)=>Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0}));
  level.enemies.forEach(e=>{e.baseX=e.x;});
  const g={level,index,player:{...level.spawn,w:28,h:40,vx:0,vy:0,hp:6,displayHP:6,hurtTimer:0,hurtFrom:6,hurtTo:6,boost:0,face:1,onGround:false,standing:null,coyote:0,jumps:0,buffer:0,invul:0,walk:0},time:0,elapsed:0,pulse:0,cooldown:0,camera:0,cameraY:0,checkpoint:false,respawn:{...level.spawn},chips:0,gears:0,deaths:0,lives:3,gameOver:false,finished:false,events:[],projectiles:[],shake:0,warp:0,progress:0,spawnGrace:1,cartCheckpoint:160};
- if(level.theme!=='fever'){setupRepairStations(g);setupResearch(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
+ if(level.theme!=='fever'){setupRepairStations(g);setupResearch(g);setupPrinter(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
  if(level.cart)resetRail(g);return g;
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
- returnCarriedPart(g);g.repairSession=null;const p=g.player;
+ resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
  const hp=p.hp,displayHP=p.displayHP,hurtTimer=p.hurtTimer;
@@ -43,6 +44,7 @@ export function laserPhase(g,l){return (g.time+(l.phase||0))%3.8;}
 export function laserActive(g,l){const phase=laserPhase(g,l);return !g.level.relays.some(r=>r.mode==='timing'&&r.on)&&g.pulse<=0&&phase>=.65&&phase<2.2;}
 export function printedPhase(a){return (a.clock+(a.phase||0))%(a.period||4.8);}
 export function platformSolid(g,a){
+ if(g.printer){const solid=printerSolid(g,a);if(solid!==null)return solid;}
  if(a.actionDevice)return actionPlatformSolid(g,a);
  if(a.requiresRepair){const r=g.level.relays.find(r=>r.id===a.group);return !!r?.on&&(!a.requiresRank||(r.repairRank||0)>=a.requiresRank);}
  if(a.type==='ghost')return g.pulse>0||!!(a.group&&g.level.relays.find(r=>r.id===a.group)?.on);
@@ -102,7 +104,7 @@ function interactions(g,activated){
  if(activated){const portal=L.portals.find(r=>Math.hypot(p.x+14-r.x,p.y+20-r.y)<115);if(portal){portal.on=true;L.relays.find(r=>r.id===portal.id).on=true;p.x=portal.toX;p.y=portal.toY;p.vx=0;p.vy=0;p.onGround=false;p.standing=null;p.invul=1.5;g.respawn={x:p.x,y:p.y};g.checkpoint=true;g.warp=.6;g.camera=clamp(p.x-VIEW.w*.32,0,L.width-VIEW.w);g.cameraY=clamp(p.y-310,L.minY,0);emit(g,'portal',{x:p.x+14,y:p.y+20});}}
  for(const c of L.checkpoints)if(!c.active&&Math.abs(p.x-c.x)<60&&Math.abs(p.y+p.h-c.y)<70){c.active=true;g.checkpoint=true;g.respawn={x:c.x,y:c.y-40};p.hp=6;p.displayHP=6;p.hurtTimer=0;if(g.cart)g.cartCheckpoint=c.x;emit(g,'checkpoint',{x:c.x,y:c.y-50});}
  for(let i=0;i<L.route.length;i++){const r=L.route[i];if(Math.hypot(p.x+14-r.x,p.y+40-r.y)<150)g.progress=Math.max(g.progress,(i+1)/(L.route.length+1));}
- const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
+ const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!g.printer||g.printer.boss.done)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
 }
 export function updateGame(g,input={},dt=1/120){
  if(g.finished||g.gameOver||g.repairSession)return;const p=g.player;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
@@ -113,7 +115,8 @@ export function updateGame(g,input={},dt=1/120){
  updateMachinery(g,dt);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else walk(g,input,dt);
  tickEnemies(g,dt,damage);
- tickLab(g,input,activated,dt,damage);
+ if(!g.printer)tickLab(g,input,activated,dt,damage);
+ tickPrinter(g,input,activated,dt,damage);
  if(g.cart)for(const e of g.level.enemies)if(e.alive&&overlap({x:g.cart.x-g.cart.w/2,y:g.cart.y-32,w:g.cart.w,h:60},e)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  for(const e of g.level.enemies){if(!e.alive||!overlap(p,e))continue;if(g.fever){e.alive=false;emit(g,'feverKill',{x:e.x+16,y:e.y+14});continue;}
   if(p.vy>50&&p.oldBottom<=e.y+14&&(e.state!=='discharge'||g.pulse>0)){e.alive=false;if(g.cart){g.cart.vy=-360;g.cart.onRail=false;}else{p.vy=-440;p.jumps=1;}emit(g,'stomp',{x:e.x+16,y:e.y+14});}
@@ -127,5 +130,6 @@ export function updateGame(g,input={},dt=1/120){
  tickResearch(g);
  if(p.y>g.level.killY){respawn(g,'fall');return;}
  const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32),0,Math.max(0,g.level.width-VIEW.w));const ty=clamp(p.y-310,g.level.minY,0);
+ if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);
 }
