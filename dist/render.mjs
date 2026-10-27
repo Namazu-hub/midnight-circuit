@@ -1,7 +1,7 @@
-import {drawResearch} from './research.mjs?v=4.4a';
-import {drawPrinter} from './printer-art.mjs?v=4.4a';
-import {drawLab} from './laboratory.mjs?v=4.4a';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.4a';
+import {drawResearch} from './research.mjs?v=4.4b';
+import {drawPrinter} from './printer-art.mjs?v=4.4b';
+import {drawLab} from './laboratory.mjs?v=4.4b';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.4b';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},

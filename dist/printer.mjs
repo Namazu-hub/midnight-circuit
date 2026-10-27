@@ -1,5 +1,5 @@
-import {overlap,clamp} from './world.mjs?v=4.4a';
-import {grant} from './research.mjs?v=4.4a';
+import {overlap,clamp} from './world.mjs?v=4.4b';
+import {grant} from './research.mjs?v=4.4b';
 export const PRINTER={arena:5400,end:6600,intro:9,bossHP:18,frameTime:6,spawnCap:3};
 const near=(g,o,d=90)=>Math.hypot(g.player.x+14-o.x,g.player.y+20-o.y)<d;
 const tell=(g,text)=>g.events.push({type:'repairStep',text});
