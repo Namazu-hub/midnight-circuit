@@ -45,3 +45,5 @@ v4の追加仕様・検証はdocs/EXPANSION-v4.mdも読む。旧仕様書はv3�
 画面操作はdist/touch-input.mjs。モバイル操作・横画面はdocs/MOBILE-CONTROLS.mdを参照。公開時は変更したエントリーCSS/JSのURL版番号も更新し、旧キャッシュとの混在を避ける。
 
 修理専用画面はrepair-ui.mjs、判定モデルはrepairs.mjs、既存8面への配置と効果はrepair-stations.mjs。docs/REPAIRS-v4.2.mdを読む。任意装置はoptionalで主経路のクリア条件から除外する。パルスXは戦闘を維持し、任意修理はCまたは専用ボタン。全経路テストは修理の操作APIも利用し、画面の操作性を保証しない。
+
+v4.3のステージ4ハンドはaction-repairs.mjsでステージ内応急修理を行う。精密画面は応急修理後のみ。購入補助でこれを迂回しない。docs/ACTION-REPAIRS-v4.3.mdと入力経路試験を維持する。

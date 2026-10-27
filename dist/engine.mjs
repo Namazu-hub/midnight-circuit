@@ -1,11 +1,12 @@
-import {setupRepairStations} from './repair-stations.mjs?v=4.2a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.2a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.2a';
-import {tickLab} from './laboratory.mjs?v=4.2a';
-import {LEVELS} from './levels.mjs?v=4.2a';
-import {clamp,overlap,approach} from './world.mjs?v=4.2a';
-import {tickEnemies} from './enemies.mjs?v=4.2a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.2a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.3a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.3a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.3a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.3a';
+import {tickLab} from './laboratory.mjs?v=4.3a';
+import {LEVELS} from './levels.mjs?v=4.3a';
+import {clamp,overlap,approach} from './world.mjs?v=4.3a';
+import {tickEnemies} from './enemies.mjs?v=4.3a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.3a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -20,7 +21,7 @@ export function createGame(index=0,customLevel=null){
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
- g.repairSession=null;const p=g.player;
+ returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
  const hp=p.hp,displayHP=p.displayHP,hurtTimer=p.hurtTimer;
@@ -42,6 +43,7 @@ export function laserPhase(g,l){return (g.time+(l.phase||0))%3.8;}
 export function laserActive(g,l){const phase=laserPhase(g,l);return !g.level.relays.some(r=>r.mode==='timing'&&r.on)&&g.pulse<=0&&phase>=.65&&phase<2.2;}
 export function printedPhase(a){return (a.clock+(a.phase||0))%(a.period||4.8);}
 export function platformSolid(g,a){
+ if(a.actionDevice)return actionPlatformSolid(g,a);
  if(a.requiresRepair){const r=g.level.relays.find(r=>r.id===a.group);return !!r?.on&&(!a.requiresRank||(r.repairRank||0)>=a.requiresRank);}
  if(a.type==='ghost')return g.pulse>0||!!(a.group&&g.level.relays.find(r=>r.id===a.group)?.on);
  if(a.type==='printed'&&g.level.relays.some(r=>r.mode==='timing'&&r.on))return true;
@@ -121,6 +123,7 @@ export function updateGame(g,input={},dt=1/120){
  for(const h of g.level.presses){const hit=pressState(g,h);if(hit.active&&overlap(p,hit))damage(g,h.x+h.w/2);}
  if(g.gameOver)return;
  interactions(g,activated);
+ tickActionRepairs(g,input,activated,dt);
  tickResearch(g);
  if(p.y>g.level.killY){respawn(g,'fall');return;}
  const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32),0,Math.max(0,g.level.width-VIEW.w));const ty=clamp(p.y-310,g.level.minY,0);

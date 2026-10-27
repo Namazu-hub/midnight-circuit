@@ -1,3 +1,4 @@
+import {completeHand} from './action-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createGame,updateGame,respawn,platformSolid,pressState} from '../dist/engine.mjs';
@@ -48,7 +49,7 @@ test('hand repair builds a bridge; lift calibration is idempotent; press and tur
  for(const [index,type] of [[3,'joints'],[4,'sensor'],[5,'joints'],[7,'logic']]){
   const g=createGame(index),r=g.level.relays.find(r=>r.puzzleType===type),p=g.level.platforms.find(p=>p.type==='moving');const range=p?.range;
   const bridge=g.level.platforms.find(p=>p.group===r.id);if(bridge)assert.equal(platformSolid(g,bridge),false);
-  approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);tickResearch(g);
+  if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);tickResearch(g);
   if(bridge)assert.equal(platformSolid(g,bridge),true);if(index===4)assert.equal(p.range,range*.6);
   if(index===5){g.level.presses[0].clock=1.2;assert.equal(pressState(g,g.level.presses[0]).active,false);}
   if(index===7){const turret=g.level.enemies.find(e=>e.kind==='chip');approach(g,{x:turret.x,y:turret.y});for(let i=0;i<500;i++)tickEnemies(g,1/120,()=>{});assert.equal(g.projectiles.some(p=>p.kind==='bolt'),false);}
@@ -58,11 +59,11 @@ test('gear repair restores a full brake without breaking cart rider or lane mech
  const g=createGame(2),r=g.level.relays.find(r=>r.puzzleType==='gears');approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);for(let i=0;i<240;i++)updateGame(g,{left:true});assert.equal(g.cart.speed,0);const x=g.cart.x;for(let i=0;i<60;i++)updateGame(g,{left:true});assert.equal(g.cart.x,x);
 });
 test('every repair family is placed in a course; repairs work with zero funds',()=>{
- const types=new Set();for(let i=0;i<8;i++){const g=createGame(i);for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
+ const types=new Set();for(let i=0;i<8;i++){const g=createGame(i);for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
  assert.deepEqual([...types].sort(),Object.keys(REPAIR_NAMES).sort());
 });
 test('emergency repair upgrades once; full-repair cache stays locked until upgraded',()=>{
- const g=createGame(3),r=g.level.relays.find(r=>r.puzzleType==='joints');approach(g,r);beginRepair(g,r);solvePuzzle(r.puzzle);changePuzzle(r.puzzle,'angle',r.puzzle.target[0]+8,0);assert.equal(commitRepair(g).rank,1);tickResearch(g);assert.equal(g.research.funds,40);
+ const g=createGame(3),r=g.level.relays.find(r=>r.puzzleType==='joints');completeHand(g,r);assert.equal(r.repairRank,1);tickResearch(g);assert.equal(g.research.funds,40);
  const box=g.level.researchCaches.find(b=>b.device===r.id);approach(g,box);tickResearch(g);assert.equal(box.got,false);
  approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);assert.equal(g.research.repairs,1);assert.equal(g.research.fullRepairs,1);
  approach(g,box);tickResearch(g);assert.equal(box.got,true);assert.equal(g.research.funds,145);tickResearch(g);assert.equal(g.research.funds,145);

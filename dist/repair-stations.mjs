@@ -1,4 +1,5 @@
-import {REPAIR_NAMES} from './repairs.mjs?v=4.2a';
+import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.3a';
+import {REPAIR_NAMES} from './repairs.mjs?v=4.3a';
 
 // Incremental integration with the existing eight courses. Room order is kept
 // compatible with old saves; a full five-section redesign is a separate change.
@@ -13,7 +14,7 @@ export function setupRepairStations(g){
  const add=(x,y,type,difficulty,effect,effectText)=>{const r={id:`research-${g.index}-${type}`,x,y,on:false,optional:true,mode:type,puzzleType:type,difficulty,repairRank:0,effect,effectText,label:REPAIR_NAMES[type]};L.relays.push(r);return r;};
  if(g.index===0)add(360,480,'wiring',1,'bridge','サービス足場を起動！ 完全修理で高所ボックスを解錠。');
  if(g.index===2){add(350,465,'gears',2,'brake','台車ブレーキ復旧！ 左を押し続けると完全停止できる。');L.signs.push({x:330,y:300,text:'C 歯車を修理 → 左で停車できる'});}
- if(g.index===3){const r=add(650,480,'joints',2,'hand','ロボットアームが造形槽の橋になった！');L.platforms.push({x:1200,y:490,w:150,h:16,type:'ghost',requiresRepair:true,group:r.id},{x:1350,y:490,w:150,h:16,type:'ghost',requiresRepair:true,group:r.id});L.handBridge={x:1200,y:490,device:r.id};}
+ if(g.index===3){const r=add(650,480,'joints',2,'hand','ロボットアームが造形槽の橋になった！');setupActionHand(g,r);}
  if(g.index===4){add(310,480,'sensor',2,'sensor','時計リフトの振幅を校正！ 揺れ幅が小さくなり乗りやすくなる。');}
  if(g.index===5){add(500,480,'joints',3,'press','プレスの関節を校正し、安全な位置で停止！');}
  if(g.index===7){add(500,480,'logic',2,'defence','ICタレットの射撃回路が停止！ 接触には注意。');}
@@ -32,6 +33,7 @@ export function applyRepairEffects(g){
 }
 
 export function drawRepairMachines(c,g){
+ drawActionRepairs(c,g);
  const h=g.level.handBridge;if(!h)return;const on=g.level.relays.find(r=>r.id===h.device)?.on;
  c.save();c.strokeStyle=on?'#82dfcd':'#68798b';c.lineWidth=16;c.lineCap='round';
  // Three articulated fingers extend horizontally as the load-bearing bridge.

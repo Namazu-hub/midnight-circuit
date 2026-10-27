@@ -1,11 +1,11 @@
-import {REPAIR_NAMES,createPuzzle,changePuzzle,assessPuzzle,puzzleHint,gearRatio,titrationPH,jointPoints,signalAt,sensorResults,truthTable} from './repairs.mjs?v=4.2a';
+import {REPAIR_NAMES,createPuzzle,changePuzzle,assessPuzzle,puzzleHint,gearRatio,titrationPH,jointPoints,signalAt,sensorResults,truthTable} from './repairs.mjs?v=4.3a';
 
 // The overlay is rendered with native inputs for touch, keyboard and screen readers.
 export function createRepairUI(host,callbacks){
  const overlay=document.createElement('div');overlay.id='repair-overlay';overlay.className='modal-overlay';overlay.hidden=true;
  overlay.innerHTML=`<section class="dialog repair-dialog" role="dialog" aria-modal="true" aria-labelledby="repair-title">
  <header><span class="dialog-kicker">RESEARCH EQUIPMENT / SERVICE MODE</span><button type="button" class="text-btn" id="repair-close">中断して戻る</button></header>
- <h2 id="repair-title"></h2><p id="repair-goal"></p><p class="repair-safety">修理中は時間が止まります。失敗しても無料で再挑戦できます。</p>
+ <div class="pico-terminal-link"><svg width="100" height="40" viewBox="0 0 100 40" aria-hidden="true"><path d="M35 24H62V12H90" fill="none" stroke="#80ffd8" stroke-width="3"/><rect x="4" y="8" width="30" height="26" rx="5" fill="#afd6d2"/><rect x="8" y="12" width="22" height="13" fill="#15343d"/><path d="M12 18h5m5 0h5" stroke="#8affdc" stroke-width="3"/><rect x="82" y="3" width="16" height="20" fill="#80ffd8"/></svg><span>PICO 接続中 · 精密調整リンク</span></div><h2 id="repair-title"></h2><p id="repair-goal"></p><p class="repair-safety">修理中は時間が止まります。失敗しても無料で再挑戦できます。</p>
  <div class="repair-workspace"><div class="repair-visual"><canvas width="600" height="260" id="repair-board" aria-label="修理装置の現在値と目標。数値は操作欄と判定欄にも表示します"></canvas><div id="repair-table"></div></div><div id="repair-controls"></div></div>
  <p id="repair-readout" role="status"></p><p id="repair-feedback" aria-live="polite"></p>
  <footer class="repair-actions"><button type="button" class="secondary-btn" id="repair-reset">調整をリセット</button><button type="button" class="secondary-btn" id="repair-hint">詳しいヒント ¥10</button><button type="button" class="secondary-btn" id="repair-assist">応急自動補助 ¥80</button><button type="button" class="primary-btn" id="repair-confirm">判定して復旧</button></footer></section>`;

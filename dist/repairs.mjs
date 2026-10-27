@@ -64,9 +64,9 @@ export function puzzleHint(s){
  if(s.type==='sensor')return '点線より上が検知。灰色の「物体なし」より高く、緑の「物体あり」より低く閾値を設定。複数センサは両方が検知したときON。';
  return 'AND＝両方1、OR＝どちらか1、XOR＝片方だけ1。NOTで最後の出力が反転。各行の赤い出力を目標に合わせよう。';
 }
-export function nearbyRepair(g,includeRepaired=false){if(!g||g.fever)return null;return g.level.relays.filter(r=>r.puzzleType&&(!r.on||includeRepaired&&(r.repairRank||0)<2)&&Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)<115).sort((a,b)=>Math.hypot(g.player.x-a.x,g.player.y-a.y)-Math.hypot(g.player.x-b.x,g.player.y-b.y))[0]||null;}
+export function nearbyRepair(g,includeRepaired=false){if(!g||g.fever)return null;return g.level.relays.filter(r=>r.puzzleType&&(!r.actionRepair||r.on)&&(!r.on||includeRepaired&&(r.repairRank||0)<2)&&Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)<115).sort((a,b)=>Math.hypot(g.player.x-a.x,g.player.y-a.y)-Math.hypot(g.player.x-b.x,g.player.y-b.y))[0]||null;}
 export function beginRepair(g,r=nearbyRepair(g,true)){
- if(!r||g.finished||g.gameOver||!g.level.relays.includes(r)||Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)>=115)return null;
+ if(!r||(r.actionRepair&&!r.on)||g.finished||g.gameOver||!g.level.relays.includes(r)||Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)>=115)return null;
  r.puzzle??=createPuzzle(r.puzzleType,r.difficulty);g.repairSession={id:r.id,puzzle:r.puzzle};return g.repairSession;
 }
 export function commitRepair(g){
