@@ -1,0 +1,80 @@
+{
+  "method": "tools/mobile-preview.html, iframe, all item controls visible (disabled), DOM bounding boxes",
+  "sizes": [
+    {
+      "viewport": [
+        844,
+        390
+      ],
+      "canvas": {
+        "x": 0,
+        "y": 74,
+        "width": 844,
+        "height": 251
+      },
+      "allControlsInside": true,
+      "minimumControlWidth": 48,
+      "minimumControlHeight": 44
+    },
+    {
+      "viewport": [
+        667,
+        375
+      ],
+      "canvas": {
+        "x": 0,
+        "y": 74,
+        "width": 667,
+        "height": 236
+      },
+      "allControlsInside": true,
+      "minimumControlWidth": 48,
+      "minimumControlHeight": 44
+    },
+    {
+      "viewport": [
+        568,
+        320
+      ],
+      "canvas": {
+        "x": 0,
+        "y": 74,
+        "width": 568,
+        "height": 181
+      },
+      "allControlsInside": true,
+      "minimumControlWidth": 48,
+      "minimumControlHeight": 44
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "canvas": {
+        "x": 0,
+        "y": 74,
+        "width": 390,
+        "height": 657
+      },
+      "allControlsInside": true,
+      "minimumControlWidth": 48,
+      "minimumControlHeight": 44
+    },
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "canvas": {
+        "x": 0,
+        "y": 74,
+        "width": 320,
+        "height": 381
+      },
+      "allControlsInside": true,
+      "minimumControlWidth": 48,
+      "minimumControlHeight": 44
+    }
+  ]
+}

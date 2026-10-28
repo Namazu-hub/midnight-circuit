@@ -47,3 +47,6 @@ localStorageはオリジン別。移行先URLに自動では引き継げない�
 移行コピーでは旧ホスティング設定を外し、dist/とtests/は無変更。READMEを更新し、資料、確認スクリプト、将来素材の受け入れ場所だけを追加した。元READMEはORIGINAL-README-v3.mdに保持。すでに役割別モジュールなので再分割は行わない。
 
 Pagesにはdist/を配信ルートとして置く。相対参照のためリポジトリ名のサブパスでも使える構造だが、GitHub Pagesの実URLでの検証は未実施。公開条件はMIGRATION.md参照。
+
+
+v4.8の工具・必須剥離・ノズル保守・冷却配線・コア侵入、および検証と未実装事項は[PRINTER-v4.8.md](PRINTER-v4.8.md)を参照。既存操作は変更せず、ACTION C/F、工具 V／TOOLを使用する。

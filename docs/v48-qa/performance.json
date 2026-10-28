@@ -1,0 +1,38 @@
+[
+  {
+    "base": "./perf-base/",
+    "samples": 600,
+    "workMs": {
+      "median": 1,
+      "p95": 3
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "base": "../",
+    "samples": 600,
+    "workMs": {
+      "median": 1,
+      "p95": 3.5
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "base": "./perf-base/",
+    "samples": 600,
+    "workMs": {
+      "median": 0.8999999999068677,
+      "p95": 2.1999999997206032
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+  },
+  {
+    "base": "../",
+    "samples": 600,
+    "workMs": {
+      "median": 0.900000000372529,
+      "p95": 2.6000000000931323
+    },
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+  }
+]
