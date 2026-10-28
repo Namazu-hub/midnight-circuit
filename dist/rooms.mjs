@@ -1,9 +1,9 @@
 // Reusable, stage-local rooms. World state is shared; only the active bounds change.
-import {clamp} from './world.mjs?v=4.5.2a';
+import {clamp} from './world.mjs?v=4.6a';
 export function setupRooms(g){if(!g.level.rooms)return;g.rooms={active:g.level.rooms[0].id,transition:null,cooldown:0,ride:null};}
 export const roomAt=(g,x=g.player.x)=>g.level.rooms?.find(r=>x>=r.left&&x<r.right);
 export const currentRoom=g=>g.level.rooms?.find(r=>r.id===g.rooms?.active);
-export function doorReady(g,d){return !d.requires||d.requires.every(id=>g.level.relays.find(r=>r.id===id)?.on);}
+export function doorReady(g,d){return !(d.id==='cd'&&g.printer?.incident&&!g.printer.journey.runawaySolved)&&(!d.requires||d.requires.every(id=>g.level.relays.find(r=>r.id===id)?.on));}
 export function roomControl(g){if(!g?.rooms||g.rooms.transition||g.rooms.cooldown>0||g.printer?.boss.active&&!g.printer.boss.done)return null;
  const p=g.player;return g.level.doors.find(d=>d.room===g.rooms.active&&Math.hypot(p.x+14-d.x,p.y+40-d.y)<80)||null;}
 export function beginDoor(g,d){if(!d||!doorReady(g,d)||g.rooms.transition)return false;g.rooms.ride=null;g.rooms.transition={door:d,time:0,fromX:g.player.x,fromY:g.player.y,camera:g.camera,cameraY:g.cameraY,arrived:false};g.player.vx=0;g.player.vy=0;g.player.standing=null;g.events.push({type:'door'});return true;}

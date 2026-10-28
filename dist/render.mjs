@@ -1,10 +1,10 @@
-import {poseScale} from './feel.mjs?v=4.5.2a';
-import {currentRoom} from './rooms.mjs?v=4.5.2a';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.5.2a';
-import {drawResearch} from './research.mjs?v=4.5.2a';
-import {drawPrinter} from './printer-art.mjs?v=4.5.2a';
-import {drawLab} from './laboratory.mjs?v=4.5.2a';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.5.2a';
+import {poseScale} from './feel.mjs?v=4.6a';
+import {currentRoom} from './rooms.mjs?v=4.6a';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.6a';
+import {drawResearch} from './research.mjs?v=4.6a';
+import {drawPrinter} from './printer-art.mjs?v=4.6a';
+import {drawLab} from './laboratory.mjs?v=4.6a';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.6a';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},

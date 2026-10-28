@@ -1,17 +1,17 @@
-import {FEEL,holdFrame} from './feel.mjs?v=4.5.2a';
-import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.5.2a';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.5.2a';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.5.2a';
-import {createRepairUI} from './repair-ui.mjs?v=4.5.2a';
-import {tickResearch} from './research.mjs?v=4.5.2a';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.5.2a';
-import {bindTouchControls} from './touch-input.mjs?v=4.5.2a';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.5.2a';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.5.2a';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.5.2a';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.5.2a';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.5.2a';
-import {drawAwakening} from './awakening.mjs?v=4.5.2a';
+import {FEEL,holdFrame} from './feel.mjs?v=4.6a';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.6a';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.6a';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.6a';
+import {createRepairUI} from './repair-ui.mjs?v=4.6a';
+import {tickResearch} from './research.mjs?v=4.6a';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.6a';
+import {bindTouchControls} from './touch-input.mjs?v=4.6a';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.6a';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.6a';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.6a';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.6a';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.6a';
+import {drawAwakening} from './awakening.mjs?v=4.6a';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -178,7 +178,7 @@ function processEvents(){
     if(e.type==='repairComplete'){repairNotice=e.text;burst(e.x,e.y,'#ffd87a',35);audio.sound('relay');toast(e.text,6);}
     if(e.type==='researchRepair'&&!game.printer){repairNotice??=e.text;burst(e.x,e.y,'#80ffd0',30);toast(e.text,5);}
     if(e.type==='funds'){const amount=e.text.match(/\+¥(\d+)/)?.[1];if(amount)particles.push({x:e.x,y:e.y-25,vx:0,vy:-35,text:'¥+'+amount,color:'#ffe2a0',life:.8,max:.8});}
-    if(e.type==='hurt')burst(e.x,e.y,'#ff787d',8);
+    if(e.type==='coreBeacon')audio.tone(660,.16,'triangle',.2);if(e.type==='jobRunaway'){audio.sound('reach');burst(e.x,e.y,'#ffd393',18);}if(e.type==='dragonDefeat'){audio.nextBeat=0;audio.step=0;audio.sound('jackpot');burst(e.x,e.y,'#ffedb6',60);}if(e.type==='printerDawn'){audio.nextBeat=0;audio.sound('checkpoint');}if(e.type==='hurt')burst(e.x,e.y,'#ff787d',8);
     if(e.type==='feverKill')burst(e.x,e.y,'#ffe195',progress.reduced?5:22);
     if(e.type==='portal'){burst(e.x,e.y,'#dbb2ff',25);toast('光路がつながった！ 次のレンズへ。',3);}
     if(e.type==='boost'){burst(e.x,e.y,'#b6ff6b',30);toast('モンエナ！ 9秒間の虹色スピードアップ ×1.55',3);}

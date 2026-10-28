@@ -1,3 +1,4 @@
+import {dragonBoxes} from '../dist/dragon.mjs';
 // v4.4 replaces the stage 4 timing-pin prototype with apparatus actions.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,7 +18,7 @@ test('gear and print repair require parts and physical controls, never timing pu
  const print=g.level.platforms.find(p=>p.printerPrint===0);g.pulse=3;assert.equal(platformSolid(g,print),false);at(g,'printStart');tick(g,true);assert.equal(g.printer.printing,undefined);at(g,'safety');tick(g,true);at(g,'pattern');tick(g,true);at(g,'printStart');tick(g,true);tick(g,false,1);assert.equal(platformSolid(g,print),false);tick(g,false,2.1);assert.ok(platformSolid(g,print));assert.ok(g.level.relays[2].on);
 });
 test('incident changes collision; cooling needs both fans; assistance cannot bypass repair',()=>{
- const g=createGame(3);g.player.x=2600;g.rooms.active='C';tick(g);const jam=g.level.platforms.find(p=>p.printerJam);assert.ok(platformSolid(g,jam));at(g,'safety');tick(g,true);assert.equal(platformSolid(g,jam),false);
+ const g=createGame(3);g.player.x=2600;g.rooms.active='C';tick(g);const jam=g.level.platforms.find(p=>p.printerJam);assert.equal(platformSolid(g,jam),false);at(g,'safety');tick(g,true);tick(g);assert.ok(platformSolid(g,jam));at(g,'purge');tick(g,true);assert.equal(platformSolid(g,jam),false);
  at(g,'cool');tick(g,true);assert.equal(g.level.relays[3].on,false);at(g,'fan1');tick(g,true);at(g,'fan2');tick(g,true);at(g,'cool');tick(g,true);assert.ok(g.level.relays[3].on);
  const v=g.level.vendors[0];Object.assign(g.player,{x:v.x-14,y:v.y-40});g.research.funds=200;assert.equal(purchase(g,'assist').ok,false);assert.equal(g.research.funds,200);
 });
@@ -27,9 +28,9 @@ test('arena closes, retries reset battle but preserve repairs and consume normal
  g.printer.boss.hp=7;g.printer.boss.jobs.push({x:5700,y:470,progress:.2});g.printer.boss.frame=.5;respawn(g,'retry');assert.equal(g.lives,2);assert.equal(g.player.x,5230);assert.equal(g.printer.boss.active,false);assert.equal(g.printer.boss.hp,18);assert.equal(g.printer.boss.jobs.length,0);assert.ok(g.level.relays.every(r=>r.on));
  enter(g);g.printer.seenIntro=true;assert.equal(printerControl(g).id,'skip');tick(g,true);assert.ok(g.printer.boss.age>=9);
 });
-test('boss cannot finish by HP alone; restraint, cooling, stop and reward are ordered',()=>{
+test('boss cannot finish by HP or a switch: restraint, cooling and a physical core hit are ordered',()=>{
  const g=createGame(3);g.level.relays.forEach(r=>r.on=true);const b=g.printer.boss;b.active=true;b.age=10;b.phase=3;b.hp=6;
- at(g,'stop');tick(g,true);assert.equal(b.done,false);at(g,'path');tick(g,true);assert.equal(b.route,false);at(g,'supply');tick(g,true);b.x=6000;at(g,'path');tick(g,true);assert.ok(b.route);at(g,'coolBoss');tick(g,true);assert.equal(b.cooled,false);tick(g,false,6.1);tick(g,true);assert.ok(b.cooled);at(g,'stop');tick(g,true);assert.ok(b.done);const funds=g.research.funds;tick(g,true);assert.equal(g.research.funds,funds);assert.equal(funds,250);
+ at(g,'stop');tick(g,true);assert.equal(b.done,false);at(g,'path');tick(g,true);assert.equal(b.route,false);at(g,'supply');tick(g,true);b.x=6000;at(g,'path');tick(g,true);assert.ok(b.route);at(g,'coolBoss');tick(g,true);assert.equal(b.cooled,false);tick(g,false,6.1);tick(g,true);assert.ok(b.cooled);at(g,'stop');tick(g,true);assert.equal(b.done,false);const core=dragonBoxes(b)[5];Object.assign(g.player,{x:core.x+20,y:core.y-25,oldBottom:core.y-1,vy:140});tickPrinter(g,{},false,1/120,()=>{});assert.ok(b.done);assert.ok(b.finalHit);const funds=g.research.funds;tick(g,true);assert.equal(g.research.funds,funds);assert.equal(funds,250);
 });
 test('enemy manufacture is capped and fresh pulse can interrupt a printed enemy',()=>{
  const g=createGame(3),b=g.printer.boss;b.active=true;b.age=10;b.phase=2;g.player.x=5500;for(let i=0;i<100;i++)tick(g,false,.5);assert.ok(b.jobs.length+b.minions.filter(e=>e.alive).length<=3);

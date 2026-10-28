@@ -1,17 +1,17 @@
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.5.2a';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.5.2a';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.5.2a';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.5.2a';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.5.2a';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.5.2a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.5.2a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.5.2a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.5.2a';
-import {tickLab} from './laboratory.mjs?v=4.5.2a';
-import {LEVELS} from './levels.mjs?v=4.5.2a';
-import {clamp,overlap,approach} from './world.mjs?v=4.5.2a';
-import {tickEnemies} from './enemies.mjs?v=4.5.2a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.5.2a';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.6a';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.6a';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.6a';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.6a';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.6a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.6a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.6a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.6a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.6a';
+import {tickLab} from './laboratory.mjs?v=4.6a';
+import {LEVELS} from './levels.mjs?v=4.6a';
+import {clamp,overlap,approach} from './world.mjs?v=4.6a';
+import {tickEnemies} from './enemies.mjs?v=4.6a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.6a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -66,7 +66,7 @@ export function pressState(g,h){
 function updateMachinery(g,dt){
  const p=g.player,frozen=g.pulse>0;
  for(const a of g.level.platforms){
-  if(a.printerEnemy)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
+  if(a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
   if((a.type==='moving'||a.type==='wave')&&!frozen&&powered){const v=Math.sin(a.clock/a.period*Math.PI*2+(a.phase||0))*a.range;a.x=a.baseX+(a.axis==='x'?v:0);a.y=a.baseY+(a.axis==='y'?v:0);}
   if(a.type==='orbit'&&!frozen&&powered){a.x=a.baseX+Math.cos(a.clock/a.period*Math.PI*2)*a.range;a.y=a.baseY+Math.sin(a.clock/a.period*Math.PI*2)*a.range;}
   if(a.type==='leaf'&&!frozen){if(a.missing>0){a.missing=Math.max(0,a.missing-dt);if(a.missing===0)a.crumble=0;}else if(a.crumble>0){a.crumble+=dt;if(a.crumble>.8){a.missing=3.2;a.crumble=0;}}}
@@ -109,10 +109,10 @@ function interactions(g,activated){
  if(activated){const portal=L.portals.find(r=>Math.hypot(p.x+14-r.x,p.y+20-r.y)<115);if(portal){portal.on=true;L.relays.find(r=>r.id===portal.id).on=true;p.x=portal.toX;p.y=portal.toY;p.vx=0;p.vy=0;p.onGround=false;p.standing=null;p.invul=1.5;g.respawn={x:p.x,y:p.y};g.checkpoint=true;g.warp=.6;g.camera=clamp(p.x-VIEW.w*.32,0,L.width-VIEW.w);g.cameraY=clamp(p.y-310,L.minY,0);emit(g,'portal',{x:p.x+14,y:p.y+20});}}
  for(const c of L.checkpoints)if(!c.active&&Math.abs(p.x-c.x)<60&&Math.abs(p.y+p.h-c.y)<70){c.active=true;g.checkpoint=true;g.respawn={x:c.x,y:c.y-40};p.hp=6;p.displayHP=6;p.hurtTimer=0;if(g.cart)g.cartCheckpoint=c.x;emit(g,'checkpoint',{x:c.x,y:c.y-50});}
  for(let i=0;i<L.route.length;i++){const r=L.route[i];if(Math.hypot(p.x+14-r.x,p.y+40-r.y)<150)g.progress=Math.max(g.progress,(i+1)/(L.route.length+1));}
- const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!g.printer||g.printer.boss.done)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
+ const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!g.printer||g.printer.ending.complete)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
 }
 function simulateGame(g,input={},dt=1/120){
- if(g.finished||g.gameOver||g.repairSession)return;const p=g.player;if(tickDoor(g,input,dt,VIEW.w))return;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
+ if(g.finished||g.gameOver||g.repairSession)return;if(g.printer?.ending.active){g.time+=dt;tickPrinter(g,{},false,dt,damage);return;}const p=g.player;if(tickDoor(g,input,dt,VIEW.w))return;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
  p.invul=Math.max(0,p.invul-dt);p.boost=Math.max(0,p.boost-dt);p.hurtTimer=Math.max(0,p.hurtTimer-dt);if(p.hurtTimer<1.95)p.displayHP+=(p.hp-p.displayHP)*Math.min(1,dt*7);
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}

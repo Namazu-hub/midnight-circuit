@@ -1,4 +1,4 @@
-import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.5.2a';
+import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.6a';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
 export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 9秒加速',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80}];

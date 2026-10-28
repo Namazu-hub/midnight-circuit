@@ -1,3 +1,4 @@
+import {extendJourney} from './printer-journey.mjs?v=4.6a';
 // v4.5 extends the existing four repairs instead of replacing their state/rewards.
 export const PRINTER_CHAT=[
 '印刷時間が23時間…！？','フィラメントが途中で切れた…','ノズルにフィラメント詰まったらしい','1家に1台3Dプリンター','残り3時間って昨日も言ってなかった？','サポート材の方が本体より重いんだけど','1層目だけは完璧だったのに…','「これ、何に使うの？」「知らん、作りたかった」','印刷失敗したけど、なんか芸術的じゃない？','積層ピッチ0.1mmでやる必要あった？','ベンチーばっかり増えていく…','3Dプリンターで3Dプリンターの部品を作ってる','研究よりプリンターの修理に時間使ってる気がする','これで最後の再印刷にする！','先輩、あのドラゴン誰が設計したんですか？'];
@@ -41,7 +42,7 @@ export function expandPrinter(L){
  pad(14760,380,200,{type:'moving',axis:'y',range:130,period:5,lift:true,power:'drive'});
  // Pattern 0 stair / 1 bridge / 2 shield. Physics and art share each exact rectangle.
  pad(3330,400,110,{printerPattern:0});pad(3430,300,110,{printerPattern:0});pad(3530,200,180,{printerPattern:0});
- pad(3300,480,32,{h:130,printerPattern:2,shield:true});
+ pad(3300,380,32,{h:130,printerPattern:2,shield:true});L.drinks.push({x:3620,y:165});L.chips.push({x:3650,y:165});
  L.printerControls.push({id:'pattern',x:3100,y:150,label:'造形レバー'}, {id:'printStart',x:3180,y:150,label:'造形開始'});
  // Original print control serves as the same physical selector for old integrations.
  L.printerControls=L.printerControls.filter(c=>c.id!=='print');
@@ -61,5 +62,6 @@ export function expandPrinter(L){
  for(const [room,x,y,name,a,b,react] of positions)L.students.push({room,x,y,name,color:'#f4bd90',lines:PRINTER_CHAT.slice(a,b),react,after:['お、動いた！……あれ、誰が直した？','これで最後の再印刷にする！']});
  // Keep every previously requested joke; old instructional sentences stay in optional hints only.
  L.students[0].lines.push(...old[0].lines.filter(l=>!/(スイッチ|ファン|プレート|パルス|Cか)/.test(l)));
+ extendJourney(L);
  L.tip='小さなPICOで、巨大なプリンターを直そう。装置・扉はC／操作。迷ったら「？」のヒント。';L.mechanic='9つの部屋 · 造形と探索 · DRAGON-01';
 }

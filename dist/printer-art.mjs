@@ -1,6 +1,7 @@
-import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.5.2a';
-import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.5.2a';
-import {drawPrinterGuides} from './printer-visual.mjs?v=4.5.2a';
+import {drawJourney} from './printer-journey-art.mjs?v=4.6a';
+import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.6a';
+import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.6a';
+import {drawPrinterGuides} from './printer-visual.mjs?v=4.6a';
 // Original procedural pixel art: silhouette polygons, mechanical joints and
 // layered resin plates rendered on a 2px grid, with no external assets.
 const poly=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
@@ -26,7 +27,7 @@ export function drawPrinter(c,g){const s=g.printer;if(!s)return;const b=s.boss,t
  }
 
  if(s.incident&&!s.safety){c.fillStyle='#e57758';for(let i=0;i<12;i++)c.fillRect(3200+i*7,510-i*16,110,10);}
- for(const e of s.foes){if(!e.alive||e.room!==g.rooms?.active)continue;if(e.kind==='spool')spool(c,e);else if(e.kind==='head'){head(c,e.x,e.y,e.warning);if(e.warning){c.fillStyle='#ff665433';c.fillRect(e.x, e.y+40,40,470-e.y);}}else if(e.kind==='tangle'){c.strokeStyle=e.disabled?'#53697a':'#e6ac80';c.lineWidth=4;c.beginPath();for(let i=0;i<45;i++){const x=e.x+20+Math.sin(i*1.7+t)*22,y=e.y+e.h-i/45*e.h;i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}}
+ for(const e of s.foes){if(!e.alive||e.captured||e.room!==g.rooms?.active)continue;if(e.kind==='spool')spool(c,e);else if(e.kind==='head'){head(c,e.x,e.y,e.warning);if(e.warning){c.fillStyle='#ff665433';c.fillRect(e.x, e.y+40,40,470-e.y);}}else if(e.kind==='tangle'){c.strokeStyle=e.disabled?'#53697a':'#e6ac80';c.lineWidth=4;c.beginPath();for(let i=0;i<45;i++){const x=e.x+20+Math.sin(i*1.7+t)*22,y=e.y+e.h-i/45*e.h;i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}}
  // Door remains physically clamped while fighting.
  c.fillStyle=b.active&&!b.done?'#ba7661':'#416779';c.fillRect(5390,b.active&&!b.done?100:0,20,b.active&&!b.done?410:90);
  if(b.active){
@@ -34,15 +35,15 @@ export function drawPrinter(c,g){const s=g.printer;if(!s)return;const b=s.boss,t
   c.fillStyle='#355362';c.fillRect(5480,520,1080,40);for(let x=5490;x<6560;x+=35){c.fillStyle='#e7b875';c.fillRect(x,523,18,5);}c.fillStyle='#dfbe7244';c.fillRect(5780,507,440,5);
   dragon(c,b,t);
   if(b.age<9){const nodes=dragonPose(b),idx=Math.min(13,Math.floor(b.age/.4)),n=nodes[13-idx];head(c,n.x+Math.sin(t*12)*28,n.y-90,true);c.fillStyle='#ffcda2';for(let j=0;j<4;j++)c.fillRect(n.x-36,n.y+35-j*5,72,1);label(c,6000,125,`${Math.min(100,Math.floor(b.age/9*100))}%`);}
-  else if(b.vulnerable&&!b.done){const n=dragonPose(b)[0];c.strokeStyle='#b3fff1';c.lineWidth=3;c.beginPath();c.arc(n.x,n.y,50,0,7);c.stroke();}
+  else if(b.vulnerable&&!b.done&&b.phase<3){const n=dragonPose(b)[0];c.strokeStyle='#b3fff1';c.lineWidth=3;c.beginPath();c.arc(n.x,n.y,50,0,7);c.stroke();}
   if(b.warning){c.fillStyle='#ffd39b';c.font='bold 30px monospace';c.textAlign='center';c.fillText('!',b.x,220);c.fillStyle='#ff665433';c.fillRect(b.target-70,496,140,14);}
-  for(const job of b.jobs){head(c,job.x,330,true);c.fillStyle='#f0ba83';for(let i=0;i<Math.floor(job.progress*10);i++)c.fillRect(job.x-20,505-i*4,40,3);}
+  for(const job of b.jobs){head(c,job.x,330,true);c.save();c.beginPath();c.rect(job.x-40,510-90*job.progress,130,90*job.progress);c.clip();if(job.kind==='mini'){c.translate(job.x+30,510);c.scale(.14,.14);dragon(c,{...b,x:0,y:0,age:10,phase:1},t);}else if(job.kind==='turret')head(c,job.x,470,false);else drawBenchy(c,job.x,462,64,t);c.restore();c.fillStyle='#f0ba83';c.fillRect(job.x-20,510-90*job.progress,100,3);}
   for(const e of b.minions)if(e.alive){if(e.kind==='benchy'){drawBenchy(c,e.x,e.y,64,t);}else if(e.kind==='mini'){c.save();c.translate(e.x,e.y+40);c.scale(.16,.16);dragon(c,{...b,x:0,y:0,phase:1},t);c.restore();}else if(e.kind==='turret'){head(c,e.x,e.y,false);}else{c.strokeStyle='#efb97d';c.lineWidth=4;c.beginPath();for(let i=0;i<20;i++)c.lineTo(e.x+20+Math.sin(i+t)*20,e.y+i*2);c.stroke();}}
   if(b.centerLatch&&!b.route)label(c,6000,480,'▰ '+Math.ceil(b.centerLatch),'#ffe0a6');
   if(b.frame>0){c.fillStyle=b.cooled?'#98e9d1':'#eeb87d';const height=220*b.frame;for(let y=510;y>510-height;y-=7){c.fillRect(b.x-190,y,18,4);c.fillRect(b.x+165,y,18,4);if(y<510-height+8)c.fillRect(b.x-190,y,373,5);}head(c,b.x+(b.done?0:Math.sin(t*5)*190),460-height,!b.done);}
-  if(b.done)label(c,6000,135,'SYSTEM RESTORED','#97ffcf');
+  if(b.done&&b.stoppedAge>1.6)label(c,6000,135,'SYSTEM RESTORED','#97ffcf');
  }
  for(const job of s.factory.jobs){head(c,job.x,380,true);c.save();c.beginPath();c.rect(job.x-20,510-60*job.progress,110,60*job.progress);c.clip();drawBenchy(c,job.x,462,64,t);c.restore();c.fillStyle='#ffe4ac';c.fillRect(job.x-10,510-60*job.progress,84,2);}
- drawNewPrinterFoes(c,g);drawPrinterGuides(c,g);
+ drawNewPrinterFoes(c,g);drawPrinterGuides(c,g);drawJourney(c,g);
  for(const q of s.bolts){c.fillStyle='#ff9a60';c.fillRect(q.x,q.y,q.w,q.h);c.fillStyle='#ffe2ac';c.fillRect(q.x+3,q.y+3,q.w-6,4);}c.restore();
 }

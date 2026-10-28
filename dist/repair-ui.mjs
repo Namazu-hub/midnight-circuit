@@ -1,4 +1,4 @@
-import {REPAIR_NAMES,createPuzzle,changePuzzle,assessPuzzle,puzzleHint,gearRatio,titrationPH,jointPoints,signalAt,sensorResults,truthTable} from './repairs.mjs?v=4.5.2a';
+import {REPAIR_NAMES,createPuzzle,changePuzzle,assessPuzzle,puzzleHint,gearRatio,titrationPH,jointPoints,signalAt,sensorResults,truthTable} from './repairs.mjs?v=4.6a';
 
 // The overlay is rendered with native inputs for touch, keyboard and screen readers.
 export function createRepairUI(host,callbacks){
