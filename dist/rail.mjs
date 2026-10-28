@@ -1,4 +1,4 @@
-import {clamp,approach} from './world.mjs?v=4.5a';
+import {clamp,approach} from './world.mjs?v=4.5.2a';
 export function railAt(level,x,lane=1){
  const r=level.rails.find(r=>(r.lane??1)===lane&&x>=r.x1&&x<=r.x2);
  return r?{y:r.y1+(r.y2-r.y1)*(x-r.x1)/(r.x2-r.x1),slope:(r.y2-r.y1)/(r.x2-r.x1)}:null;

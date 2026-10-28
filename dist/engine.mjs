@@ -1,16 +1,17 @@
-import {tickPrinterChat} from './printer-visual.mjs?v=4.5a';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.5a';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.5a';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.5a';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.5a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.5a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.5a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.5a';
-import {tickLab} from './laboratory.mjs?v=4.5a';
-import {LEVELS} from './levels.mjs?v=4.5a';
-import {clamp,overlap,approach} from './world.mjs?v=4.5a';
-import {tickEnemies} from './enemies.mjs?v=4.5a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.5a';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.5.2a';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.5.2a';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.5.2a';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.5.2a';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.5.2a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.5.2a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.5.2a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.5.2a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.5.2a';
+import {tickLab} from './laboratory.mjs?v=4.5.2a';
+import {LEVELS} from './levels.mjs?v=4.5.2a';
+import {clamp,overlap,approach} from './world.mjs?v=4.5.2a';
+import {tickEnemies} from './enemies.mjs?v=4.5.2a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.5.2a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -110,7 +111,7 @@ function interactions(g,activated){
  for(let i=0;i<L.route.length;i++){const r=L.route[i];if(Math.hypot(p.x+14-r.x,p.y+40-r.y)<150)g.progress=Math.max(g.progress,(i+1)/(L.route.length+1));}
  const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!g.printer||g.printer.boss.done)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
 }
-export function updateGame(g,input={},dt=1/120){
+function simulateGame(g,input={},dt=1/120){
  if(g.finished||g.gameOver||g.repairSession)return;const p=g.player;if(tickDoor(g,input,dt,VIEW.w))return;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
  p.invul=Math.max(0,p.invul-dt);p.boost=Math.max(0,p.boost-dt);p.hurtTimer=Math.max(0,p.hurtTimer-dt);if(p.hurtTimer<1.95)p.displayHP+=(p.hp-p.displayHP)*Math.min(1,dt*7);
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
@@ -133,7 +134,13 @@ export function updateGame(g,input={},dt=1/120){
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
  if(p.y>g.level.killY){respawn(g,'fall');return;}
- const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32),left,Math.max(left,right-VIEW.w));const ty=clamp(p.y-310,room?.minY??g.level.minY,0);
+ const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0),left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);
+}
+
+export function updateGame(g,input={},dt=1/120){
+ const f=feelState(g);
+ const before={onGround:g.player.onGround,vy:g.player.vy,vx:g.player.vx},n=g.events.length,merged={...input};for(const k of Object.keys(f.pending))merged[k]=true;f.pending={};
+ const time=g.time;simulateGame(g,merged,dt);if(g.time!==time)finishFrame(g,before,g.events.slice(n),dt);
 }

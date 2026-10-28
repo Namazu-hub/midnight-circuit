@@ -1,4 +1,4 @@
-import {expandPrinter} from './printer-expansion.mjs?v=4.5a';
+import {expandPrinter} from './printer-expansion.mjs?v=4.5.2a';
 // FDM-inspired fictional machine. Stage index and save identity remain unchanged.
 export function redesignPrinter(L){
  const students=L.students;

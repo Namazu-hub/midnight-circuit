@@ -1,8 +1,8 @@
-import {roomControl,cableControl,beginDoor} from './rooms.mjs?v=4.5a';
-import {initDragon,updateDragon,dragonBoxes} from './dragon.mjs?v=4.5a';
-import {setupPrinterFoes,movePrinterFoes,fightPrinterFoes,createPrinterFoe,attachPrinterSurface} from './printer-enemies.mjs?v=4.5a';
-import {overlap,clamp} from './world.mjs?v=4.5a';
-import {grant} from './research.mjs?v=4.5a';
+import {roomControl,cableControl,beginDoor} from './rooms.mjs?v=4.5.2a';
+import {initDragon,updateDragon,dragonBoxes} from './dragon.mjs?v=4.5.2a';
+import {setupPrinterFoes,movePrinterFoes,fightPrinterFoes,createPrinterFoe,attachPrinterSurface} from './printer-enemies.mjs?v=4.5.2a';
+import {overlap,clamp} from './world.mjs?v=4.5.2a';
+import {grant} from './research.mjs?v=4.5.2a';
 export const PRINTER={arena:5400,end:6600,intro:9,bossHP:18,frameTime:6,spawnCap:3};
 const near=(g,o,d=90)=>Math.hypot(g.player.x+14-o.x,g.player.y+20-o.y)<d;
 const tell=(g,text)=>{g.printer.feedback=.65;};

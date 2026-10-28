@@ -1,9 +1,10 @@
-import {currentRoom} from './rooms.mjs?v=4.5a';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.5a';
-import {drawResearch} from './research.mjs?v=4.5a';
-import {drawPrinter} from './printer-art.mjs?v=4.5a';
-import {drawLab} from './laboratory.mjs?v=4.5a';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.5a';
+import {poseScale} from './feel.mjs?v=4.5.2a';
+import {currentRoom} from './rooms.mjs?v=4.5.2a';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.5.2a';
+import {drawResearch} from './research.mjs?v=4.5.2a';
+import {drawPrinter} from './printer-art.mjs?v=4.5.2a';
+import {drawLab} from './laboratory.mjs?v=4.5.2a';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.5.2a';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -172,7 +173,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const p of g.level.platforms){if(p.h<60||p.w<350)continue;const x=p.x+p.w-65;if(x<g.camera-100||x>g.camera+VIEW.w+100)continue;
     if(g.level.theme==='garden')plant(c,x,p.y,1.1,'#9ac77a');else{rect(c,x-13,p.y-34,35,34,'#354b5c');rect(c,x-10,p.y-31,29,4,P.edge);rect(c,x-8,p.y-21,8,11,P.glow+'88');rect(c,x+5,p.y-21,10,2,'#748f9b');rect(c,x+5,p.y-16,8,2,'#748f9b');}}
   for(const s of g.level.students){if(g.rooms&&s.room!==g.rooms.active)continue;student(c,s.x,s.y,s.color,t,1);const close=Math.hypot(g.player.x-s.x,g.player.y+40-s.y)<200;rect(c,s.x+18,s.y-87,3,7,g.level.color);rect(c,s.x+18,s.y-77,3,3,g.level.color);
-    if(g.printer){drawPrinterStudentWork(c,g,s);drawPrinterChat(c,g,s,VIEW.w,VIEW.pixelScale||1);continue;}if(close){const text=s.lines[Math.floor(t/7)%s.lines.length],small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
+    if(g.printer){drawPrinterStudentWork(c,g,s);drawPrinterChat(c,g,s,VIEW.w,VIEW.pixelScale||1);continue;}if(close){const original=s.lines[Math.floor(t/7)%s.lines.length],text=g.touchInput?original.replace(/Xで/g,'PULSEで').replace(/Cか画面ボタン|Cで/g,'ACTIONで'):original,small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
       round(c,left,top,w,h,6,'#101f32ee');c.strokeStyle=g.level.color+'70';c.lineWidth=1;c.strokeRect(left+.5,top+.5,w,h);c.fillStyle=g.level.color;c.font=`${nameFont}px "Segoe UI",sans-serif`;c.fillText(s.name,left+13,top+(small?28:19));c.fillStyle='#e0ecef';c.font=`${bodyFont}px "Segoe UI",sans-serif`;c.fillText(text,left+13,top+(small?65:44));line(c,s.x+15,top+h,s.x+15,s.y-100,g.level.color+'77');}}
   for(const sign of g.level.signs){if(Math.abs(g.player.x-sign.x)>310||g.level.students.some(s=>Math.abs(g.player.x-s.x)<185&&Math.abs(s.x-sign.x)<240&&sign.y>310&&sign.y<410))continue;c.save();c.globalAlpha=.8;c.font='11px "Segoe UI",sans-serif';const w=c.measureText(sign.text).width+20;round(c,sign.x-w/2,sign.y-13,w,26,4,'#0d1c2bbc');c.fillStyle='#b6ced6';c.textAlign='center';c.fillText(sign.text,sign.x,sign.y+4);c.textAlign='left';c.restore();}
   for(const coin of g.level.chips){if(coin.got||coin.x<g.camera-30||coin.x>g.camera+VIEW.w+30)continue;const yy=coin.y+Math.sin(t*3+coin.x)*3;glow(c,coin.x,yy,18,'#f8d98a10');const ww=4+Math.abs(Math.sin(t*2+coin.x*.01))*3;rect(c,coin.x-ww,yy-7,ww*2,14,'#d0a75e');rect(c,coin.x-ww+2,yy-6,ww*2-3,10,'#ffe3a2');rect(c,coin.x-1,yy-4,2,6,'#fff2ca');}
@@ -208,7 +209,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
     for(let i=reduced?1:6;i>0;i--){c.save();c.globalAlpha=.07+(6-i)*.025;c.filter=`hue-rotate(${(t*95+i*45)%360}deg)`;robot(c,p.x-3-p.face*i*9,p.y-3,2,p.walk*.018,true,p.face,!p.onGround);c.restore();}
     c.save();c.shadowColor=`hsl(${t*130%360},100%,65%)`;c.shadowBlur=22;c.strokeStyle=`hsl(${t*130%360},100%,65%)`;c.lineWidth=3;c.beginPath();c.ellipse(p.x+14,p.y+20,27,33,0,0,Math.PI*2);c.stroke();c.restore();
   }
-  if(g.fever||reduced||p.invul<=0||Math.floor(p.invul*12)%2===0){c.save();if(p.boost>0){c.filter=`hue-rotate(${t*150%360}deg) saturate(2.6)`;c.shadowColor=`hsl(${t*130%360},100%,65%)`;c.shadowBlur=18;}robot(c,p.x-3,p.y-3,2,p.walk*.018,Math.abs(p.vx)>25,p.face,!p.onGround&&p.vy<0);c.restore();}
+  if(g.fever||reduced||p.invul<=0||Math.floor(p.invul*12)%2===0){c.save();const [sx,sy]=poseScale(g,reduced);c.translate(p.x+14,p.y+40);c.scale(sx,sy);c.translate(-p.x-14,-p.y-40);if(!reduced&&g.feel?.flash>0)c.filter='brightness(3)';if(p.boost>0){c.filter=`hue-rotate(${t*150%360}deg) saturate(2.6)`;c.shadowColor=`hsl(${t*130%360},100%,65%)`;c.shadowBlur=18;}robot(c,p.x-3,p.y-3,2,p.walk*.018,Math.abs(p.vx)>25,p.face,!p.onGround&&p.vy<0);c.restore();}
   // The head stays clear during normal play; show the loss briefly after a hit.
   const hx=p.x+14,hy=p.y-43,notice=lifeNotice(p);
   if(notice){

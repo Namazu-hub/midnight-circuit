@@ -1,5 +1,5 @@
 // Reusable, stage-local rooms. World state is shared; only the active bounds change.
-import {clamp} from './world.mjs?v=4.5a';
+import {clamp} from './world.mjs?v=4.5.2a';
 export function setupRooms(g){if(!g.level.rooms)return;g.rooms={active:g.level.rooms[0].id,transition:null,cooldown:0,ride:null};}
 export const roomAt=(g,x=g.player.x)=>g.level.rooms?.find(r=>x>=r.left&&x<r.right);
 export const currentRoom=g=>g.level.rooms?.find(r=>r.id===g.rooms?.active);

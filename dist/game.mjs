@@ -1,16 +1,17 @@
-import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.5a';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.5a';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.5a';
-import {createRepairUI} from './repair-ui.mjs?v=4.5a';
-import {tickResearch} from './research.mjs?v=4.5a';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.5a';
-import {bindTouchControls} from './touch-input.mjs?v=4.5.1a';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.5a';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.5a';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.5a';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.5a';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.5a';
-import {drawAwakening} from './awakening.mjs?v=4.5a';
+import {FEEL,holdFrame} from './feel.mjs?v=4.5.2a';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.5.2a';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.5.2a';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.5.2a';
+import {createRepairUI} from './repair-ui.mjs?v=4.5.2a';
+import {tickResearch} from './research.mjs?v=4.5.2a';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.5.2a';
+import {bindTouchControls} from './touch-input.mjs?v=4.5.2a';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.5.2a';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.5.2a';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.5.2a';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.5.2a';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.5.2a';
+import {drawAwakening} from './awakening.mjs?v=4.5.2a';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -118,7 +119,7 @@ function syncUI(){
   repairUI.overlay.hidden=mode!=='repair';$('repair-open').hidden=mode!=='playing'||!(printerControl(game)||nearbyAction(game)||nearbyRepair(game,true));$('shop-overlay').hidden=mode!=='shop';$('shop-open').hidden=mode!=='playing'||!game||!nearVendor(game);$('world-map').hidden=mode!=='map';$('home').hidden=mode!=='home';$('lever-btn').hidden=true;$('pause-overlay').hidden=mode!=='paused';$('result-overlay').hidden=mode!=='result';$('help-overlay').hidden=mode!=='help';$('gameover-overlay').hidden=mode!=='gameover';
   const inGame=!['feverIntro','feverOutro'].includes(mode)&&!!game&&mode!=='home'&&mode!=='map'&&!(mode==='help'&&['home','map'].includes(previousMode))&&!(mode==='bonus'&&bonus?.demo);
   $('hud').hidden=!inGame||mode==='bonus';$('pulse-hud').hidden=!inGame||mode==='bonus';$('progress-track').hidden=!inGame||mode==='bonus';$('printer-hint-btn').hidden=mode!=='playing'||!game?.printer;$('pause-btn').hidden=!['playing','feverIntro','feverOutro'].includes(mode);$('bonus-skip').hidden=mode!=='bonus';
-  canvas.setAttribute('aria-label',mode==='bonus'?'パチンコ風ボーナス演出。リーチから777で修理大成功。スペースまたはレバーボタンで覚醒。':'横スクロールアクション。矢印で移動、スペースで二段ジャンプ、Xでパルス。');
+  canvas.setAttribute('aria-label',mode!=='bonus'&&lastInput==='touch'?'画面の左右・JUMP・PULSE・ACTIONで操作。':mode==='bonus'?'パチンコ風ボーナス演出。リーチから777で修理大成功。スペースまたはレバーボタンで覚醒。':'横スクロールアクション。矢印で移動、スペースで二段ジャンプ、Xでパルス。');
   if(mode!=='playing')$('toast').classList.remove('visible');
   if(mode==='map'){$('screen-status').innerHTML='<i></i> WORLD MAP / CHOOSE A ROOM';$('bottom-message').textContent='次は、どの部屋にあかりを灯そう。';}
   else if(mode==='home'){$('screen-status').innerHTML='<i></i> SYSTEM STANDBY';$('bottom-message').textContent='おかえり、夜の冒険へ。';}
@@ -164,7 +165,7 @@ function showResult(){mode='result';const all=progress.completed.every(Boolean),
   $('research-result').textContent=game.research?`撃破 ${game.research.kills} · 修理 ${game.research.repairs} （完全 ${game.research.fullRepairs||0}） · 高所ボックス ${game.research.caches}`:'';
   $('next-btn').innerHTML=(final?'もう一度、夜の冒険へ':'次の部屋へ')+' <span>→</span>';syncUI();$('next-btn').focus({preventScroll:true});
 }
-function updateHUD(){if(!game)return;const target=printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.includes('cable')?'滑走':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!game.printer?.boss.active!==arenaView||!!game.printer!==printerView){arenaView=!!game.printer?.boss.active;printerView=!!game.printer;resize();}$('repair-open').textContent=(printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(printerObjective(game)||actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.opacity=worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
+function updateHUD(){if(!game)return;const target=printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.includes('cable')?'滑走':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!game.printer?.boss.active!==arenaView||!!game.printer!==printerView){arenaView=!!game.printer?.boss.active;printerView=!!game.printer;resize();}$('repair-open').textContent=(printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(printerObjective(game)||actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.opacity=worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;document.querySelector('[data-control=pulse]').textContent=g.pulse>0?'PULSE ●':g.cooldown>0?'PULSE '+Math.ceil(g.cooldown):'PULSE';g.touchInput=lastInput==='touch';document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
   const active=g.pulse>0,ready=g.cooldown<=0;$('pulse-status').textContent=active?'ACTIVE':ready?'READY':`${g.cooldown.toFixed(1)}s`;$('pulse-fill').style.width=(active?g.pulse/(g.fever?.pulseDuration||RULES.pulse):ready?1:1-g.cooldown/(g.fever?.attackCooldown||RULES.cooldown))*100+'%';$('pulse-fill').style.background=active?'#c7ffe8':ready?'#75efce':'#698c9e';$('progress-fill').style.width=g.progress*100+'%';
 }
 function burst(x,y,color,count=14){if(progress.reduced)count=Math.min(count,5);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=30+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,size:2+Math.random()*3,color,life:.4+Math.random()*.45,max:.85});}}
@@ -176,7 +177,7 @@ function processEvents(){
     if(e.type==='actionStep'){burst(e.x,e.y,'#8affe0',18);audio.sound('relay');toast(e.text,4);}
     if(e.type==='repairComplete'){repairNotice=e.text;burst(e.x,e.y,'#ffd87a',35);audio.sound('relay');toast(e.text,6);}
     if(e.type==='researchRepair'&&!game.printer){repairNotice??=e.text;burst(e.x,e.y,'#80ffd0',30);toast(e.text,5);}
-    if(e.type==='funds'&&e.text!=='科研費 +¥5')toast(e.text,2);
+    if(e.type==='funds'){const amount=e.text.match(/\+¥(\d+)/)?.[1];if(amount)particles.push({x:e.x,y:e.y-25,vx:0,vy:-35,text:'¥+'+amount,color:'#ffe2a0',life:.8,max:.8});}
     if(e.type==='hurt')burst(e.x,e.y,'#ff787d',8);
     if(e.type==='feverKill')burst(e.x,e.y,'#ffe195',progress.reduced?5:22);
     if(e.type==='portal'){burst(e.x,e.y,'#dbb2ff',25);toast('光路がつながった！ 次のレンズへ。',3);}
@@ -184,7 +185,7 @@ function processEvents(){
     if(e.type==='chip')burst(e.x,e.y,'#ffe0a0',6);
     if(e.type==='gear'){burst(e.x,e.y,'#9bffdc',26);toast(`ひみつのパーツを発見！ ${game.gears} / 3`,2.6);}
     if(e.type==='doublejump'||e.type==='spring')burst(e.x,e.y,'#9ffad8',10);
-    if(e.type==='stomp')burst(e.x,e.y,'#efb5be',17);
+    if(e.type==='stomp'){burst(e.x,e.y,'#efb5be',17);if(e.combo>1){particles.push({x:e.x,y:e.y-50,vx:0,vy:-25,text:e.combo+' COMBO',color:'#adffdf',life:.7,max:.7});audio.tone(440*2**(Math.min(8,e.combo)/12),.12,'triangle',.2);}}if(e.type==='land'||e.type==='runStart')burst(e.x,e.y,'#aec2c2',e.type==='land'?9:4);
     if(e.type==='pulse'){particles.push({x:e.x,y:e.y,vx:0,vy:0,ring:true,radius:progress.reduced?140:450,color:'#9affde',life:.8,max:.8});burst(e.x,e.y,'#75efce',20);}
     if(e.type==='checkpoint'){burst(e.x,e.y,'#75efce',30);toast('チェックポイント！ ライフも全回復。');}
     if(e.type==='relay'){burst(e.x,e.y,'#c8b1ff',25);toast(`制御装置を修理！ ${game.level.relays.filter(r=>r.on).length} / ${game.level.relays.length}`);}
@@ -196,21 +197,21 @@ function processEvents(){
     if(e.type==='repairStep'&&!game.printer)toast(e.text,2);
     if(e.type==='locked')toast(game.level.boss&&!game.level.boss.repaired?'暴走ロボを止め、近くでXで再起動しよう！':'未修理の装置がある。高所の制御盤も確認しよう！',4.5);
     if(e.type==='finish')finish();
-  }game.events=[];if(repairNotice)toast(repairNotice,6);
+  }particles=particles.slice(-(progress.reduced?FEEL.reducedParticles:FEEL.particles));game.events=[];if(repairNotice)toast(repairNotice,6);
 }
 function tick(ms){
-  const dt=lastTime?Math.min((ms-lastTime)/1000,.05):.016;lastTime=ms;worldTime+=dt;
+  const dt=lastTime?Math.min((ms-lastTime)/1000,.05):.016;lastTime=ms;if(!game?.feel?.stop)worldTime+=dt;
   if(toastUntil<worldTime)$('toast').classList.remove('visible');
   if(mode==='repair'){repairUI.draw(progress.reduced?0:ms);}
   if(mode==='playing'){
     accumulator+=dt;let safety=0;
-    while(accumulator>=1/120&&safety++<8&&mode==='playing'){(game.fever?updateFever:updateGame)(game,input(),1/120);interactEdge=false;jumpEdge=false;pulseEdge=false;jumpRelease=false;processEvents();accumulator-=1/120;}
-    for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(!p.ring)p.vy+=150*dt;}particles=particles.filter(p=>p.life>0);updateHUD();audio.music();if(game.fever&&game.elapsed-lastFeverSave>3){lastFeverSave=game.elapsed;checkpointFever();}
+    while(accumulator>=1/120&&safety++<8&&mode==='playing'){if(progress.reduced&&game.feel)game.feel.stop=0;if(holdFrame(game,input(),1/120)){accumulator-=1/120;continue;}(game.fever?updateFever:updateGame)(game,input(),1/120);interactEdge=false;jumpEdge=false;pulseEdge=false;jumpRelease=false;processEvents();accumulator-=1/120;}
+    for(const p of particles){if(game.feel?.stop>0)continue;p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(!p.ring)p.vy+=150*dt;}particles=particles.filter(p=>p.life>0);updateHUD();audio.music();if(game.fever&&game.elapsed-lastFeverSave>3){lastFeverSave=game.elapsed;checkpointFever();}
   }else {accumulator=0;if(['feverIntro','feverOutro'].includes(mode)){feverAge+=dt;if(mode==='feverIntro'&&feverAge>=FEVER_CONFIG.intro){mode='playing';syncUI();canvas.focus({preventScroll:true});checkpointFever();toast(game.level.tip,5);}else if(mode==='feverOutro'&&feverAge>=FEVER_CONFIG.outro)completeFever();}}
   ctx.setTransform(1,0,0,1,0,0);
   if(mode==='home'||mode==='map'||(mode==='help'&&['home','map'].includes(previousMode))||(mode==='bonus'&&bonus?.demo)){
     ctx.save();if(VIEW.w<1050)ctx.translate(VIEW.w-1200,0);drawHome(ctx,worldTime);ctx.restore();
-  }else if(game){drawWorld(ctx,game,mode==='playing'?worldTime:game.time,particles,progress.reduced);if(game.fever)drawFeverFX(ctx,game,game.time,progress.reduced);}
+  }else if(game){drawWorld(ctx,game,game.time,particles,progress.reduced);if(game.fever)drawFeverFX(ctx,game,game.time,progress.reduced);}
   if(['feverIntro','feverOutro'].includes(mode)||(mode==='paused'&&['feverIntro','feverOutro'].includes(pauseMode))){drawFeverIntro(ctx,feverAge,progress.reduced,(mode==='feverOutro'||pauseMode==='feverOutro'&&mode==='paused'),game?.fever);}
   if(mode==='bonus'&&bonus){bonus.age=(ms-bonus.startedAt)/1000;
     if(bonus.age>1.8&&!bonus.reel1){bonus.reel1=true;audio.sound('reach');}
