@@ -1,5 +1,5 @@
-import {toolBox,equipTool,TOOLS} from './equipment.mjs?v=4.8a';
-import {overlap} from './world.mjs?v=4.8a';
+import {toolBox,equipTool,TOOLS} from './equipment.mjs?v=4.9a';
+import {overlap} from './world.mjs?v=4.9a';
 export function extendPeeling(L){
  L.peelTargets=[{id:'benchy',room:'C',x:2730,y:442,w:90,h:68,source:'scraper-C'},{id:'support',room:'E',x:5740,y:425,w:110,h:85,source:'scraper-E'}];
  for(const t of L.peelTargets)L.platforms.push({...t,type:'platform',peelTarget:t.id});

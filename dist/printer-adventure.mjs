@@ -1,4 +1,4 @@
-import {toolHit} from './equipment.mjs?v=4.8a';
+import {toolHit} from './equipment.mjs?v=4.9a';
 // v4.7 stage-local additions. All state is shared across the existing room graph.
 export function extendAdventure(L){
  const pad=(x,y,w,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',...extra});

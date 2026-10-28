@@ -1,10 +1,12 @@
-import {extendNozzle} from './printer-nozzle.mjs?v=4.8a';
-import {extendPeeling} from './printer-peeling.mjs?v=4.8a';
+import {configurePrinterGates} from './printer-progress.mjs?v=4.9a';
+import {extendNozzle} from './printer-nozzle.mjs?v=4.9a';
+import {extendPeeling} from './printer-peeling.mjs?v=4.9a';
 // Stage-local v4.8 layout; preserves the old room graph and repair identities.
 export function extendWorkshop(L){
- extendPeeling(L);extendNozzle(L);
+ extendPeeling(L);extendNozzle(L);configurePrinterGates(L);
  const pad=(x,y,w=120,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',recovery:true,...extra});
  for(const [x,y] of [[2100,600],[2230,520],[3470,590],[3610,500],[11800,400],[11900,290]])pad(x,y);
+ for(const [x,y] of [[2040,650],[2390,650],[3430,650],[3820,650]])L.chips.push({x,y});
  L.recoveryRoutes=[{room:'B',from:[2150,680],steps:[[2150,600],[2280,520],[2460,510]]},{room:'C',from:[3500,680],steps:[[3520,590],[3660,500],[3860,510]]}];
  L.printerControls.push({id:'recall-cargo',x:11000,y:480,label:'搬送船を呼ぶ'});
  L.tethers=[{id:'cable-end',socket:'fan1',room:'D',x:4130,y:480,toX:4280,toY:260,length:440,printSite:'cable-stairs'}];

@@ -181,3 +181,6 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
  body.play-session .item-controls{order:0;width:auto}
  body.play-session .item-controls button{width:58px;font-size:9px}
 }
+
+/* v4.9 gate status shares the existing noninteractive HUD hint surface. */
+.action-repair-hint{white-space:pre-line;line-height:1.45;max-width:min(420px,90%)}
