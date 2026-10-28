@@ -163,3 +163,15 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 
 /* Desktop actions stay keyboard-first; touch retains its full control bar. */
 @media (pointer:fine) and (min-width:901px) and (min-height:601px){body[data-input=keyboard] #repair-open,body[data-input=keyboard] #shop-open{opacity:.35;font-size:11px}}
+
+.item-controls{display:flex;gap:4px}.inventory-stat{font:10px var(--mono)}
+.item-controls button{background:#463b4a;color:#ffe4af}
+@media(max-width:900px),(pointer:coarse) and (max-width:1400px),(max-height:600px) and (max-width:1400px){
+ body.play-session .touch-controls{flex-wrap:wrap}
+ body.play-session .item-controls{order:4;width:100%;justify-content:center}
+ body.play-session .item-controls:has(button:not([hidden])){display:flex}
+ body.play-session .item-controls:not(:has(button:not([hidden]))){display:none}
+ body.play-session .item-controls button{height:44px;min-height:44px;width:70px}
+ body.play-session .hud-stage{display:none}
+ body.play-session .hud{justify-content:center}.inventory-stat{font-size:9px}
+}

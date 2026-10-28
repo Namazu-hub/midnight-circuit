@@ -1,7 +1,8 @@
+import {TOOLS,equipTool,EQUIPMENT} from './equipment.mjs?v=4.7a';
 import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.6a';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
-export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 9秒加速',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80}];
+export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 1本（Bで飲む）',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80},...TOOLS];
 export function balance(value){return Number.isFinite(value)?Math.min(ECONOMY.max,Math.max(0,Math.floor(value))):0;}
 export function setupResearch(g){
  g.research={funds:0,earned:0,kills:0,repairs:0,fullRepairs:0,caches:0};
@@ -37,7 +38,8 @@ export function purchase(g,id){
  const nearest=g.level.relays.filter(r=>!r.on&&!r.portal).sort((a,b)=>Math.hypot(g.player.x-a.x,g.player.y-a.y)-Math.hypot(g.player.x-b.x,g.player.y-b.y))[0];
  if(id==='heal'&&g.player.hp>=6)return {ok:false,text:'HPは満タンです'};
  if(id==='battery'&&g.lives>=3)return {ok:false,text:'バッテリーは最大3機です'};
- if(id==='drink'&&g.player.boost>0)return {ok:false,text:'モンエナの効果が残っています'};
+ if(id==='drink'&&g.equipment.drinks>=EQUIPMENT.drinkCap)return {ok:false,text:'モンエナは3本まで持てます'};
+ if(TOOLS.some(t=>t.id===id)&&g.equipment.weapon)return {ok:false,text:'装備中の工具を使い切ってください'};
  if(['hint','assist'].includes(id)&&!nearest)return {ok:false,text:'対象の未修理装置はありません'};
  if(id==='assist'&&Math.hypot(g.player.x-nearest.x,g.player.y-nearest.y)>800)return {ok:false,text:'装置が遠すぎます。近くの自販機へ進んでください'};
  if(id==='assist'&&nearest.actionRepair?.assisted)return {ok:false,text:'このハンドの補助は導入済みです'};
@@ -45,7 +47,8 @@ export function purchase(g,id){
  g.research.funds-=item.cost;let text='購入しました';
  if(id==='heal'){g.player.hp=Math.min(6,g.player.hp+3);g.player.displayHP=g.player.hp;text='応急補修完了！';}
  if(id==='battery'){g.lives++;text='予備バッテリーを追加！';}
- if(id==='drink'){g.player.boost=9;text='モンエナ！ 9秒間の虹色加速';}
+ if(id==='drink'){g.equipment.drinks++;text='モンエナを保管。B / DRINKで使用';}
+ if(TOOLS.some(t=>t.id===id)){equipTool(g,id);text='工具を装備。V / TOOLで使用';}
  if(id==='hint')text=`未修理装置まで ${Math.round(Math.abs(nearest.x-g.player.x))}：${nearest.x>g.player.x?'右':'左'}・${nearest.y<g.player.y?'上':'下'}。${nearest.label||'近くでパルス'}`;
  if(id==='assist'&&nearest.actionRepair){nearest.actionRepair.assisted=true;text='関節の緑の受付時間と部品回収範囲が広がりました。PICOで修理しよう！';}
  else if(id==='assist'){nearest.on=true;nearest.step=3;nearest.amount=6;nearest.repairRank=1;nearest.repairResult='応急修理';tickResearch(g);text='自動補助で装置が復旧しました';}

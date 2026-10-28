@@ -1,3 +1,4 @@
+import {toolHit} from './equipment.mjs?v=4.7a';
 import {clamp,overlap} from './world.mjs?v=4.6a';
 import {grant} from './research.mjs?v=4.6a';
 const near=(p,e,r)=>Math.hypot(p.x+14-e.x-e.w/2,p.y+20-e.y-e.h/2)<r;
@@ -23,6 +24,7 @@ export function movePrinterFoes(g,dt){const s=g.printer,p=g.player;for(const e o
  }}
 export function fightPrinterFoes(g,activated,hit){const p=g.player,s=g.printer;for(const e of s.foes){if(!e.alive||e.captured||e.room!==g.rooms?.active||s.boss.active)continue;
  if(e.kind==='tangle'&&!e.disabled&&near(p,e,95))p.vx*=.97;
+ if(toolHit(g,e,e.id)){killPrinterFoe(g,e);continue;}
  const riding=e.surface!==undefined&&p.standing===e.surface;
  if(activated&&near(p,e,170)){killPrinterFoe(g,e);continue;}
  if(!riding&&p.vy>40&&p.oldBottom<=e.y+16&&overlap(p,e)){killPrinterFoe(g,e);p.vy=-440;p.jumps=1;continue;}

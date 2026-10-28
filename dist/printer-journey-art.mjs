@@ -1,3 +1,4 @@
+import {drawAdventure} from './printer-adventure-art.mjs?v=4.7a';
 import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.6a';
 const line=(c,x,y,xx,yy,color,w=3)=>{c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 function screen(c,x,y,text,small=''){c.fillStyle='#102033';c.fillRect(x,y,240,75);c.strokeStyle='#77a4b2';c.lineWidth=3;c.strokeRect(x,y,240,75);c.fillStyle='#b7e9dc';c.font='bold 15px monospace';c.textAlign='left';c.fillText(text,x+12,y+26);c.fillStyle='#edbd90';c.font='12px sans-serif';c.fillText(small,x+12,y+53);}
@@ -18,7 +19,7 @@ export function drawJourney(c,g){const s=g.printer;if(!s)return;const j=s.journe
  // Consistent, bright landing marks on the safe body/stairs and a visible final core.
  if(b.cooled){const core=dragonCore(b),n={x:core.x+core.w/2,y:core.y+core.h/2};line(c,n.x,n.y+30,n.x,n.y+105,'#829fa9',10);c.fillStyle='#16354b';c.fillRect(n.x-26,n.y-27,52,54);c.fillStyle=b.done?'#8a9a9e':'#ffe0a4';c.fillRect(n.x-18,n.y-19,36,38);if(b.finalHit){line(c,n.x-18,n.y-20,n.x+4,n.y+2,'#fcfff4',5);line(c,n.x+4,n.y+2,n.x-10,n.y+22,'#fcfff4',5);}if(b.beacon>0)line(c,6450,260,n.x,n.y,'#c6ffdd',2);c.strokeStyle='#fff0b6';c.lineWidth=4;c.beginPath();c.arc(n.x,n.y,43+Math.sin(t*5)*3,0,7);c.stroke();line(c,n.x-11,n.y-13,n.x+2,n.y,'#fcf5d3');line(c,n.x+2,n.y,n.x-5,n.y+16,'#fcf5d3');}
  for(const e of s.foes){const age=t-(e.deathTime??-100);if(e.alive||age>.55)continue;c.fillStyle='#e9b7bd';for(let k=0;k<6;k++){const a=k*Math.PI/3;c.fillRect(e.x+20+Math.cos(a)*age*95,e.y+20+Math.sin(a)*age*80+age*age*100,7-age*9,7-age*9);}}
- c.restore();}
+ drawAdventure(c,g);c.restore();}
 export function drawDawn(c,g,w,h){const end=g.printer?.ending;if(!end?.active)return;const age=end.age;c.save();const sky=c.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#9ca3ba');sky.addColorStop(1,'#edc59e');c.fillStyle=sky;c.fillRect(0,0,w,h);const cx=w/2;c.fillStyle='#e7d6ad';c.fillRect(cx-180,65,360,240);c.fillStyle='#7892a4';for(let i=0;i<3;i++)c.fillRect(cx-170+i*120,75,105,210);c.fillStyle='#47596c';c.fillRect(cx-270,410,540,18);c.fillRect(cx-240,428,15,172);c.fillRect(cx+220,428,15,172);
  c.save();c.translate(cx+100,402);c.scale(.19,.19);drawDragon(c,{...g.printer.boss,x:0,y:0,age:10,phase:1,done:true,stoppedAge:3,clock:0},0);c.restore();
  const wake=Math.min(1,Math.max(0,(age-1.2)*1.3));c.fillStyle='#b4a3dd';c.fillRect(cx-190,380-wake*45,47,65);c.fillStyle='#e4b69b';c.fillRect(cx-183,350-wake*45,32,32);c.fillStyle='#273649';c.fillRect(cx-185,345-wake*45,37,12);c.fillStyle='#203547';c.fillRect(cx-178,365-wake*45,10,wake>0?4:1);c.fillRect(cx-164,365-wake*45,10,wake>0?4:1);

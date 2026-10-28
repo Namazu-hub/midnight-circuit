@@ -1,3 +1,5 @@
+import {drawEquipment} from './equipment-art.mjs?v=4.7a';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.7a';
 import {poseScale} from './feel.mjs?v=4.6a';
 import {currentRoom} from './rooms.mjs?v=4.6a';
 import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.6a';
@@ -157,6 +159,7 @@ function goal(c,g,t){
 export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=PALETTES[g.level.theme];background(c,g.level.theme,g.camera,t);
   c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,-1000,room.right-room.left,3000);c.clip();}
+  drawDawnRoom(c,g);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}
   for(const a of g.level.platforms){if(a.x+a.w<g.camera-30||a.x>g.camera+VIEW.w+30)continue;platform(c,a,P,g.pulse,t,g);}
   for(const z of g.level.gravityZones){c.save();c.fillStyle='#75ebce0b';c.fillRect(z.x,z.y,z.w,z.h);c.strokeStyle='#7bedd357';c.setLineDash([7,10]);c.strokeRect(z.x,z.y,z.w,z.h);c.setLineDash([]);c.fillStyle='#9bded0';c.font='13px monospace';c.fillText('LOW GRAVITY / 0.38 G',z.x+30,z.y+40);for(let i=0;i<25;i++){const x=z.x+(i*149)%z.w,y=z.y+((i*87-t*18)%z.h+z.h)%z.h;star(c,x,y,2,'#b7ffe555');}c.restore();}
@@ -210,6 +213,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
     c.save();c.shadowColor=`hsl(${t*130%360},100%,65%)`;c.shadowBlur=22;c.strokeStyle=`hsl(${t*130%360},100%,65%)`;c.lineWidth=3;c.beginPath();c.ellipse(p.x+14,p.y+20,27,33,0,0,Math.PI*2);c.stroke();c.restore();
   }
   if(g.fever||reduced||p.invul<=0||Math.floor(p.invul*12)%2===0){c.save();const [sx,sy]=poseScale(g,reduced);c.translate(p.x+14,p.y+40);c.scale(sx,sy);c.translate(-p.x-14,-p.y-40);if(!reduced&&g.feel?.flash>0)c.filter='brightness(3)';if(p.boost>0){c.filter=`hue-rotate(${t*150%360}deg) saturate(2.6)`;c.shadowColor=`hsl(${t*130%360},100%,65%)`;c.shadowBlur=18;}robot(c,p.x-3,p.y-3,2,p.walk*.018,Math.abs(p.vx)>25,p.face,!p.onGround&&p.vy<0);c.restore();}
+  drawEquipment(c,g,reduced);
   // The head stays clear during normal play; show the loss briefly after a hit.
   const hx=p.x+14,hy=p.y-43,notice=lifeNotice(p);
   if(notice){

@@ -18,7 +18,7 @@ test('shop requires proximity and balance; useless purchases never charge',()=>{
  const g=createGame(0);g.research.funds=200;assert.ok(nearVendor(g));
  assert.equal(purchase(g,'heal').ok,false);assert.equal(g.research.funds,200);
  g.player.hp=2;assert.equal(purchase(g,'heal').ok,true);assert.equal(g.player.hp,5);assert.equal(g.research.funds,175);
- assert.equal(purchase(g,'drink').ok,true);assert.equal(g.player.boost,9);assert.equal(purchase(g,'drink').ok,false);
+ assert.equal(purchase(g,'drink').ok,true);assert.equal(g.player.boost,0);assert.equal(g.equipment.drinks,1);g.equipment.drinks=3;assert.equal(purchase(g,'drink').ok,false);
  g.player.x+=1000;const funds=g.research.funds;assert.equal(purchase(g,'battery').ok,false);assert.equal(g.research.funds,funds);
 });
 test('battery is capped and hints are optional; zero funds do not alter repairs',()=>{

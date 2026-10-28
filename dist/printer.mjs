@@ -1,3 +1,4 @@
+import {startFabrication} from './fabrication.mjs?v=4.7a';
 import {feelState} from './feel.mjs?v=4.6a';
 import {initJourney,tickJourney,journeyAction,journeySolid} from './printer-journey.mjs?v=4.6a';
 import {roomControl,cableControl,beginDoor} from './rooms.mjs?v=4.6a';
@@ -9,7 +10,7 @@ export const PRINTER={arena:5400,end:6600,intro:9,bossHP:18,frameTime:6,spawnCap
 const near=(g,o,d=90)=>Math.hypot(g.player.x+14-o.x,g.player.y+20-o.y)<d;
 const tell=(g,text)=>{g.printer.feedback=.65;};
 const relay=(g,id)=>g.level.relays.find(r=>r.id===id);
-export function setupPrinter(g){if(!g.level.printer)return;g.printer={carried:null,gear:false,safety:false,prints:[0,0],target:0,fans:[false,false],incident:false,seenIntro:false,bossPaid:false,bolts:[],foes:[foe('spool',620,462),foe('tangle',2250,625),foe('head',2950,110),foe('tangle',3520,625),foe('head',4630,100)],boss:newBoss(),patterns:[0,0,0],pattern:0,hintLevel:0,hintUntil:0,hintText:'',idle:0,factory:{clock:0,jobs:[],made:0}};setupPrinterFoes(g);initJourney(g);}
+export function setupPrinter(g){if(!g.level.printer)return;g.printer={carried:null,gear:false,safety:false,prints:[0,0],target:0,fans:[false,false],incident:false,seenIntro:false,bossPaid:false,bolts:[],foes:[foe('spool',620,462),foe('tangle',2250,625),foe('head',2950,110),foe('tangle',3520,625),foe('head',4630,100)],boss:newBoss(),patterns:[0,0,0],pattern:0,hintLevel:0,hintUntil:0,hintText:'',idle:0,factory:{clock:0,jobs:[],made:0},patternJobs:[{progress:0},{progress:0},{progress:0}]};setupPrinterFoes(g);initJourney(g);}
 const foe=(kind,x,y)=>({kind,x,y,origin:x,alive:true,clock:0,v:0,w:kind==='spool'?48:40,h:kind==='spool'?48:40});
 function newBoss(){const b={active:false,done:false,age:0,hp:18,phase:1,x:6000,y:510,clock:0,invul:0,attack:0,target:6000,feed:0,route:false,frame:0,cooled:false,medic:false,spawnClock:0,jobs:[],minions:[],warning:null};initDragon(b);return b;}
 export function resetPrinter(g){const s=g.printer;if(!s)return;s.journey.cargo={x:10650,waiting:true};if(s.boss.done){g.respawn={x:5480,y:470};s.ending={active:false,complete:false,age:0};}if(s.carried){g.level.printerParts.find(p=>p.id===s.carried).state='loose';s.carried=null;}if(s.boss.active&&!s.boss.done){s.boss=newBoss();s.bolts=[];const bed=g.level.platforms.find(p=>p.arenaBed);Object.assign(bed,{type:'platform',baseY:510,y:510,range:0});g.respawn={x:5230,y:470};}}
@@ -29,7 +30,7 @@ function operate(g,id){const s=g.printer,b=s.boss;if(journeyAction(g,id))return;
  if(id==='drive'){if(s.gear&&relay(g,'feed').on){restore(g,'drive');}else tell(g,'材料供給と高所のギア装着が必要');}
  if(id==='safety'){s.safety=true;tell(g,'供給暴走を遮断！ 上層で造形位置を切り替えよう。');}
  if(id==='pattern'){s.pattern=(s.pattern+1)%3;s.printing=false;tell(g,'');}
- if(id==='printStart'){if(!s.safety){tell(g,'');return;}s.printing=true;tell(g,'');}
+ if(id==='printStart'){if(!s.safety){tell(g,'');return;}const job=s.patternJobs[s.pattern];job.progress=s.patterns[s.pattern];if(job.charged||startFabrication(g,{kind:['stairs','bridge','shield'][s.pattern],required:s.pattern===1,x:3180,y:150},job))s.printing=true;tell(g,'');}
  if(id==='fan1'||id==='fan2'){s.fans[id==='fan1'?0:1]=true;tell(g,'ファン起動！ 2基を起動したら安全インターロックへ');}
  if(id==='cool'){if(s.fans.every(Boolean))restore(g,'cool');else tell(g,'上層の吸気・冷却ファンを両方起動しよう');}
  if(id==='enter'){if(g.level.relays.some(r=>!r.on)){tell(g,'供給・押出・造形・冷却の復旧が必要');return;}b.active=true;g.respawn={x:5230,y:470};g.player.x=Math.max(5440,g.player.x);g.player.vx=0;g.events.push({type:'dragonIntro'});}
@@ -56,7 +57,7 @@ export function tickPrinter(g,input,activated,dt,hit){const s=g.printer;if(!s)re
  fightPrinterFoes(g,activated,hit);
  if(b.active){
   const bed=g.level.platforms.find(p=>p.arenaBed);if(b.phase===3&&!b.done){Object.assign(bed,{type:'moving',baseY:496,axis:'y',range:b.route?0:14,period:4});b.y=bed.y;}
-  p.x=clamp(p.x,5420,b.done?6970:6560);b.age+=dt;b.beacon=Math.max(0,(b.beacon||0)-dt);b.feed=Math.max(0,b.feed-dt);b.invul=Math.max(0,b.invul-dt);
+  if(!b.done)p.x=clamp(p.x,5420,6560);b.age+=dt;b.beacon=Math.max(0,(b.beacon||0)-dt);b.feed=Math.max(0,b.feed-dt);b.invul=Math.max(0,b.invul-dt);
   if(b.age>=9&&!b.done){if(!b.awake){b.awake=true;g.events.push({type:'actionStep',x:b.x,y:490,text:'造形完了 · DRAGON-01 起動！'});}s.seenIntro=true;b.clock+=dt;const cycle=b.clock%4.2;b.attack=Math.floor(b.clock/4.2)%5;
    if(cycle<1){b.target=clamp(p.x,5600,6400);b.warning=['CHARGE','TAIL','SLAM','RESIN','WIND'][b.attack];}else b.warning=null;
    if(b.phase===3){b.centerLatch=Math.max(0,(b.centerLatch||0)-dt);if(Math.abs(b.x-6000)<100&&Math.abs(p.x-6000)<130){if(!b.centerLatch)tell(g,'中央重量プレート作動！ 12秒間固定。左中層の経路スイッチへ');b.centerLatch=12;}}
