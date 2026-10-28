@@ -2,6 +2,8 @@
 import {overlap} from './world.mjs?v=4.6a';
 import {grant} from './research.mjs?v=4.6a';
 export function extendJourney(L){
+ L.fallZones=L.rooms.map(r=>({room:r.id,x:r.left,y:755,w:r.right-r.left,h:220}));
+ for(const r of L.rooms)r.maxY=210;
  const pad=(x,y,w,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',...extra});
  L.printSites=[{id:'shelf',room:'S',x:7900,y:480,kind:'stairs',blocks:[[7980,400,120],[8100,300,120],[8220,200,160]]},{id:'transfer',room:'B2',x:10480,y:480,kind:'dock',blocks:[[10520,410,160],[10820,280,180]]},{id:'shelter',room:'C2',x:13060,y:480,kind:'shield',blocks:[[13130,380,36,130],[13020,380,150,18]]},{id:'chute',room:'D2',x:16940,y:480,kind:'ramp',blocks:[[17010,440,100],[17110,380,100],[17210,320,150]]}];
  for(const s of L.printSites){L.printerControls.push({id:'site-'+s.id,x:s.x,y:s.y,label:'造形 '+({stairs:'階段',dock:'搬送ドック',shield:'防護壁',ramp:'搬送段差'})[s.kind]});for(const [x,y,w,h] of s.blocks)pad(x,y,w,{h:h||18,printSite:s.id,shield:s.kind==='shield'});const last=s.blocks.at(-1);L.chips.push({x:last[0]+50,y:last[1]-30});L.drinks.push({x:last[0]+90,y:last[1]-30});}

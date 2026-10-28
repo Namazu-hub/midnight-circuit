@@ -1,3 +1,4 @@
+import {actionKeys} from './input-map.mjs?v=4.7a';
 import {FEEL,holdFrame} from './feel.mjs?v=4.6a';
 import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.6a';
 import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.6a';
@@ -190,7 +191,7 @@ function processEvents(){
     if(e.type==='checkpoint'){burst(e.x,e.y,'#75efce',30);toast('チェックポイント！ ライフも全回復。');}
     if(e.type==='relay'){burst(e.x,e.y,'#c8b1ff',25);toast(`制御装置を修理！ ${game.level.relays.filter(r=>r.on).length} / ${game.level.relays.length}`);}
     if(e.type==='respawn')toast(`再開！ HP ${game.player.hp}/6 · 残機 ${game.lives}`,2.4);
-    if(e.type==='fall')audio.sound('hurt');
+    if(e.type==='fall'){audio.sound('hurt');burst(game.player.x+14,game.player.y+30,'#8dc7df',14);}
     if(e.type==='lifeLost'){progress.runLives=game.lives;save();toast(`残機 ${game.lives}。もう一度、挑戦！`,3);}
     if(e.type==='gameOver'){progress.runLives=0;save();mode='gameover';clearInput();syncUI();$('restart-run').focus({preventScroll:true});}
     if(e.type==='docked')toast('終点です！ 右へ進んで修理装置にタッチ。',5);
@@ -240,7 +241,7 @@ document.addEventListener('keydown',e=>{lastInput='keyboard';document.body.datas
   if(mode==='bonus'&&['Space','Enter'].includes(e.code)){e.preventDefault();pullLever();return;}
   if(mode==='map'&&['ArrowLeft','ArrowRight','Enter'].includes(e.code)&&!e.target.closest('button')){e.preventDefault();if(e.code==='Enter')startLevel(selectedStage);else{selectedStage=(selectedStage+(e.code==='ArrowRight'?1:LEVELS.length-1))%LEVELS.length;renderMap();}return;}
   if(mode==='map'&&['ArrowLeft','ArrowRight'].includes(e.code)){e.preventDefault();selectedStage=(selectedStage+(e.code==='ArrowRight'?1:LEVELS.length-1))%LEVELS.length;renderMap();return;}
-  if(mode!=='playing')return;if(e.code==='KeyC'){e.preventDefault();if(!e.repeat)requestRepair();return;}if(movementCodes.includes(e.code))e.preventDefault();if(e.repeat)return;
+  if(mode!=='playing')return;if(actionKeys.includes(e.code)){e.preventDefault();if(!e.repeat)contextAction();return;}if(movementCodes.includes(e.code))e.preventDefault();if(e.repeat)return;
   if(jumpCodes.includes(e.code))jumpEdge=true;if(['KeyX','ShiftLeft','ShiftRight'].includes(e.code))pulseEdge=true;if(e.code==='KeyR'&&!game.fever){e.preventDefault();respawn(game);processEvents();}
   pressed.add(e.code);
 });

@@ -160,3 +160,6 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
  body.play-session .screen-actions{flex-shrink:0;align-items:center;height:44px}
 }
 @media(max-width:900px),(pointer:coarse) and (max-width:1400px),(max-height:600px) and (max-width:1400px){body.play-session .screen-top{border-bottom:0}}
+
+/* Desktop actions stay keyboard-first; touch retains its full control bar. */
+@media (pointer:fine) and (min-width:901px) and (min-height:601px){body[data-input=keyboard] #repair-open,body[data-input=keyboard] #shop-open{opacity:.35;font-size:11px}}

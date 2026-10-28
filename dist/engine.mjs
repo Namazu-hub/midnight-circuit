@@ -35,7 +35,7 @@ export function respawn(g,cause='retry'){
  for(const e of g.level.enemies)Object.assign(e,{x:e.baseX,y:e.baseY,state:'patrol',stateTime:0,clock:0,aim:null});
  if(g.level.cart)resetRail(g,g.cartCheckpoint);
  g.projectiles=[];g.pulse=0;g.cooldown=0;g.spawnGrace=2;g.deaths++;g.shake=.18;g.warp=0;
- resetRooms(g);const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;g.camera=clamp(g.player.x-VIEW.w*.32,left,Math.max(left,right-VIEW.w));g.cameraY=clamp(g.player.y-310,room?.minY??g.level.minY,0);emit(g,'respawn');
+ resetRooms(g);const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;g.camera=clamp(g.player.x-VIEW.w*.32,left,Math.max(left,right-VIEW.w));g.cameraY=clamp(g.player.y-310,room?.minY??g.level.minY,room?.maxY??0);emit(g,'respawn');
 }
 function damage(g,x){
  const p=g.player;if(g.fever||p.invul>0||g.spawnGrace>0)return;
@@ -133,8 +133,8 @@ function simulateGame(g,input={},dt=1/120){
  interactions(g,activated);
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
- if(p.y>g.level.killY){respawn(g,'fall');return;}
- const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0),left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,0);
+ if(p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){respawn(g,'fall');return;}
+ const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0),left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,room?.maxY??0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);
 }
