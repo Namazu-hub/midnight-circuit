@@ -1,6 +1,6 @@
-import {drawDawn} from './printer-journey-art.mjs?v=4.6a';
-import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.6a';
-import {drawBenchy} from './printer-enemies.mjs?v=4.6a';
+import {drawDawn} from './printer-journey-art.mjs?v=4.7a';
+import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.7a';
+import {drawBenchy} from './printer-enemies.mjs?v=4.7a';
 const line=(c,x,y,xx,yy,col,w=2)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 export function printerPlatform(c,p,g,solid){const {x,y,w,h}=p,t=g.time;if(p.printerEnemy)return;
  if(p.benchy){drawBenchy(c,x-10,y,w+20,t);line(c,x,y,x+w,y,'#d9fff2',4);return;}
@@ -14,7 +14,7 @@ export function printerPlatform(c,p,g,solid){const {x,y,w,h}=p,t=g.time;if(p.pri
  if(p.lift){line(c,x+10,y+20,x+10,y+60,'#9ec3c8',4);line(c,x+w-10,y+20,x+w-10,y+60,'#9ec3c8',4);c.fillStyle='#d6b579';c.fillRect(x+40,y+24,w-80,6);}
  c.restore();}
 const iconFor=id=>({'site-shelf':'▟','site-transfer':'━','site-shelter':'▥','site-chute':'▟',purge:'↶',spare:'◉',weight:'▰',gear:'⚙',drive:'↻',safety:'■',pattern:'▰',printStart:'▶',fan1:'✣',fan2:'✣',cool:'✓',supply:'◉',path:'▥',coolBoss:'✣',stop:'■',medic:'+'})[id]||'•';
-export function controlReady(g,o){const s=g.printer,b=s.boss;if(o.id.startsWith('site-'))return g.level.relays[0].on&&s.journey.sites[o.id.slice(5)]?.progress<1;if(o.id==='purge')return s.incident&&!s.journey.runawaySolved;if(o.id==='spare')return !s.journey.bonusHolder;return ({weight:s.carried==='weight',gear:s.carried==='gear',drive:s.gear,safety:!s.safety,pattern:s.safety,printStart:s.safety,fan1:!s.fans[0],fan2:!s.fans[1],cool:s.fans.every(Boolean),supply:true,path:b.phase===3&&b.feed>0&&Math.abs(b.x-6000)<220,coolBoss:b.frame>=1,stop:b.cooled,medic:!b.medic})[o.id]??false;}
+export function controlReady(g,o){const s=g.printer,b=s.boss;if(o.id.startsWith('site-'))return g.level.relays[0].on&&s.journey.sites[o.id.slice(5)]?.progress<1;if(o.id==='purge')return s.incident&&!s.journey.runawaySolved;if(o.id==='spare')return !s.journey.bonusHolder;return ({'release-spool':!g.printer.chase.done&&!g.printer.chase.active,sprint:true,weight:s.carried==='weight',gear:s.carried==='gear',drive:s.gear,safety:!s.safety,pattern:s.safety,printStart:s.safety,fan1:!s.fans[0],fan2:!s.fans[1],cool:s.fans.every(Boolean),supply:true,path:b.phase===3&&b.feed>0&&Math.abs(b.x-6000)<220,coolBoss:b.frame>=1,stop:b.cooled,medic:!b.medic})[o.id]??false;}
 function wire(c,points,t,on,hint){c.strokeStyle='#213b50';c.lineWidth=6;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.strokeStyle=on?'#84ecd2':hint?'#dcb784':'#496779';c.lineWidth=2;c.stroke();if(on||hint){for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],u=(t*.7)%1;c.fillStyle=on?'#ccfff2':'#ffdf9f';c.fillRect(a[0]+(b[0]-a[0])*u-3,a[1]+(b[1]-a[1])*u-3,6,6);}}}
 export function drawPrinterGuides(c,g){const s=g.printer,b=s.boss,t=g.time,r=currentRoom(g);if(!r)return;const on=id=>g.level.relays.find(a=>a.id===id)?.on,hint=s.idle>18;
  c.save();c.font='bold 16px monospace';c.textAlign='left';c.fillStyle='#7b9aa7';c.fillText(r.id+' / '+r.name,r.left+55,75);

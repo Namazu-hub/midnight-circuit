@@ -1,18 +1,18 @@
 import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.7a';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.6a';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.6a';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.6a';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.6a';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.6a';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.6a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.6a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.6a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.6a';
-import {tickLab} from './laboratory.mjs?v=4.6a';
-import {LEVELS} from './levels.mjs?v=4.6a';
-import {clamp,overlap,approach} from './world.mjs?v=4.6a';
-import {tickEnemies} from './enemies.mjs?v=4.6a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.6a';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.7a';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.7a';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.7a';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.7a';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.7a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.7a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.7a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.7a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.7a';
+import {tickLab} from './laboratory.mjs?v=4.7a';
+import {LEVELS} from './levels.mjs?v=4.7a';
+import {clamp,overlap,approach} from './world.mjs?v=4.7a';
+import {tickEnemies} from './enemies.mjs?v=4.7a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.7a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -30,13 +30,14 @@ export function respawn(g,cause='retry'){
  resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
+ if(g.equipment){g.equipment.strike=null;g.equipment.cooldown=0;}
  const hp=p.hp,displayHP=p.displayHP,hurtTimer=p.hurtTimer;
  Object.assign(g.player,{...g.respawn,vx:0,vy:0,hp,displayHP,hurtTimer,boost:0,invul:2,jumps:0,coyote:0,buffer:0,onGround:false,standing:null});
  for(const a of g.level.platforms)Object.assign(a,{x:a.baseX,y:a.baseY,clock:0,crumble:0,missing:0,dx:0,dy:0});
  for(const e of g.level.enemies)Object.assign(e,{x:e.baseX,y:e.baseY,state:'patrol',stateTime:0,clock:0,aim:null});
  if(g.level.cart)resetRail(g,g.cartCheckpoint);
  g.projectiles=[];g.pulse=0;g.cooldown=0;g.spawnGrace=2;g.deaths++;g.shake=.18;g.warp=0;
- resetRooms(g);const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;g.camera=clamp(g.player.x-VIEW.w*.32,left,Math.max(left,right-VIEW.w));g.cameraY=clamp(g.player.y-310,room?.minY??g.level.minY,room?.maxY??0);emit(g,'respawn');
+ resetRooms(g);const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;g.camera=clamp(g.player.x-VIEW.w*.32,left,Math.max(left,right-VIEW.w));g.cameraY=clamp(g.player.y-310,room?.minY??g.level.minY,g.player.y>530?(room?.maxY??0):0);emit(g,'respawn');
 }
 function damage(g,x){
  const p=g.player;if(g.fever||p.invul>0||g.spawnGrace>0)return;
@@ -136,8 +137,8 @@ function simulateGame(g,input={},dt=1/120){
  interactions(g,activated);
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
- if(p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){respawn(g,'fall');return;}
- const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const tx=clamp(p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0),left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,room?.maxY??0);
+ if(g.printer?.forceFall||p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){if(g.printer)g.printer.forceFall=false;respawn(g,'fall');return;}
+ const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??0):0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);
 }

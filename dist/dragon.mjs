@@ -1,5 +1,5 @@
 // A single articulated pose drives both rendering and collision on either side.
-import {clamp,approach} from './world.mjs?v=4.6a';
+import {clamp,approach} from './world.mjs?v=4.7a';
 export function initDragon(b){b.face=-1;b.turn=Array(14).fill(-1);b.motionTime=0;b.turnCooldown=0;b.stoppedAge=0;}
 export function updateDragon(b,p,dt){if(!b.turn)initDragon(b);b.motionTime+=dt;b.turnCooldown=Math.max(0,b.turnCooldown-dt);if(b.done){b.stoppedAge+=dt;return;}
  const dx=p.x+14-b.x;if(Math.abs(dx)>105&&b.turnCooldown<=0&&Math.sign(dx)!==b.face&&!b.route){b.face=Math.sign(dx);b.turnCooldown=1.5;}

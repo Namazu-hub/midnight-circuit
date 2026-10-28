@@ -175,3 +175,9 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
  body.play-session .hud-stage{display:none}
  body.play-session .hud{justify-content:center}.inventory-stat{font-size:9px}
 }
+
+@media(min-width:550px) and (max-width:1400px){
+ body.play-session .touch-controls{flex-wrap:nowrap}
+ body.play-session .item-controls{order:0;width:auto}
+ body.play-session .item-controls button{width:58px;font-size:9px}
+}

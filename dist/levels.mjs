@@ -1,5 +1,5 @@
-import {redesignPrinter} from './printer-level.mjs?v=4.6a';
-import {expandRooms} from './laboratory.mjs?v=4.6a';
+import {redesignPrinter} from './printer-level.mjs?v=4.7a';
+import {expandRooms} from './laboratory.mjs?v=4.7a';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],

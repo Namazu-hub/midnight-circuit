@@ -6,6 +6,11 @@ import {collectDrink,drink,useTool,toolHit,EQUIPMENT} from '../dist/equipment.mj
 import {purchase} from '../dist/research.mjs';
 import {journeyAction,tickJourney} from '../dist/printer-journey.mjs';
 import {platformSolid,respawn} from '../dist/engine.mjs';
+import {CHASE,chaseAction,tickChase} from '../dist/printer-chase.mjs';
+import {beginDefense,tickDefense,coreReady} from '../dist/printer-defense.mjs';
+import {dragonBoxes} from '../dist/dragon.mjs';
+import {tickPrinter} from '../dist/printer.mjs';
+import {beginDoor,doorReady,tickDoor} from '../dist/rooms.mjs';
 test('explicit printer abyss costs one HP while a lower recovery deck is safe',()=>{
  const g=createGame(3);g.rooms.active='B';Object.assign(g.player,{x:2200,y:640,vy:0});g.spawnGrace=0;
  for(let i=0;i<120;i++)updateGame(g,{});assert.equal(g.player.hp,6);assert.equal(g.player.y+40,680);
@@ -44,4 +49,27 @@ test('maze has three required print spans and does not remove the old room graph
  const g=createGame(3),gate=g.level.platforms.find(a=>a.mazeLock);assert.ok(platformSolid(g,gate));
  for(const id of ['maze-stairs','maze-bridge','maze-ramp']){g.printer.journey.sites[id].progress=1;}
  assert.equal(platformSolid(g,gate),false);assert.ok(g.level.printSites.find(a=>a.id==='maze-bridge').blocks[0][2]>600);assert.ok(g.level.doors.find(d=>d.id==='gallery'));assert.ok(g.level.doors.find(d=>d.id==='dawn'));
+});
+test('giant spool is button-triggered, crushes props and resets a failed chase without refund farming',()=>{
+ const g=createGame(3),c=g.printer.chase;g.rooms.active='A2';g.player.x=21000;tickChase(g,5);assert.equal(c.x,CHASE.start);assert.equal(c.active,false);
+ chaseAction(g,'release-spool');assert.ok(c.active);c.age=2;c.x=21450;c.speed=220;g.player.x=22000;tickChase(g,.01);assert.ok(g.level.chaseObstacles[0].broken);
+ const foe=g.printer.foes.find(e=>e.chase);c.x=foe.x;c.y=foe.y;tickChase(g,.01);assert.equal(foe.alive,false);const cash=g.research.funds;
+ g.spawnGrace=0;g.player.invul=0;Object.assign(g.player,{x:c.x,y:c.y-20});updateGame(g,{});assert.equal(g.player.hp,5);assert.equal(g.rooms.active,'A2');assert.equal(c.active,false);assert.equal(c.x,CHASE.start);assert.ok(g.level.chaseObstacles.every(a=>!a.broken));assert.ok(g.player.invul>1.9);assert.equal(g.research.funds,cash);
+});
+test('giant loading is one-time and never re-awards the existing supply repair',()=>{
+ const g=createGame(3);g.rooms.active='A2';const c=g.printer.chase;g.level.relays[0].on=true;g.level.relays[0].rewardPaid=true;chaseAction(g,'release-spool');c.age=20;c.x=CHASE.holder;g.player.x=24000;tickChase(g,.1);assert.ok(c.done);assert.equal(g.printer.journey.progress,28);const cash=g.research.funds;chaseAction(g,'release-spool');tickChase(g,30);assert.equal(g.research.funds,cash);assert.equal(c.active,false);
+});
+test('moving dragon body and either tail side use shared pose while cooled traversal is safe',()=>{
+ for(const dir of [-1,1]){const g=createGame(3),b=g.printer.boss;g.rooms.active='E';b.active=true;b.age=10;b.phase=3;b.clock=3;b.turn.fill(dir);b.face=dir;g.player.x=b.x+500;let hits=0;const a=dragonBoxes(b)[7];Object.assign(g.player,{x:a.x+5,y:a.y+4});tickPrinter(g,{},false,1/120,()=>hits++);assert.ok(hits>0);hits=0;b.cooled=true;tickPrinter(g,{},false,1/120,()=>hits++);assert.equal(hits,0);}
+});
+test('cooled defense has two turrets and two flying minis, warnings, a capped build and pulse counterplay',()=>{
+ const g=createGame(3),b=g.printer.boss;b.active=true;b.age=10;b.cooled=true;beginDefense(g);assert.equal(coreReady(b),false);Object.assign(g.player,{x:6000,y:100});
+ for(let i=0;i<120*12;i++)tickDefense(g,{},false,1/120,()=>{});
+ assert.ok(coreReady(b));assert.equal(b.minions.filter(e=>e.kind==='turret').length,2);assert.equal(b.minions.filter(e=>e.kind==='mini').length,2);assert.ok(b.jobs.length+b.minions.length<=4);assert.ok(g.printer.bolts.length);assert.ok(b.minions.filter(e=>e.kind==='mini').every(e=>e.y<470));
+ const e=b.minions[0];g.player.x=e.x;g.player.y=e.y;tickDefense(g,{},true,1/120,()=>{});assert.ok(!b.minions.includes(e));
+ const wall=b.defense.wall;wall.progress=1;g.printer.bolts.push({x:6152,y:400,w:12,h:12,vx:0,vy:0,life:3});tickDefense(g,{},false,.01,()=>{});assert.equal(g.printer.bolts.at(-1).life,0);
+ respawn(g,'retry');assert.equal(g.printer.boss.defense,undefined);assert.equal(g.printer.boss.jobs.length,0);assert.equal(g.printer.bolts.length,0);assert.equal(g.lives,2);
+});
+test('dawn door remains locked until the physical boss finish and the next room is playable',()=>{
+ const g=createGame(3),d=g.level.doors.find(d=>d.id==='dawn');assert.equal(doorReady(g,d),false);g.printer.boss.done=true;g.printer.boss.active=true;g.rooms.active='E';assert.ok(beginDoor(g,d));for(let i=0;i<150;i++)tickDoor(g,{},1/120,1200);assert.equal(g.rooms.active,'H');assert.equal(g.finished,false);const x=g.player.x;for(let i=0;i<120;i++)updateGame(g,{right:true});assert.ok(g.player.x>x+100);assert.equal(g.printer.ending.active,false);
 });

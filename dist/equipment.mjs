@@ -9,7 +9,7 @@ export const TOOLS=Object.freeze([
 export function setupEquipment(g){g.equipment={drinks:0,consumed:0,weapon:null,strike:null,cooldown:0,overload:0};}
 export function collectDrink(g,at){const e=g.equipment;if(!e||e.drinks>=EQUIPMENT.drinkCap)return false;e.drinks++;g.events.push({type:'drinkPickup',...at});return true;}
 export function drink(g){const e=g.equipment,p=g.player;if(!e?.drinks||g.fever)return false;e.drinks--;e.consumed++;p.boost=EQUIPMENT.duration;
- if(e.consumed===1){p.hp=Math.min(6,p.hp+1);p.displayHP=p.hp;}
+ if(e.consumed===1){p.hp=Math.min(6,p.hp+1);p.displayHP=p.hp;p.hurtTimer=0;}
  if(e.consumed>=3){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.displayHP=p.hp;p.hurtTimer=2.2;p.hp--;e.overload=2.5;g.events.push({type:'overload',x:p.x+14,y:p.y});}
  g.events.push({type:'boost',x:p.x+14,y:p.y+20});return true;
 }
