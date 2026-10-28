@@ -34,7 +34,7 @@ test('overload at HP1 consumes a normal life and the boost still expires',()=>{
 test('tool purchases charge once, reject replacement and exhaust exact durability',()=>{
  for(const [id,cost,uses] of [['iron',60,3],['scraper',40,5],['heatgun',75,2]]){
  const g=createGame();g.research.funds=500;assert.ok(purchase(g,id).ok);assert.equal(g.research.funds,500-cost);assert.equal(purchase(g,id).ok,false);assert.equal(g.research.funds,500-cost);
- for(let i=0;i<uses;i++){g.equipment.cooldown=0;assert.ok(useTool(g));const t={x:g.player.x+40,y:g.player.y,w:20,h:20};assert.ok(toolHit(g,t,'a'));assert.equal(toolHit(g,t,'a'),0);}
+ for(let i=0;i<uses;i++){g.equipment.cooldown=0;assert.ok(useTool(g));const t={x:g.player.x+40,y:g.player.y+(id==='scraper'?28:0),w:20,h:20};assert.ok(toolHit(g,t,'a'));assert.equal(toolHit(g,t,'a'),0);}
  assert.equal(g.equipment.weapon,null);assert.equal(useTool(g),false);
  }
 });

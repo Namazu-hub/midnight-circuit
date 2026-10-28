@@ -1,3 +1,4 @@
+import {toolHit} from './equipment.mjs?v=4.8a';
 // v4.7 stage-local additions. All state is shared across the existing room graph.
 export function extendAdventure(L){
  const pad=(x,y,w,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',...extra});
@@ -44,5 +45,5 @@ export function adventureSolid(g,a){const v=g.printer.adventure,j=g.printer.jour
 export function adventureAction(g,id){if(id==='sprint'){const v=g.printer.adventure;if(!v.sprintWon)v.sprint=g.level.sprintRoute.seconds;return true;}return false;}
 export function tickAdventure(g,dt){const v=g.printer.adventure,p=g.player;v.sprint=Math.max(0,v.sprint-dt);if(g.rooms.active==='S'&&v.sprint>0&&p.x>8020)v.sprintWon=true;
  if(g.rooms.active==='H'){g.printer.ending.active=false;g.printer.ending.complete=true;}
- const strike=g.equipment?.strike;if(strike&&['scraper','heatgun'].includes(strike.id)&&g.rooms.active==='S'&&Math.abs(p.x-8520)<strike.range&&!v.obstacleCleared){v.obstacleCleared=true;g.events.push({type:'toolBreakResin',x:8520,y:430});}
+ const strike=g.equipment?.strike;if((strike?.id==='scraper'||g.equipment?.shots?.some(q=>q.life>0))&&g.rooms.active==='S'&&!v.obstacleCleared&&toolHit(g,g.level.toolObstacle,'resin-obstacle')){v.obstacleCleared=true;g.events.push({type:'toolBreakResin',x:8520,y:430});}
 }

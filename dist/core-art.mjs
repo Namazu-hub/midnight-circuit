@@ -1,0 +1,2 @@
+// Reusable antagonist motif, independent of stage or boss state.
+export function drawCore(c,x,y,time,broken=false){c.save();c.translate(x,y);c.rotate(time*.4);c.strokeStyle='#ef8cff';c.lineWidth=4;c.fillStyle='#371d53';c.beginPath();for(let i=0;i<6;i++){const a=i*Math.PI/3,xx=Math.cos(a)*25,yy=Math.sin(a)*25;i?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.closePath();c.fill();c.stroke();c.fillStyle='#f3a5ff';c.fillRect(-8,-8,16,16);if(broken){c.strokeStyle='#fff0de';c.beginPath();c.moveTo(-20,-15);c.lineTo(4,2);c.lineTo(-10,21);c.stroke();}c.restore();}

@@ -1,7 +1,8 @@
-import {drawJourney} from './printer-journey-art.mjs?v=4.7a';
-import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.7a';
-import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.7a';
-import {drawPrinterGuides} from './printer-visual.mjs?v=4.7a';
+import {drawService,drawCage} from './printer-service-art.mjs?v=4.8a';
+import {drawJourney} from './printer-journey-art.mjs?v=4.8a';
+import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.8a';
+import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.8a';
+import {drawPrinterGuides} from './printer-visual.mjs?v=4.8a';
 // Original procedural pixel art: silhouette polygons, mechanical joints and
 // layered resin plates rendered on a 2px grid, with no external assets.
 const poly=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
@@ -40,10 +41,10 @@ export function drawPrinter(c,g){const s=g.printer;if(!s)return;const b=s.boss,t
   for(const job of b.jobs){const bottom=(job.y||470)+50;head(c,job.x,(job.y||470)-110,true);c.save();c.beginPath();c.rect(job.x-40,bottom-90*job.progress,130,90*job.progress);c.clip();if(job.kind==='mini'){c.translate(job.x+30,(job.y||470)+50);c.scale(.14,.14);dragon(c,{...b,x:0,y:0,age:10,phase:1},t);}else if(job.kind==='turret')head(c,job.x,job.y||470,false);else drawBenchy(c,job.x,(job.y||470)-8,64,t);c.restore();c.fillStyle='#f0ba83';c.fillRect(job.x-20,bottom-90*job.progress,100,3);}
   for(const e of b.minions)if(e.alive){if(e.kind==='benchy'){drawBenchy(c,e.x,e.y,64,t);}else if(e.kind==='mini'){c.save();c.translate(e.x,e.y+40);c.scale(.16,.16);dragon(c,{...b,x:0,y:0,phase:1},t);c.restore();}else if(e.kind==='turret'){head(c,e.x,e.y,!!e.aim);if(e.aim){c.strokeStyle='#ffd69f88';c.setLineDash([5,7]);c.beginPath();c.moveTo(e.x+20,e.y+10);c.lineTo(e.aim.x,e.aim.y);c.stroke();c.setLineDash([]);}}else{c.strokeStyle='#efb97d';c.lineWidth=4;c.beginPath();for(let i=0;i<20;i++)c.lineTo(e.x+20+Math.sin(i+t)*20,e.y+i*2);c.stroke();}}
   if(b.centerLatch&&!b.route)label(c,6000,480,'▰ '+Math.ceil(b.centerLatch),'#ffe0a6');
-  if(b.frame>0){c.fillStyle=b.cooled?'#98e9d1':'#eeb87d';const height=220*b.frame;for(let y=510;y>510-height;y-=7){c.fillRect(b.x-190,y,18,4);c.fillRect(b.x+165,y,18,4);if(y<510-height+8)c.fillRect(b.x-190,y,373,5);}head(c,b.x+(b.done?0:Math.sin(t*5)*190),460-height,!b.done);}
+  drawCage(c,b,t);
   if(b.done&&b.stoppedAge>1.6)label(c,6000,135,'SYSTEM RESTORED','#97ffcf');
  }
  for(const job of s.factory.jobs){head(c,job.x,380,true);c.save();c.beginPath();c.rect(job.x-20,510-60*job.progress,110,60*job.progress);c.clip();drawBenchy(c,job.x,462,64,t);c.restore();c.fillStyle='#ffe4ac';c.fillRect(job.x-10,510-60*job.progress,84,2);}
- drawNewPrinterFoes(c,g);drawPrinterGuides(c,g);drawJourney(c,g);
+ drawService(c,g);drawNewPrinterFoes(c,g);drawPrinterGuides(c,g);drawJourney(c,g);
  for(const q of s.bolts){c.fillStyle='#ff9a60';c.fillRect(q.x,q.y,q.w,q.h);c.fillStyle='#ffe2ac';c.fillRect(q.x+3,q.y+3,q.w-6,4);}c.restore();
 }

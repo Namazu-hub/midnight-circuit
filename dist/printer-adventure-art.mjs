@@ -1,7 +1,7 @@
-import {PRINT_COST} from './fabrication.mjs?v=4.7a';
-import {coreReady} from './printer-defense.mjs?v=4.7a';
-import {drawDragon} from './dragon.mjs?v=4.7a';
-import {CHASE} from './printer-chase.mjs?v=4.7a';
+import {PRINT_COST} from './fabrication.mjs?v=4.8a';
+import {coreReady} from './printer-defense.mjs?v=4.8a';
+import {drawDragon} from './dragon.mjs?v=4.8a';
+import {CHASE} from './printer-chase.mjs?v=4.8a';
 const line=(c,x,y,xx,yy,col,w=3)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 export function drawAdventure(c,g){if(!g.printer)return;const v=g.printer.adventure,r=g.rooms.active,j=g.printer.journey;c.save();
  if(r==='A2')drawChase(c,g);

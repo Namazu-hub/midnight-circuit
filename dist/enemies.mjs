@@ -1,4 +1,4 @@
-import {clamp,overlap} from './world.mjs?v=4.7a';
+import {clamp,overlap} from './world.mjs?v=4.8a';
 export const ENEMY_GUIDE=[
  ['spring','横伸びバネ','縮んで予告した後、左右に伸びる。上から踏むかパルス。'],
  ['coil','電磁コイル','充電中は引き寄せ、放電中は押し戻す。パルスで停止。'],

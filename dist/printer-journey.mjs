@@ -1,10 +1,13 @@
+import {initNozzle,tickNozzle,nozzleAction} from './printer-nozzle.mjs?v=4.8a';
+import {tetherAction} from './tether.mjs?v=4.8a';
+import {initPeeling,tickPeeling,peelAction} from './printer-peeling.mjs?v=4.8a';
 import {extendWorkshop,workshopAction} from './printer-workshop.mjs?v=4.8a';
-import {extendChase,initChase,chaseAction,chaseSolid,tickChase} from './printer-chase.mjs?v=4.7a';
-import {extendAdventure,initAdventure,adventureAction,adventureSolid,tickAdventure} from './printer-adventure.mjs?v=4.7a';
-import {startFabrication} from './fabrication.mjs?v=4.7a';
+import {extendChase,initChase,chaseAction,chaseSolid,tickChase} from './printer-chase.mjs?v=4.8a';
+import {extendAdventure,initAdventure,adventureAction,adventureSolid,tickAdventure} from './printer-adventure.mjs?v=4.8a';
+import {startFabrication} from './fabrication.mjs?v=4.8a';
 // Stage-local story and fabrication state survives rooms and ordinary retries.
-import {overlap} from './world.mjs?v=4.7a';
-import {grant} from './research.mjs?v=4.7a';
+import {overlap} from './world.mjs?v=4.8a';
+import {grant} from './research.mjs?v=4.8a';
 export function extendJourney(L){
  L.fallZones=L.rooms.map(r=>({room:r.id,x:r.left,y:755,w:r.right-r.left,h:220}));
  for(const r of L.rooms)r.maxY=210;
@@ -26,9 +29,9 @@ export function extendJourney(L){
  L.printerControls.find(c=>c.id==='stop').label='コア照明';
  extendAdventure(L);extendChase(L);extendWorkshop(L);
 }
-export function initJourney(g){g.printer.journey={progress:3,runawaySolved:false,capture:0,holder:false,holderSource:null,sites:Object.fromEntries(g.level.printSites.map(s=>[s.id,{progress:0,active:false,paid:false}])),cargo:{x:10650,waiting:true}};initAdventure(g);initChase(g);g.printer.ending={active:false,complete:false,age:0};}
+export function initJourney(g){g.printer.journey={progress:3,runawaySolved:false,capture:0,holder:false,holderSource:null,sites:Object.fromEntries(g.level.printSites.map(s=>[s.id,{progress:0,active:false,paid:false}])),cargo:{x:10650,waiting:true}};initAdventure(g);initPeeling(g);initNozzle(g);initChase(g);g.printer.ending={active:false,complete:false,age:0};}
 export function journeySolid(g,a){const s=g.printer,j=s.journey;const chase=chaseSolid(g,a);if(chase!==null)return chase;const extra=adventureSolid(g,a);if(extra!==null)return extra;if(a.printSite)return j.sites[a.printSite].progress>=1;if(a.coreStair)return s.boss.cooled;return null;}
-export function journeyAction(g,id){const s=g.printer,j=s.journey;if(workshopAction(g,id))return true;if(chaseAction(g,id))return true;if(adventureAction(g,id))return true;if(id.startsWith('site-')){const site=j.sites[id.slice(5)];if(site&&g.level.relays[0].on)startFabrication(g,g.level.printSites.find(s=>s.id===id.slice(5)),site);return true;}
+export function journeyAction(g,id){const s=g.printer,j=s.journey;if(nozzleAction(g,id))return true;if(tetherAction(g,id)){if(id==='fan1')g.printer.fans[0]=g.tethers[0].connected;return true;}if(peelAction(g,id))return true;if(workshopAction(g,id))return true;if(chaseAction(g,id))return true;if(adventureAction(g,id))return true;if(id.startsWith('site-')){const site=j.sites[id.slice(5)];if(site&&g.level.relays[0].on)startFabrication(g,g.level.printSites.find(s=>s.id===id.slice(5)),site);return true;}
  if(id==='purge'){if(s.incident){j.runawaySolved=true;s.factory.jobs=[];}return true;}
  if(id==='spare'){const e=s.foes.find(e=>e.kind==='spool'&&e.room==='B2');if(e&&!e.captured){e.alive=true;e.rewardPaid=true;e.x=11480;e.origin=11480;e.baseY=462;e.y=462;e.v=60;}return true;}
  return false;}
@@ -43,5 +46,5 @@ export function tickJourney(g,dt,hit=()=>{}){const s=g.printer,j=s.journey,b=s.b
  // The cargo starts when boarded, waits at both ends, and can always be recalled by boarding.
  const ship=g.level.platforms.find(a=>a.cargo),second=g.level.platforms.find(a=>a.cargoSecond),cargo=j.cargo;
  if(ship&&g.rooms.active==='B2'){for(const a of g.level.cargoObstacles)if(g.pulse<=0&&overlap(p,a))hit(g,a.x);const oldX=ship.x;if(p.standing===ship.id)cargo.waiting=false;if(!cargo.waiting){cargo.x=Math.min(11550,cargo.x+dt*125);if(cargo.x===11550)cargo.waiting=true;}ship.x=cargo.x;ship.dx=ship.x-oldX;ship.y=370-Math.max(0,cargo.x-10900)*.18;ship.dy=ship.y-(ship.lastY??ship.y);ship.lastY=ship.y;second.dx=0;second.dy=0;}
- tickAdventure(g,dt);tickChase(g,dt);
+ tickNozzle(g,dt);tickPeeling(g,dt);tickAdventure(g,dt);tickChase(g,dt);
 }

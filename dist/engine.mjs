@@ -1,18 +1,19 @@
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.7a';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.7a';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.7a';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.7a';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.7a';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.7a';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.7a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.7a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.7a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.7a';
-import {tickLab} from './laboratory.mjs?v=4.7a';
-import {LEVELS} from './levels.mjs?v=4.7a';
-import {clamp,overlap,approach} from './world.mjs?v=4.7a';
-import {tickEnemies} from './enemies.mjs?v=4.7a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.7a';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.8a';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.8a';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.8a';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.8a';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.8a';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.8a';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.8a';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.8a';
+import {setupRepairStations} from './repair-stations.mjs?v=4.8a';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.8a';
+import {setupResearch,tickResearch} from './research.mjs?v=4.8a';
+import {tickLab} from './laboratory.mjs?v=4.8a';
+import {LEVELS} from './levels.mjs?v=4.8a';
+import {clamp,overlap,approach} from './world.mjs?v=4.8a';
+import {tickEnemies} from './enemies.mjs?v=4.8a';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.8a';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -22,15 +23,15 @@ export function createGame(index=0,customLevel=null){
  level.platforms.forEach((a,i)=>Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0}));
  level.enemies.forEach(e=>{e.baseX=e.x;});
  const g={level,index,player:{...level.spawn,w:28,h:40,vx:0,vy:0,hp:6,displayHP:6,hurtTimer:0,hurtFrom:6,hurtTo:6,boost:0,face:1,onGround:false,standing:null,coyote:0,jumps:0,buffer:0,invul:0,walk:0},time:0,elapsed:0,pulse:0,cooldown:0,camera:0,cameraY:0,checkpoint:false,respawn:{...level.spawn},chips:0,gears:0,deaths:0,lives:3,gameOver:false,finished:false,events:[],projectiles:[],shake:0,warp:0,progress:0,spawnGrace:1,cartCheckpoint:160};
- if(level.theme!=='fever'){setupEquipment(g);setupRepairStations(g);setupResearch(g);setupPrinter(g);setupRooms(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
+ if(level.theme!=='fever'){setupEquipment(g);setupRepairStations(g);setupResearch(g);setupPrinter(g);setupRooms(g);setupTethers(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
  if(level.cart)resetRail(g);return g;
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
- resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
+ resetTethers(g);resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
- if(g.equipment){g.equipment.strike=null;g.equipment.cooldown=0;}
+ if(g.equipment){g.equipment.strike=null;g.equipment.shots=[];g.equipment.cooldown=0;}
  const hp=p.hp,displayHP=p.displayHP,hurtTimer=p.hurtTimer;
  Object.assign(g.player,{...g.respawn,vx:0,vy:0,hp,displayHP,hurtTimer,boost:0,invul:2,jumps:0,coyote:0,buffer:0,onGround:false,standing:null});
  for(const a of g.level.platforms)Object.assign(a,{x:a.baseX,y:a.baseY,clock:0,crumble:0,missing:0,dx:0,dy:0});
@@ -116,12 +117,12 @@ function interactions(g,activated){
 function simulateGame(g,input={},dt=1/120){
  if(g.finished||g.gameOver||g.repairSession)return;const p=g.player;if(tickDoor(g,input,dt,VIEW.w))return;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
  p.invul=Math.max(0,p.invul-dt);p.boost=Math.max(0,p.boost-dt);p.hurtTimer=Math.max(0,p.hurtTimer-dt);if(p.hurtTimer<1.95)p.displayHP+=(p.hp-p.displayHP)*Math.min(1,dt*7);
- tickEquipment(g,dt);if(input.drink){drink(g);if(p.hp<=0){respawn(g,'damage');return;}}if(input.weapon)useTool(g);
+ tickEquipment(g,dt,a=>platformSolid(g,a));if(input.drink){drink(g);if(p.hp<=0){respawn(g,'damage');return;}}if(input.weapon)useTool(g);
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
  if(g.printer)movePrinterFoes(g,dt);updateMachinery(g,dt);p.oldBottom=p.y+p.h;
- if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);
+ if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);
  if(!g.printer)tickLab(g,input,activated,dt,damage);

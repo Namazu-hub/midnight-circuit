@@ -19,7 +19,7 @@ test('gear and print repair require parts and physical controls, never timing pu
 });
 test('incident changes collision; cooling needs both fans; assistance cannot bypass repair',()=>{
  const g=createGame(3);g.player.x=2600;g.rooms.active='C';tick(g);const jam=g.level.platforms.find(p=>p.printerJam);assert.equal(platformSolid(g,jam),false);at(g,'safety');tick(g,true);tick(g);assert.ok(platformSolid(g,jam));at(g,'purge');tick(g,true);assert.equal(platformSolid(g,jam),false);
- at(g,'cool');tick(g,true);assert.equal(g.level.relays[3].on,false);at(g,'fan1');tick(g,true);at(g,'fan2');tick(g,true);at(g,'cool');tick(g,true);assert.ok(g.level.relays[3].on);
+ at(g,'cool');tick(g,true);assert.equal(g.level.relays[3].on,false);g.printer.journey.sites['cable-stairs'].progress=1;g.tethers[0].held=true;at(g,'fan1');tick(g,true);at(g,'fan2');tick(g,true);tick(g,true);at(g,'cool');tick(g,true);assert.ok(g.level.relays[3].on);
  const v=g.level.vendors[0];Object.assign(g.player,{x:v.x-14,y:v.y-40});g.research.funds=200;assert.equal(purchase(g,'assist').ok,false);assert.equal(g.research.funds,200);
 });
 function enter(g){g.rooms.active='D';Object.assign(g.player,{x:5346,y:470});for(let i=0;i<65;i++)updateGame(g,{});updateGame(g,{interact:true});for(let i=0;i<220;i++)updateGame(g,{});}

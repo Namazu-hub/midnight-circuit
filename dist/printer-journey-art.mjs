@@ -1,5 +1,6 @@
-import {drawAdventure} from './printer-adventure-art.mjs?v=4.7a';
-import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.7a';
+import {drawCore} from './core-art.mjs?v=4.8a';
+import {drawAdventure} from './printer-adventure-art.mjs?v=4.8a';
+import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.8a';
 const line=(c,x,y,xx,yy,color,w=3)=>{c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 function screen(c,x,y,text,small=''){c.fillStyle='#102033';c.fillRect(x,y,240,75);c.strokeStyle='#77a4b2';c.lineWidth=3;c.strokeRect(x,y,240,75);c.fillStyle='#b7e9dc';c.font='bold 15px monospace';c.textAlign='left';c.fillText(text,x+12,y+26);c.fillStyle='#edbd90';c.font='12px sans-serif';c.fillText(small,x+12,y+53);}
 function nozzle(c,x,y){c.fillStyle='#adcccb';c.fillRect(x-28,y-30,56,25);c.fillStyle='#18384b';c.fillRect(x-18,y-24,36,9);c.fillStyle='#ecc291';c.beginPath();c.moveTo(x-12,y-5);c.lineTo(x+12,y-5);c.lineTo(x,y+12);c.fill();}
@@ -17,7 +18,7 @@ export function drawJourney(c,g){const s=g.printer;if(!s)return;const j=s.journe
  for(const a of g.level.cargoObstacles){c.fillStyle='#162c3e';c.fillRect(a.x,a.y,a.w,a.h);c.fillStyle='#f4c18c';for(let k=0;k<5;k++)c.fillRect(a.x+k*10,a.y,5,a.h);line(c,a.x+a.w/2,100,a.x+a.w/2,a.y,'#688798',5);}
  for(const a of g.level.platforms.filter(a=>a.coreStair)){if(b.frame<=0||b.cooled)continue;c.fillStyle='#e7bb91';for(let k=0;k<Math.floor(b.frame*6);k++)c.fillRect(a.x,a.y+18-k*3,a.w,2);}
  // Consistent, bright landing marks on the safe body/stairs and a visible final core.
- if(b.cooled){const core=dragonCore(b),n={x:core.x+core.w/2,y:core.y+core.h/2};line(c,n.x,n.y+30,n.x,n.y+105,'#829fa9',10);c.fillStyle='#16354b';c.fillRect(n.x-26,n.y-27,52,54);c.fillStyle=b.done?'#8a9a9e':'#ffe0a4';c.fillRect(n.x-18,n.y-19,36,38);if(b.finalHit){line(c,n.x-18,n.y-20,n.x+4,n.y+2,'#fcfff4',5);line(c,n.x+4,n.y+2,n.x-10,n.y+22,'#fcfff4',5);}if(b.beacon>0)line(c,6450,260,n.x,n.y,'#c6ffdd',2);c.strokeStyle='#fff0b6';c.lineWidth=4;c.beginPath();c.arc(n.x,n.y,43+Math.sin(t*5)*3,0,7);c.stroke();line(c,n.x-11,n.y-13,n.x+2,n.y,'#fcf5d3');line(c,n.x+2,n.y,n.x-5,n.y+16,'#fcf5d3');}
+ if(b.cooled){const core=dragonCore(b),n={x:core.x+core.w/2,y:core.y+core.h/2};line(c,n.x,n.y+30,n.x,n.y+105,'#829fa9',10);c.fillStyle='#16354b';c.fillRect(n.x-26,n.y-27,52,54);drawCore(c,n.x,n.y,t,!!b.finalHit);if(b.finalHit){line(c,n.x-18,n.y-20,n.x+4,n.y+2,'#fcfff4',5);line(c,n.x+4,n.y+2,n.x-10,n.y+22,'#fcfff4',5);}if(b.beacon>0)line(c,6450,260,n.x,n.y,'#c6ffdd',2);c.strokeStyle='#fff0b6';c.lineWidth=4;c.beginPath();c.arc(n.x,n.y,43+Math.sin(t*5)*3,0,7);c.stroke();line(c,n.x-11,n.y-13,n.x+2,n.y,'#fcf5d3');line(c,n.x+2,n.y,n.x-5,n.y+16,'#fcf5d3');}
  for(const e of s.foes){const age=t-(e.deathTime??-100);if(e.alive||age>.55)continue;c.fillStyle='#e9b7bd';for(let k=0;k<6;k++){const a=k*Math.PI/3;c.fillRect(e.x+20+Math.cos(a)*age*95,e.y+20+Math.sin(a)*age*80+age*age*100,7-age*9,7-age*9);}}
  drawAdventure(c,g);c.restore();}
 export function drawDawn(c,g,w,h){const end=g.printer?.ending;if(!end?.active)return;const age=end.age;c.save();const sky=c.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#9ca3ba');sky.addColorStop(1,'#edc59e');c.fillStyle=sky;c.fillRect(0,0,w,h);const cx=w/2;c.fillStyle='#e7d6ad';c.fillRect(cx-180,65,360,240);c.fillStyle='#7892a4';for(let i=0;i<3;i++)c.fillRect(cx-170+i*120,75,105,210);c.fillStyle='#47596c';c.fillRect(cx-270,410,540,18);c.fillRect(cx-240,428,15,172);c.fillRect(cx+220,428,15,172);
