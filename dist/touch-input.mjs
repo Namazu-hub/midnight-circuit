@@ -11,10 +11,10 @@ export function bindTouchControls({buttons,root,doc,win,isPlaying,onChange,onSta
   const release=id=>{const old=contacts.get(id);if(!old)return;contacts.delete(id);sync();try{if(old.owner.hasPointerCapture(id))old.owner.releasePointerCapture(id);}catch{ /* Capture may already be cancelled by Safari. */ }};
   const clear=()=>{for(const id of [...contacts.keys()])release(id);};
   const suppress=e=>{if(e.cancelable)e.preventDefault();};
-  const hit=(x,y)=>{const b=doc.elementFromPoint(x,y)?.closest('[data-control]');return buttons.includes(b)&&!b.hidden?b.dataset.control:null;};
+  const hit=(x,y)=>{const b=doc.elementFromPoint(x,y)?.closest('[data-control]');return buttons.includes(b)&&!b.hidden&&!b.disabled?b.dataset.control:null;};
   for(const b of buttons){
     b.addEventListener('pointerdown',e=>{
-      suppress(e);if(!isPlaying()||(e.pointerType==='mouse'&&e.button!==0))return;
+      suppress(e);if(b.disabled||!isPlaying()||(e.pointerType==='mouse'&&e.button!==0))return;
       contacts.set(e.pointerId,{key:b.dataset.control,owner:b});sync();
       try{b.setPointerCapture(e.pointerId);}catch{ /* Document listeners still release it. */ }
       onStart?.();

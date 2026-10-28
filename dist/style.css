@@ -108,3 +108,55 @@ body:not([data-mode=playing]):not([data-mode=paused]) .touch-controls{display:no
 .action-repair-hint{position:absolute;top:64px;left:50%;transform:translateX(-50%);max-width:85%;background:#102536e8;border:1px solid #73e6ca;border-radius:10px;padding:8px 12px;color:#dbfff3;font-size:12px;pointer-events:none;z-index:4}.action-repair-hint[hidden]{display:none}
 
 .pico-terminal-link{display:flex;align-items:center;gap:12px;color:#80ffd8;font-size:12px}
+
+/* Compact game-only layout in BOTH phone orientations. HUD owns its own row. */
+.rotate-note{display:none}
+@media (max-width:900px),(pointer:coarse) and (max-width:1400px),(max-height:600px) and (max-width:1400px){
+ body.play-session{height:100dvh;overflow:hidden;overscroll-behavior:none}
+ body.play-session .site-header,body.play-session .above-game,body.play-session .stage-section,body.play-session .controls-strip,body.play-session footer,body.play-session .game-bottom{display:none}
+ body.play-session main{margin:0;padding:0;max-width:none}
+ body.play-session .game-shell{position:fixed;inset:0;z-index:30;display:grid;grid-template-rows:44px minmax(0,1fr) auto;width:100%;height:100dvh;border:0;border-radius:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+ body.play-session .screen-top{display:flex;height:44px;padding:0 6px;gap:4px}
+ body.play-session #screen-status{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:7px;min-width:0;flex:1}
+ body.play-session .screen-actions{display:flex;gap:0}
+ body.play-session .screen-actions button{min-width:44px;min-height:44px;font-size:22px}
+ body.play-session .viewport{min-height:0;height:100%;max-height:none;max-width:none;aspect-ratio:auto;width:100%;margin:0}
+ body.play-session canvas#game{position:absolute;top:30px;left:0;width:100%;height:calc(100% - 30px);object-fit:contain}
+ body.play-session .hud{position:absolute;top:0;left:0;right:0;height:30px;gap:4px;padding:0 6px;background:#0b1928;white-space:nowrap}
+ body.play-session .hud-stage{gap:4px;min-width:0}.hud-stage strong{overflow:hidden;text-overflow:ellipsis}
+ body.play-session .hud-stage strong{font-size:9px;max-width:100px}
+ body.play-session .hud-stage small,body.play-session .hud-stage>span,body.play-session .pulse-hud{display:none}
+ body.play-session .hud-stats{font-size:10px;gap:5px;border:0;padding:2px;background:none}
+ body.play-session #hearts{font-size:10px;letter-spacing:0}
+ body.play-session .touch-controls{position:static;display:flex;align-items:end;justify-content:space-between;gap:4px;padding:6px 8px;background:#111e2d;border-top:1px solid #314657;pointer-events:none}
+ body[data-mode=playing].play-session .touch-controls button{pointer-events:auto}
+ body.play-session .touch-controls>div:first-child{display:grid;grid-template-columns:repeat(2,44px);width:auto;min-width:0;gap:4px}
+ body.play-session .touch-controls>div:last-child{display:flex;gap:4px}
+ body.play-session .touch-controls button{height:52px;min-height:44px;width:48px;min-width:44px;padding:0 4px;font-size:10px;opacity:1}
+ body.play-session .touch-controls .touch-jump{width:58px}.context-action{background:#244b50;color:#adf4dd;border:1px solid #72b5a4;border-radius:7px}
+ body.play-session .context-action{width:60px;flex-shrink:0}.context-action:disabled{opacity:.4!important}
+ body.play-session #repair-open,body.play-session #shop-open{display:none!important}
+ body.play-session .toast,body.play-session .action-repair-hint{top:34px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);max-width:90%;width:max-content;padding:5px 8px;font-size:11px;pointer-events:none;transition:opacity .5s}
+ body.play-session .modal-overlay{position:fixed;inset:0;z-index:60;max-height:100dvh}.dialog{overflow:auto;max-height:90dvh}
+}
+@media (max-width:900px) and (orientation:portrait){body.play-session .rotate-note{display:block;white-space:nowrap;font-size:9px;color:#98b5bd}body.play-session .hud-stage strong{max-width:75px}}
+@media (orientation:landscape) and (max-height:500px){
+ body:not(.play-session) .site-header,body:not(.play-session) .above-game{display:none}
+ body:not(.play-session) main{padding:0 10px}
+ body:not(.play-session) .home-overlay{padding:12px 24px}
+ body:not(.play-session) .home-copy h1{font-size:34px;margin:7px 0}
+ body:not(.play-session) .home-copy h1 em{font-size:10px;margin-top:4px}
+ body:not(.play-session) .home-copy>p{margin:6px 0;font-size:10px;line-height:1.3}
+ body:not(.play-session) .home-meta,body:not(.play-session) .hero-caption{display:none}
+ body:not(.play-session) .viewport{height:calc(100dvh - 72px);aspect-ratio:auto}
+}
+
+.screen-top .rotate-note{display:none}@media(max-width:900px) and (orientation:portrait){body.play-session .screen-top .rotate-note{display:block}}
+@media(max-width:900px),(pointer:coarse) and (max-width:1400px),(max-height:600px) and (max-width:1400px){
+ body.play-session .game-shell{grid-template-columns:minmax(0,1fr)}
+ body.play-session .game-shell>*{min-width:0}
+ body.play-session .screen-actions button{box-sizing:border-box;height:44px;max-height:44px;padding:0;display:grid;place-items:center;line-height:1}
+ body.play-session .screen-actions button[hidden]{display:none}
+ body.play-session .screen-actions{flex-shrink:0;align-items:center;height:44px}
+}
+@media(max-width:900px),(pointer:coarse) and (max-width:1400px),(max-height:600px) and (max-width:1400px){body.play-session .screen-top{border-bottom:0}}

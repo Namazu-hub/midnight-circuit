@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#0b101c"><meta name="description" content="夜の研究室と、小さな修理ロボ。パルスで時間を止めて冒険する、全8ステージのオリジナル2Dアクション。">
   <title>MIDNIGHT CIRCUIT — 真夜中の修理屋</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='24' height='18' rx='4' fill='%2375efce'/%3E%3Crect x='8' y='12' width='16' height='8' rx='2' fill='%230b101c'/%3E%3Cpath d='M11 15h3v3h-3zm7 0h3v3h-3z' fill='%2375efce'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=4.5a">
+  <link rel="stylesheet" href="style.css?v=4.5.1a">
 </head>
 <body>
   <div class="page-glow" aria-hidden="true"></div>
@@ -19,7 +19,7 @@
   <main>
     <div class="above-game"><span class="eyebrow"><i></i> THE LAB IS ASLEEP. YOU ARE NOT.</span><span class="tiny-label">2D PLATFORMER <b>／</b> 8 STAGES + FEVER</span></div>
     <section class="game-shell" id="game-shell" aria-label="真夜中の修理屋 ゲーム画面">
-      <div class="screen-top"><span id="screen-status"><i></i> SYSTEM STANDBY</span><div class="screen-actions"><button id="printer-hint-btn" aria-label="修理のヒント" title="短いヒント" hidden>?</button><button id="pause-btn" aria-label="一時停止" hidden>Ⅱ</button><button id="fullscreen-btn" aria-label="全画面表示" title="全画面表示">⛶</button></div></div>
+      <div class="screen-top"><span id="screen-status"><i></i> SYSTEM STANDBY</span><span class="rotate-note">横向き推奨</span><div class="screen-actions"><button id="printer-hint-btn" aria-label="修理のヒント" title="短いヒント" hidden>?</button><button id="pause-btn" aria-label="一時停止" hidden>Ⅱ</button><button id="fullscreen-btn" aria-label="全画面表示" title="全画面表示">⛶</button></div></div>
       <div class="viewport" id="viewport">
         <canvas id="game" width="1200" height="600" tabindex="0" aria-label="横スクロールアクション。矢印で移動、スペースで二段ジャンプ、Xでパルス。"></canvas>
         <div id="hud" class="hud" hidden>
@@ -47,11 +47,11 @@
         <div id="help-overlay" class="modal-overlay" hidden><div class="dialog help-dialog"><button id="help-close" class="close-btn" aria-label="遊び方を閉じる">×</button><span class="dialog-kicker">ROBOT FIELD GUIDE</span><h2>夜勤の手引き</h2><div class="help-grid"><div><span><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd></span><strong>左右に移動</strong></div><div><span><kbd>SPACE</kbd> / <kbd>Z</kbd></span><strong>ジャンプ・空中でもう一度</strong></div><div><span><kbd>X</kbd> / <kbd>SHIFT</kbd></span><strong>パルスを発動</strong></div><div><span><kbd>ESC</kbd> / <kbd>P</kbd></span><strong>一時停止</strong></div></div><div class="pulse-explanation"><span>◉</span><p><b>パルスで、世界をひとやすみ。</b>約3秒間、敵・通常の移動足場・レーザーが停止（搬送台車は走り続けます）。透明な足場も実体化します。ゲージが戻ったら、もう一度。</p></div><p class="help-note">HPは6、残機は3。落下でHP −1、HP 0で1機消費。<br>残機0ならステージ1からやり直し。頭上HPは被弾時だけ表示。<br>モンエナで9秒間、虹色に光って速度1.55倍！<br>搬送ライン：← 減速 / → 加速 / SPACE 台車ごとジャンプ。<br>旗は全回復と再開地点。✦ は任意の収集パーツ。<br>時計塔は3つの装置を修理。光学ベンチはレンズの近くで X。</p><details class="enemy-guide"><summary>敵の能力と攻略</summary><div id="enemy-guide"></div></details><details class="enemy-guide"><summary>フィーバーのルールと抽選</summary><p>異なる8コースのクリアで1周。同じコースの再クリアでは抽選しません。前半8%、後半は救済で上昇。未当選なら最後のコースで必ず突入、1周に1回です。</p><p>無敵・高速・Xで連射パルス！ 4秒以内の連続撃破でコンボ。ゴールまで自分で操作しよう。途中で閉じても再開できます。音は右上の♪でオン。練習は記録と抽選に影響しません。</p></details><label class="effects-option"><input type="checkbox" id="reduce-effects"> 光と動きの演出を控えめにする</label><button id="help-ok" class="primary-btn">準備できた！ <span>→</span></button></div></div>
       </div>
       <div class="game-bottom"><span><i></i> <b id="bottom-message">おかえり、夜の冒険へ。</b></span><span id="save-status">PROGRESS SAVED LOCALLY <span class="small-dot"></span></span></div>
-      <div class="touch-controls" id="touch-controls"><div><button data-control="laneUp" aria-label="レール上段へ">上段</button><button data-control="laneDown" aria-label="レール下段へ">下段</button><button data-control="left" aria-label="左へ移動"><span class="direction-icon direction-left" aria-hidden="true"></span></button><button data-control="right" aria-label="右へ移動"><span class="direction-icon direction-right" aria-hidden="true"></span></button></div><div><button data-control="pulse" class="touch-pulse" aria-label="パルス発動">PULSE</button><button data-control="jump" class="touch-jump" aria-label="ジャンプ">JUMP</button></div></div>
+      <div class="touch-controls" id="touch-controls"><div><button data-control="laneUp" aria-label="レール上段へ">上段</button><button data-control="laneDown" aria-label="レール下段へ">下段</button><button data-control="left" aria-label="左へ移動"><span class="direction-icon direction-left" aria-hidden="true"></span></button><button data-control="right" aria-label="右へ移動"><span class="direction-icon direction-right" aria-hidden="true"></span></button></div><button id="context-action" data-control="action" class="context-action" aria-label="ACTION" disabled>ACTION</button><div><button data-control="pulse" class="touch-pulse" aria-label="パルス発動">PULSE</button><button data-control="jump" class="touch-jump" aria-label="ジャンプ">JUMP</button></div></div>
     </section>
     <section class="stage-section" id="stages"><div class="section-label"><h2>THE NIGHT SHIFT <span>8つの部屋をめぐる旅</span></h2><span id="completion-label">0 / 8 RESTORED</span></div><div class="stage-grid" id="stage-grid"></div></section>
     <div class="controls-strip"><div><kbd>←</kbd><kbd>→</kbd><span>移動</span><kbd>SPACE</kbd><span>二段ジャンプ</span><kbd>X</kbd><span>パルス</span><kbd>ESC</kbd><span>一時停止</span></div><span><button id="fever-demo-btn" class="text-btn">FEVERを遊ぶ ↗</button><button id="demo-btn">777 ボーナス演出を試す ↗</button><button id="footer-sound">♪ 音をオン</button></span></div>
   </main>
   <footer><span>BUILT FOR THE QUIET HOURS.</span><span>夜が明けるまで、あと少し。 <i>✦</i></span></footer>
-  <script type="module" src="game.mjs?v=4.5a"></script>
+  <script type="module" src="game.mjs?v=4.5.1a"></script>
 </body></html>

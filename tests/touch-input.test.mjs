@@ -10,7 +10,7 @@ function fire(target,type,props={}) {
 function setup({captureFails=false}={}) {
   const doc=new EventTarget(),win=new EventTarget(),root=new EventTarget(),down=new Set(),changes=[];
   let playing=true,hit=null,starts=0;
-  const buttons=['left','right','jump','pulse','laneUp','laneDown'].map(key=>{
+  const buttons=['left','right','jump','pulse','laneUp','laneDown','action'].map(key=>{
     const b=new EventTarget(),classes=new Set(),captures=new Set();
     b.dataset={control:key};b.hidden=false;b.attrs={};
     b.classList={toggle:(name,on)=>on?classes.add(name):classes.delete(name),contains:name=>classes.has(name)};
@@ -76,3 +76,5 @@ test('paused input and non-primary mouse buttons are ignored; a lost mouse relea
 test('hidden lane controls cannot acquire input during a slide',()=>{
  const f=setup();f.buttons[4].hidden=true;f.start('left');f.move('laneUp');assert.equal(f.down.size,0);
 });
+
+test('ACTION shares contact lifecycle and disabled controls cannot acquire sliding input',()=>{const f=setup(),a=f.buttons.find(b=>b.dataset.control==='action');f.start('right',1);f.start('action',2);assert.ok(f.down.has('action'));f.end(2);assert.deepEqual([...f.down],['right']);a.disabled=true;f.move('action',1);assert.equal(f.down.size,0);f.start('action',3);assert.equal(f.down.size,0);});
