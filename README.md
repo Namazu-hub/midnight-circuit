@@ -120,3 +120,6 @@ GitHub PagesのSourceはGitHub Actionsを選択します。`.github/workflows/de
 
 
 v4.5.2のスマートフォン表示・演出の変更、75件のテスト、5サイズの画像・寸法、限定的な性能測定と未検証事項は[検証記録](docs/MOBILE-FEEL-v4.5.2.md)を参照。
+
+
+v4.6のステージ4は修理連動ジョブ・追加造形・スプール充填・搬送船・コア決着・後日談を追加。[実装と検証・残課題](docs/PRINTER-v4.6.md)を参照。
