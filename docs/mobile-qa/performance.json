@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-28",
+  "browser": "Chrome 155 Linux cloud",
+  "canvas": [
+    1200,
+    600
+  ],
+  "stage": 4,
+  "warmup": 120,
+  "samples": 600,
+  "metric": "CPU update and Canvas command submission per frame; not presentation interval",
+  "before_ms": {
+    "median": 0.7,
+    "p95": 2.3
+  },
+  "after_ms": {
+    "median": 0.7,
+    "p95": 2.0
+  },
+  "audio": false,
+  "reduced": false
+}
