@@ -6,7 +6,7 @@ export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink'
 export function balance(value){return Number.isFinite(value)?Math.min(ECONOMY.max,Math.max(0,Math.floor(value))):0;}
 export function setupResearch(g){
  g.research={funds:0,earned:0,kills:0,repairs:0,fullRepairs:0,caches:0};
- g.level.vendors=[{x:g.level.spawn.x+70,y:g.level.spawn.y+40},...g.level.checkpoints.map(c=>({x:c.x+45,y:c.y}))];
+ g.level.vendors=g.level.vendorSites||[{x:g.level.spawn.x+70,y:g.level.spawn.y+40},...g.level.checkpoints.map(c=>({x:c.x+45,y:c.y}))];
  g.level.researchCaches=[];
  for(const [i,r] of g.level.relays.entries()){
   r.id??=`device-${g.index}-${i}`;r.rewardPaid=false;r.repairResult??=r.on?'restored':'broken';r.researchLink=[];

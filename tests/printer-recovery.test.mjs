@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createGame,updateGame} from '../dist/engine.mjs';
+import {workshopAction} from '../dist/printer-workshop.mjs';
+function move(g,x,y){for(let i=0;i<1800;i++){const p=g.player,dx=x-p.x-14,dy=y-p.y-40;if(Math.abs(dx)<20&&Math.abs(dy)<5&&p.onGround)return;updateGame(g,{left:dx<-6,right:dx>6,jump:p.onGround&&dy<-35||p.jumps===1&&p.vy>-60&&dy<-20,pulse:g.cooldown<=0});}assert.fail(`recovery ${x},${y} stuck ${g.player.x},${g.player.y}`);}
+for(const [room,start,steps] of [['B',[2150,640],[[2150,600],[2280,520],[2460,510]]],['C',[3500,640],[[3520,590],[3660,500],[3860,510]]]])test(`intentional ${room} lower-deck fall returns through ordinary jumps without equipment`,()=>{const g=createGame(3);g.rooms.active=room;Object.assign(g.player,{x:start[0],y:start[1],vy:0});for(let i=0;i<100;i++)updateGame(g,{});const hp=g.player.hp;for(const [x,y] of steps)move(g,x,y);assert.equal(g.player.hp,hp);assert.equal(g.deaths,0);});
+test('cargo can be recalled from its accessible lower corridor',()=>{const g=createGame(3);g.printer.journey.cargo.x=11550;workshopAction(g,'recall-cargo');assert.equal(g.printer.journey.cargo.x,10650);assert.ok(g.printer.journey.cargo.waiting);});
+test('three vendors have distinct action zones from doors and students',()=>{const g=createGame(3);assert.equal(g.level.vendors.length,3);for(const v of g.level.vendors){for(const d of g.level.doors)assert.ok(Math.hypot(v.x-d.x,v.y-d.y)>160);for(const s of g.level.students)assert.ok(Math.hypot(v.x-s.x,v.y-s.y)>80);}});

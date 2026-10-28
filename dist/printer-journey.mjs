@@ -1,3 +1,4 @@
+import {extendWorkshop,workshopAction} from './printer-workshop.mjs?v=4.8a';
 import {extendChase,initChase,chaseAction,chaseSolid,tickChase} from './printer-chase.mjs?v=4.7a';
 import {extendAdventure,initAdventure,adventureAction,adventureSolid,tickAdventure} from './printer-adventure.mjs?v=4.7a';
 import {startFabrication} from './fabrication.mjs?v=4.7a';
@@ -23,11 +24,11 @@ export function extendJourney(L){
  for(const [x,y] of [[5790,430],[5880,350],[6020,300]])pad(x,y,140,{coreStair:true});
  const designer=L.students.find(s=>s.name==='試作品の設計者');designer.color='#b4a3dd';designer.lines.unshift('「これ、何に使うの？」「知らん、作りたかった」');
  L.printerControls.find(c=>c.id==='stop').label='コア照明';
- extendAdventure(L);extendChase(L);
+ extendAdventure(L);extendChase(L);extendWorkshop(L);
 }
 export function initJourney(g){g.printer.journey={progress:3,runawaySolved:false,capture:0,holder:false,holderSource:null,sites:Object.fromEntries(g.level.printSites.map(s=>[s.id,{progress:0,active:false,paid:false}])),cargo:{x:10650,waiting:true}};initAdventure(g);initChase(g);g.printer.ending={active:false,complete:false,age:0};}
 export function journeySolid(g,a){const s=g.printer,j=s.journey;const chase=chaseSolid(g,a);if(chase!==null)return chase;const extra=adventureSolid(g,a);if(extra!==null)return extra;if(a.printSite)return j.sites[a.printSite].progress>=1;if(a.coreStair)return s.boss.cooled;return null;}
-export function journeyAction(g,id){const s=g.printer,j=s.journey;if(chaseAction(g,id))return true;if(adventureAction(g,id))return true;if(id.startsWith('site-')){const site=j.sites[id.slice(5)];if(site&&g.level.relays[0].on)startFabrication(g,g.level.printSites.find(s=>s.id===id.slice(5)),site);return true;}
+export function journeyAction(g,id){const s=g.printer,j=s.journey;if(workshopAction(g,id))return true;if(chaseAction(g,id))return true;if(adventureAction(g,id))return true;if(id.startsWith('site-')){const site=j.sites[id.slice(5)];if(site&&g.level.relays[0].on)startFabrication(g,g.level.printSites.find(s=>s.id===id.slice(5)),site);return true;}
  if(id==='purge'){if(s.incident){j.runawaySolved=true;s.factory.jobs=[];}return true;}
  if(id==='spare'){const e=s.foes.find(e=>e.kind==='spool'&&e.room==='B2');if(e&&!e.captured){e.alive=true;e.rewardPaid=true;e.x=11480;e.origin=11480;e.baseY=462;e.y=462;e.v=60;}return true;}
  return false;}
