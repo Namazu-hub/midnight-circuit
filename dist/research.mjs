@@ -1,4 +1,4 @@
-import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.4b';
+import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.5a';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
 export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 9秒加速',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80}];
@@ -51,6 +51,6 @@ export function purchase(g,id){
  else if(id==='assist'){nearest.on=true;nearest.step=3;nearest.amount=6;nearest.repairRank=1;nearest.repairResult='応急修理';tickResearch(g);text='自動補助で装置が復旧しました';}
  return {ok:true,text};
 }
-export function drawResearch(c,g){if(!g.research||g.fever)return;drawRepairMachines(c,g);c.save();c.textAlign='center';
+export function drawResearch(c,g){if(!g.research||g.fever)return;if(!g.printer)drawRepairMachines(c,g);c.save();c.textAlign='center';
  for(const v of g.level.vendors){if(Math.abs(v.x-g.player.x)>1400)continue;c.fillStyle='#1a3447';c.fillRect(v.x-24,v.y-74,48,74);c.strokeStyle='#8ff4d0';c.lineWidth=2;c.strokeRect(v.x-24,v.y-74,48,74);c.fillStyle='#8ff4d0';c.fillRect(v.x-17,v.y-62,34,20);c.font='bold 12px sans-serif';c.fillStyle='#132d3b';c.fillText('¥ LAB',v.x,v.y-48);c.fillStyle='#ffce87';c.fillRect(v.x-14,v.y-28,28,10);c.fillStyle='#c8f4eb';c.fillText('研究支援 自販機',v.x,v.y-87);}
  for(const box of g.level.researchCaches){if(box.got)continue;const device=g.level.relays.find(r=>r.id===box.device);const on=device?.on&&(!box.requiresRank||(device.repairRank||0)>=box.requiresRank);c.globalAlpha=on?1:.35;c.fillStyle='#ffda85';c.fillRect(box.x-19,box.y-16,38,30);c.strokeStyle='#fff4bd';c.strokeRect(box.x-19,box.y-16,38,30);c.fillStyle='#553c23';c.font='bold 18px sans-serif';c.fillText('¥',box.x,box.y+5);if(!on&&box.requiresRank){c.font='11px sans-serif';c.fillStyle='#e5d6ac';c.fillText('完全修理で解錠',box.x,box.y+30);}}c.restore();}

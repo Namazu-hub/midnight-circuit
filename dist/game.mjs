@@ -1,16 +1,16 @@
-import {printerControl,printerObjective} from './printer.mjs?v=4.4b';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.4b';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.4b';
-import {createRepairUI} from './repair-ui.mjs?v=4.4b';
-import {tickResearch} from './research.mjs?v=4.4b';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.4b';
-import {bindTouchControls} from './touch-input.mjs?v=4.4b';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.4b';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.4b';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.4b';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.4b';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.4b';
-import {drawAwakening} from './awakening.mjs?v=4.4b';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.5a';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.5a';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.5a';
+import {createRepairUI} from './repair-ui.mjs?v=4.5a';
+import {tickResearch} from './research.mjs?v=4.5a';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.5a';
+import {bindTouchControls} from './touch-input.mjs?v=4.5a';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.5a';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.5a';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.5a';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.5a';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.5a';
+import {drawAwakening} from './awakening.mjs?v=4.5a';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -77,8 +77,8 @@ const audio=new Synth();
 function syncSound(){$('sound-label').textContent=progress.sound?'ON':'OFF';$('sound-btn').setAttribute('aria-label',progress.sound?'音をオフにする':'音をオンにする');$('sound-btn').setAttribute('aria-pressed',String(progress.sound));$('footer-sound').textContent=progress.sound?'♪ 音をオフ':'♪ 音をオン';audio.enabled=progress.sound;}
 function toggleSound(){progress.sound=!progress.sound;if(progress.sound)audio.init();syncSound();save();if(progress.sound)audio.sound('chip');}
 $('sound-btn').addEventListener('click',toggleSound);$('footer-sound').addEventListener('click',toggleSound);
-let arenaView=false;
-function resize(){const r=$('viewport').getBoundingClientRect();if(r.width<=0||r.height<=0)return;VIEW.w=arenaView?1200:Math.max(600,Math.round(r.width/r.height*600));canvas.width=VIEW.w;canvas.height=600;canvas.style.objectFit=arenaView?'contain':'';ctx.imageSmoothingEnabled=false;}
+let arenaView=false,printerView=false;
+function resize(){const r=$('viewport').getBoundingClientRect();if(r.width<=0||r.height<=0)return;VIEW.w=arenaView?1200:Math.min(printerView?1200:Infinity,Math.max(600,Math.round(r.width/r.height*600)));VIEW.pixelScale=Math.min(r.width/VIEW.w,r.height/600);canvas.width=VIEW.w;canvas.height=600;canvas.style.objectFit=printerView?'contain':'';ctx.imageSmoothingEnabled=false;}
 new ResizeObserver(resize).observe($('viewport'));resize();
 function toast(text,seconds=3.6){$('toast').textContent=text;$('toast').classList.add('visible');toastUntil=worldTime+seconds;}
 function renderCards(){
@@ -114,7 +114,7 @@ $('map-play').onclick=()=>startLevel(selectedStage);$('map-home').onclick=goHome
 function syncUI(){
   repairUI.overlay.hidden=mode!=='repair';$('repair-open').hidden=mode!=='playing'||!(printerControl(game)||nearbyAction(game)||nearbyRepair(game,true));$('shop-overlay').hidden=mode!=='shop';$('shop-open').hidden=mode!=='playing'||!game||!nearVendor(game);$('world-map').hidden=mode!=='map';$('home').hidden=mode!=='home';$('lever-btn').hidden=true;$('pause-overlay').hidden=mode!=='paused';$('result-overlay').hidden=mode!=='result';$('help-overlay').hidden=mode!=='help';$('gameover-overlay').hidden=mode!=='gameover';
   const inGame=!['feverIntro','feverOutro'].includes(mode)&&!!game&&mode!=='home'&&mode!=='map'&&!(mode==='help'&&['home','map'].includes(previousMode))&&!(mode==='bonus'&&bonus?.demo);
-  $('hud').hidden=!inGame||mode==='bonus';$('pulse-hud').hidden=!inGame||mode==='bonus';$('progress-track').hidden=!inGame||mode==='bonus';$('pause-btn').hidden=!['playing','feverIntro','feverOutro'].includes(mode);$('bonus-skip').hidden=mode!=='bonus';
+  $('hud').hidden=!inGame||mode==='bonus';$('pulse-hud').hidden=!inGame||mode==='bonus';$('progress-track').hidden=!inGame||mode==='bonus';$('printer-hint-btn').hidden=mode!=='playing'||!game?.printer;$('pause-btn').hidden=!['playing','feverIntro','feverOutro'].includes(mode);$('bonus-skip').hidden=mode!=='bonus';
   canvas.setAttribute('aria-label',mode==='bonus'?'パチンコ風ボーナス演出。リーチから777で修理大成功。スペースまたはレバーボタンで覚醒。':'横スクロールアクション。矢印で移動、スペースで二段ジャンプ、Xでパルス。');
   if(mode!=='playing')$('toast').classList.remove('visible');
   if(mode==='map'){$('screen-status').innerHTML='<i></i> WORLD MAP / CHOOSE A ROOM';$('bottom-message').textContent='次は、どの部屋にあかりを灯そう。';}
@@ -136,7 +136,7 @@ function goHome(){checkpointFever();clearInput();mode='home';bonus=null;particle
 function selectStages(){showMap();}
 function pause(){if(!['playing','feverIntro','feverOutro'].includes(mode))return;pauseMode=mode;checkpointFever();mode='paused';clearInput();syncUI();$('resume-btn').focus({preventScroll:true});}
 function resume(){if(!game)return;mode=pauseMode;clearInput();syncUI();canvas.focus({preventScroll:true});accumulator=0;}
-function openHelp(){if(mode==='bonus')return;previousMode=mode;mode='help';clearInput();syncUI();$('help-close').focus({preventScroll:true});}
+function openHelp(){if(mode==='playing'&&game?.printer){requestPrinterHint(game);updateHUD();return;}if(mode==='bonus')return;previousMode=mode;mode='help';clearInput();syncUI();$('help-close').focus({preventScroll:true});}
 function closeHelp(){mode=previousMode;syncUI();if(mode==='playing')canvas.focus({preventScroll:true});else $('help-btn').focus({preventScroll:true});}
 function startBonus(demo=false){mode='bonus';bonus={age:0,startedAt:performance.now(),demo,reel1:false,reel2:false,won:false,pulled:false,pullAge:null};$('bonus-skip').textContent='演出をスキップ →';clearInput();syncUI();audio.sound('bonus');$('bonus-announcement').textContent='修理チャンス。パチンコ風ボーナス演出が始まります。';}
 function pullLever(){if(!bonus||bonus.age<5.4||bonus.pulled)return;bonus.pulled=true;bonus.pullAge=bonus.age;$('lever-btn').hidden=true;audio.sound('pulse');$('bonus-announcement').textContent='レバー作動。覚醒ハイパー！';}
@@ -161,7 +161,7 @@ function showResult(){mode='result';const all=progress.completed.every(Boolean),
   $('research-result').textContent=game.research?`撃破 ${game.research.kills} · 修理 ${game.research.repairs} （完全 ${game.research.fullRepairs||0}） · 高所ボックス ${game.research.caches}`:'';
   $('next-btn').innerHTML=(final?'もう一度、夜の冒険へ':'次の部屋へ')+' <span>→</span>';syncUI();$('next-btn').focus({preventScroll:true});
 }
-function updateHUD(){if(!game)return;if(!!game.printer?.boss.active!==arenaView){arenaView=!!game.printer?.boss.active;resize();}$('repair-open').textContent=(printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=(printerObjective(game)||actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;const g=game;document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
+function updateHUD(){if(!game)return;if(!!game.printer?.boss.active!==arenaView||!!game.printer!==printerView){arenaView=!!game.printer?.boss.active;printerView=!!game.printer;resize();}$('repair-open').textContent=(printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=(printerObjective(game)||actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;const g=game;document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
   const active=g.pulse>0,ready=g.cooldown<=0;$('pulse-status').textContent=active?'ACTIVE':ready?'READY':`${g.cooldown.toFixed(1)}s`;$('pulse-fill').style.width=(active?g.pulse/(g.fever?.pulseDuration||RULES.pulse):ready?1:1-g.cooldown/(g.fever?.attackCooldown||RULES.cooldown))*100+'%';$('pulse-fill').style.background=active?'#c7ffe8':ready?'#75efce':'#698c9e';$('progress-fill').style.width=g.progress*100+'%';
 }
 function burst(x,y,color,count=14){if(progress.reduced)count=Math.min(count,5);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=30+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,size:2+Math.random()*3,color,life:.4+Math.random()*.45,max:.85});}}
@@ -172,7 +172,7 @@ function processEvents(){
     if(e.type==='repairOpen'){openRepair();}
     if(e.type==='actionStep'){burst(e.x,e.y,'#8affe0',18);audio.sound('relay');toast(e.text,4);}
     if(e.type==='repairComplete'){repairNotice=e.text;burst(e.x,e.y,'#ffd87a',35);audio.sound('relay');toast(e.text,6);}
-    if(e.type==='researchRepair'){repairNotice??=e.text;burst(e.x,e.y,'#80ffd0',30);toast(e.text,5);}
+    if(e.type==='researchRepair'&&!game.printer){repairNotice??=e.text;burst(e.x,e.y,'#80ffd0',30);toast(e.text,5);}
     if(e.type==='funds'&&e.text!=='科研費 +¥5')toast(e.text,2);
     if(e.type==='hurt')burst(e.x,e.y,'#ff787d',8);
     if(e.type==='feverKill')burst(e.x,e.y,'#ffe195',progress.reduced?5:22);
@@ -190,7 +190,7 @@ function processEvents(){
     if(e.type==='lifeLost'){progress.runLives=game.lives;save();toast(`残機 ${game.lives}。もう一度、挑戦！`,3);}
     if(e.type==='gameOver'){progress.runLives=0;save();mode='gameover';clearInput();syncUI();$('restart-run').focus({preventScroll:true});}
     if(e.type==='docked')toast('終点です！ 右へ進んで修理装置にタッチ。',5);
-    if(e.type==='repairStep')toast(e.text,2);
+    if(e.type==='repairStep'&&!game.printer)toast(e.text,2);
     if(e.type==='locked')toast(game.level.boss&&!game.level.boss.repaired?'暴走ロボを止め、近くでXで再起動しよう！':'未修理の装置がある。高所の制御盤も確認しよう！',4.5);
     if(e.type==='finish')finish();
   }game.events=[];if(repairNotice)toast(repairNotice,6);
@@ -223,7 +223,7 @@ $('restart-run').onclick=()=>{const {sound,reduced,best}=progress;progress={...b
 $('start-btn').addEventListener('click',()=>{if(progress.runLives<=0){mode='gameover';syncUI();return;}if(progress.pending){resumePendingFever();return;}const i=progress.completed.findIndex(x=>!x);selectedStage=i<0?0:i;showMap();});
 $('select-btn').addEventListener('click',selectStages);$('pause-btn').addEventListener('click',pause);$('resume-btn').addEventListener('click',resume);$('retry-btn').addEventListener('click',()=>{if(game.fever){const demo=feverDemo;beginFever(demo);checkpointFever();}else{respawn(game);processEvents();if(!game.gameOver)resume();}});
 $('home-btn').addEventListener('click',goHome);$('brand').addEventListener('click',e=>{e.preventDefault();goHome();});$('next-btn').addEventListener('click',()=>{selectedStage=(game.index+1)%LEVELS.length;showMap();});$('result-home-btn').addEventListener('click',selectStages);
-$('help-btn').addEventListener('click',openHelp);$('help-close').addEventListener('click',closeHelp);$('help-ok').addEventListener('click',closeHelp);
+$('printer-hint-btn').addEventListener('click',openHelp);$('help-btn').addEventListener('click',openHelp);$('help-close').addEventListener('click',closeHelp);$('help-ok').addEventListener('click',closeHelp);
 $('fullscreen-btn').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('game-shell').requestFullscreen();}catch{toast('このブラウザでは全画面表示に対応していません。');}});
 $('demo-btn').addEventListener('click',()=>{if(progress.sound)audio.init();startBonus(true);$('game-shell').scrollIntoView({block:'center',behavior:'smooth'});});
 $('bonus-skip').addEventListener('click',endBonus);canvas.addEventListener('pointerdown',()=>{if(mode==='bonus'&&bonus.age>=5.4&&!bonus.pulled)pullLever();else if(mode==='playing')canvas.focus({preventScroll:true});});

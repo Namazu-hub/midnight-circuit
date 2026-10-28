@@ -1,3 +1,4 @@
+import {expandPrinter} from './printer-expansion.mjs?v=4.5a';
 // FDM-inspired fictional machine. Stage index and save identity remain unchanged.
 export function redesignPrinter(L){
  const students=L.students;
@@ -39,4 +40,5 @@ export function redesignPrinter(L){
  L.goal={x:6810,y:510};L.route=[{x:6800,y:510}];
  students.forEach((s,i)=>{s.x=i?3940:190;s.y=510;s.lines=s.lines.map(line=>line==='青く冷えた造形床に乗ろう。X でも固定できる。'?'ファンを2基起動して、安全インターロックを操作しよう。':line==='ノズルは黄色で予告、赤で加熱！'?'プリントヘッドが赤く光ったら、樹脂が落ちてくる！':line==='足場の表示で、冷却までの時間が分かるよ。'?'冷却を復旧すれば、ぐらつく造形足場が安定するよ。':line);});students[0].lines.push('ロールを右の重量プレートへ誘導！ 倒したら棚の重りを運ぼう。','Cか画面ボタンで装置操作。パルスは戦闘に使おう。');
  L.tip='ロールを重量プレートへ誘導。高所のギアを運び、C／操作で設備を復旧。最後はプリンターでドラゴンを拘束しよう。';L.mechanic='材料供給 → 押出 → 積層 → 冷却 → DRAGON-01';
+ expandPrinter(L);
 }
