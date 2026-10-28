@@ -1,7 +1,4 @@
 // v4.7 stage-local additions. All state is shared across the existing room graph.
-import {overlap,clamp} from './world.mjs?v=4.7a';
-import {grant} from './research.mjs?v=4.7a';
-import {killPrinterFoe} from './printer-enemies.mjs?v=4.7a';
 export function extendAdventure(L){
  const pad=(x,y,w,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',...extra});
  // Replace the repetitive C2 service shelves with three physical fabrication spans.
@@ -26,8 +23,7 @@ export function extendAdventure(L){
  L.printerControls.push({id:'sprint',x:7460,y:480,label:'試走ゲート'});
  pad(7990,150,70,{h:360,sprintGate:true});L.sprintRoute={start:7460,end:8020,seconds:1.65};
  L.chips.push(...Array.from({length:12},(_,i)=>({x:8080+i*24,y:475,sprintReward:true})));
- L.gears.push({x:8310,y:475,extraDesign:true}); // separate optional data; the 3 legacy parts remain intact.
- L.gears.pop();L.chips.push({x:8310,y:475,sprintReward:true});
+ L.chips.push({x:8310,y:475,sprintReward:true});
  // Dawn is now an ordinary, controllable room. The old cutscene never emits finish.
  L.width=20100;L.rooms.push({id:'H',left:18800,right:20100,minY:0,maxY:0,name:'夜明けの研究室'});
  pad(18800,510,1300,{h:220,type:'ground'});

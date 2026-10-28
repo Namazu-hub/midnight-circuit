@@ -1,0 +1,8 @@
+{"stage":1,"finish":true,"elapsed":30.891666666665554,"deaths":0,"wp":18,"position":[8197.09375000039,376.8944444444445],"relays":[true,true,true,false],"maxY":-177.83055555555558}
+{"stage":2,"finish":true,"elapsed":31.95833333333216,"deaths":0,"wp":12,"position":[7612.930555555894,-690],"relays":[true],"maxY":-1037.8305555555553}
+{"stage":3,"finish":true,"elapsed":43.74999999999816,"deaths":0,"wp":12,"position":[9332.673611111111,453],"relays":[false],"maxY":0}
+{"stage":4,"finish":true,"elapsed":183.999999999997,"deaths":0,"position":[19882.25000000049,470],"relays":[true,true,true,true],"maxY":-100}
+{"stage":5,"finish":true,"elapsed":19.08333333333289,"deaths":0,"wp":16,"position":[2558.3020833333367,-1308.1361111111112],"relays":[true,true,true,false],"maxY":-1417.8305555555555}
+{"stage":6,"finish":true,"elapsed":34.95833333333199,"deaths":0,"wp":18,"position":[8458.520833333734,376.8944444444445],"relays":[true,false],"maxY":-177.83055555555558}
+{"stage":7,"finish":true,"elapsed":40.37499999999835,"deaths":0,"wp":17,"position":[7702.6909722225355,470],"relays":[true],"maxY":-621.5072081761791}
+{"stage":8,"finish":true,"elapsed":57.91666666666402,"deaths":0,"wp":8,"position":[8011.826388889065,-430],"relays":[true,true,true,false],"maxY":-1227.8305555555555}
