@@ -1,8 +1,10 @@
+import {traversePCB} from './pcb-route.mjs';
 import {traversePrinter} from './printer-route.mjs';
 import {solveSession} from './repair-inputs.mjs';
 import {createGame,updateGame,platformSolid} from '../dist/engine.mjs';
 export function traverse(index,{limit=180,trace=false}={}){
  if(index===3)return traversePrinter();
+ if(index===5)return traversePCB();
  const g=createGame(index);let wp=0,maxY=0,oldDeaths=0,stuck=0,lastWP=0;
  for(let f=0;f<120*limit&&!g.finished;f++){
   if(g.repairSession)solveSession(g);

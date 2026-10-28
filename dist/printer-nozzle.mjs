@@ -1,4 +1,4 @@
-import {grant} from './research.mjs?v=4.9a';
+import {grant} from './research.mjs?v=4.9b';
 export function extendNozzle(L){L.printerControls.push({id:'motor',x:1350,y:480,label:'供給モーター 正転・停止・逆転'},{id:'heater',x:1550,y:480,label:'ノズル温調'},{id:'pull',x:1700,y:480,label:'詰まりをつかむ'});}
 export function initNozzle(g){g.printer.nozzle={motor:0,heat:false,temp:20,pulling:false,amount:0,done:false};}
 export function nozzleAction(g,id){const n=g.printer.nozzle;if(id==='motor'){n.motor=n.motor===0?1:n.motor===1?-1:0;return true;}if(id==='heater'){n.heat=!n.heat;return true;}if(id==='pull'){if(n.motor===-1&&n.temp>=50&&n.temp<=70&&!n.done)n.pulling=true;return true;}return false;}

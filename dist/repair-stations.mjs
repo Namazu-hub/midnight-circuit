@@ -1,10 +1,10 @@
-import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.9a';
-import {REPAIR_NAMES} from './repairs.mjs?v=4.9a';
+import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.9b';
+import {REPAIR_NAMES} from './repairs.mjs?v=4.9b';
 
 // Incremental integration with the existing eight courses. Room order is kept
 // compatible with old saves; a full five-section redesign is a separate change.
 export function setupRepairStations(g){
- const L=g.level;if(L.printer)return;
+ const L=g.level;if(L.printer)return;if(L.pcb){L.relays.push({id:'pcb-calibration',x:1440,y:480,on:false,optional:true,mode:'joints',puzzleType:'joints',difficulty:3,repairRank:0,effect:'press',effectText:'保守プレスを校正',label:REPAIR_NAMES.joints,repairResult:'故障',bonusPaid:false});return;}
  for(const r of L.relays){
   if(r.mode==='sequence')r.puzzleType='wiring';
   if(r.mode==='titration')r.puzzleType='titration';

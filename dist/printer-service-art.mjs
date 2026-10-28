@@ -1,8 +1,8 @@
-import {dragonPose} from './dragon.mjs?v=4.9a';
-import {drawTethers} from './tether.mjs?v=4.9a';
-import {drawNozzle} from './printer-nozzle.mjs?v=4.9a';
-import {drawBenchy} from './printer-enemies.mjs?v=4.9a';
-import {drawCore} from './core-art.mjs?v=4.9a';
+import {dragonPose} from './dragon.mjs?v=4.9b';
+import {drawTethers} from './tether.mjs?v=4.9b';
+import {drawNozzle} from './printer-nozzle.mjs?v=4.9b';
+import {drawBenchy} from './printer-enemies.mjs?v=4.9b';
+import {drawCore} from './core-art.mjs?v=4.9b';
 export function drawService(c,g){const s=g.printer;if(!s?.peeling)return;drawTethers(c,g);drawNozzle(c,g);c.save();if(g.rooms.active==='D2'){c.save();c.translate(18150,85);c.rotate((s.fanDirection||0)*Math.PI/2);c.strokeStyle='#bde5df';c.lineWidth=6;c.strokeRect(-35,-35,70,70);c.fillStyle='#98d7d0';c.beginPath();c.moveTo(0,-25);c.lineTo(18,15);c.lineTo(-18,15);c.fill();c.restore();}for(const t of g.level.peelTargets){if(t.room!==g.rooms.active)continue;const state=s.peeling.targets[t.id];if(state.done&&state.age>.7)continue;c.save();const u=state.done?Math.min(1,state.age/.7):0;c.translate(t.x,t.y-u*70);c.rotate(u*.45);if(t.id==='benchy')drawBenchy(c,0,0,t.w,g.time);else{c.strokeStyle='#c8acbb';c.lineWidth=10;for(let i=0;i<4;i++){c.beginPath();c.moveTo(i*30,85);c.lineTo(i*30,0);c.lineTo(i*30+20,25);c.stroke();}}c.fillStyle='#e2cba4';c.fillRect(0,t.h-5,t.w,5);c.restore();}
  for(const d of s.peeling.drops){if(d.room!==g.rooms.active)continue;c.fillStyle='#bcd8dc';c.fillRect(d.x-17,d.y+3,34,7);c.fillStyle='#aa849e';c.fillRect(d.x-3,d.y-17,7,23);c.strokeStyle='#b6efcb';c.strokeRect(d.x-24,d.y-25,48,43);c.fillStyle='#f5e4bc';c.font='12px monospace';c.textAlign='center';c.fillText(g.touchInput?'ACTION':'C / F',d.x,d.y-32);}
  const b=s.boss;if(b.story&&!b.infected&&s.peeling.targets.support.done){const u=Math.min(1,(b.infection||0)/3);const n=dragonPose(b)[5];drawCore(c,6550+(n.x-6550)*u,90+(n.y-90)*u,g.time);c.strokeStyle='#ed8cff';c.lineWidth=3;const nodes=dragonPose(b);for(let i=13;i>=Math.max(0,14-Math.floor(u*14));i--){const n=nodes[i];c.strokeRect(n.x-n.r*.65,n.y-n.r*.4,n.r*1.3,n.r*.8);}}

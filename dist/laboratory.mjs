@@ -1,4 +1,4 @@
-import {overlap,clamp} from './world.mjs?v=4.9a';
+import {overlap,clamp} from './world.mjs?v=4.9b';
 export const LAB_RULES={repairCooldown:.65,bossHP:6,bossImmunity:1.1,magnetCooldown:3,stickyDuration:12};
 export function expandRooms(rooms){
  const kinds=[['spring','coil'],['mouse-hop','silicone-a','silicone-b'],[],['silicone-a','silicone-b','coil'],['spring','mouse-erratic'],['mouse-dash','coil'],['coil','mouse-chase'],['mouse-chase','spring']];

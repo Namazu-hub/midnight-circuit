@@ -1,5 +1,5 @@
-import {TOOLS,equipTool,EQUIPMENT} from './equipment.mjs?v=4.9a';
-import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.9a';
+import {TOOLS,equipTool,EQUIPMENT} from './equipment.mjs?v=4.9b';
+import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.9b';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
 export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 1本（Bで飲む）',cost:35},{id:'battery',name:'予備バッテリー · 残機 +1',cost:100},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80},...TOOLS];
@@ -10,7 +10,7 @@ export function setupResearch(g){
  g.level.researchCaches=[];
  for(const [i,r] of g.level.relays.entries()){
   r.id??=`device-${g.index}-${i}`;r.rewardPaid=false;r.repairResult??=r.on?'restored':'broken';r.researchLink=[];
-  if(g.level.printer||g.level.cart||r.portal||!r.mode)continue;
+  if(g.level.pcb&&!r.puzzleType||g.level.printer||g.level.cart||r.portal||!r.mode)continue;
   // One-way service stairs are optional; they never gate the existing main route.
   for(let k=0;k<3;k++){
    const x=Math.max(10,Math.min(g.level.width-170,r.x-350+k*95)),y=r.y-45-k*65;

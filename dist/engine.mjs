@@ -1,19 +1,20 @@
-import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9a';
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9a';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9a';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.9a';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9a';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.9a';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9a';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9a';
-import {setupRepairStations} from './repair-stations.mjs?v=4.9a';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9a';
-import {setupResearch,tickResearch} from './research.mjs?v=4.9a';
-import {tickLab} from './laboratory.mjs?v=4.9a';
-import {LEVELS} from './levels.mjs?v=4.9a';
-import {clamp,overlap,approach} from './world.mjs?v=4.9a';
-import {tickEnemies} from './enemies.mjs?v=4.9a';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9a';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9b';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9b';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9b';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9b';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.9b';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9b';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.9b';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9b';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9b';
+import {setupRepairStations} from './repair-stations.mjs?v=4.9b';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9b';
+import {setupResearch,tickResearch} from './research.mjs?v=4.9b';
+import {tickLab} from './laboratory.mjs?v=4.9b';
+import {LEVELS} from './levels.mjs?v=4.9b';
+import {clamp,overlap,approach} from './world.mjs?v=4.9b';
+import {tickEnemies} from './enemies.mjs?v=4.9b';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9b';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -23,12 +24,12 @@ export function createGame(index=0,customLevel=null){
  level.platforms.forEach((a,i)=>Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0}));
  level.enemies.forEach(e=>{e.baseX=e.x;});
  const g={level,index,player:{...level.spawn,w:28,h:40,vx:0,vy:0,hp:6,displayHP:6,hurtTimer:0,hurtFrom:6,hurtTo:6,boost:0,face:1,onGround:false,standing:null,coyote:0,jumps:0,buffer:0,invul:0,walk:0},time:0,elapsed:0,pulse:0,cooldown:0,camera:0,cameraY:0,checkpoint:false,respawn:{...level.spawn},chips:0,gears:0,deaths:0,lives:3,gameOver:false,finished:false,events:[],projectiles:[],shake:0,warp:0,progress:0,spawnGrace:1,cartCheckpoint:160};
- if(level.theme!=='fever'){setupEquipment(g);setupRepairStations(g);setupResearch(g);setupPrinter(g);setupRooms(g);setupTethers(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
+ if(level.theme!=='fever'){setupEquipment(g);setupRepairStations(g);setupResearch(g);setupPrinter(g);setupRooms(g);setupTethers(g);setupPCB(g);level.platforms.forEach((a,i)=>{if(a.id===undefined)Object.assign(a,{id:i,baseX:a.x,baseY:a.y,clock:0,dx:0,dy:0,crumble:0,missing:0});});}
  if(level.cart)resetRail(g);return g;
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
- resetTethers(g);resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
+ resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
  if(g.equipment){g.equipment.strike=null;g.equipment.shots=[];g.equipment.cooldown=0;}
@@ -51,6 +52,7 @@ export function laserPhase(g,l){return (g.time+(l.phase||0))%3.8;}
 export function laserActive(g,l){const phase=laserPhase(g,l);return !g.level.relays.some(r=>r.mode==='timing'&&r.on)&&g.pulse<=0&&phase>=.65&&phase<2.2;}
 export function printedPhase(a){return (a.clock+(a.phase||0))%(a.period||4.8);}
 export function platformSolid(g,a){
+ if(g.pcb){const solid=pcbSolid(g,a);if(solid!==null)return solid;}
  if(g.printer){const solid=printerSolid(g,a);if(solid!==null)return solid;}
  if(a.actionDevice)return actionPlatformSolid(g,a);
  if(a.requiresRepair){const r=g.level.relays.find(r=>r.id===a.group);return !!r?.on&&(!a.requiresRank||(r.repairRank||0)>=a.requiresRank);}
@@ -69,7 +71,7 @@ export function pressState(g,h){
 function updateMachinery(g,dt){
  const p=g.player,frozen=g.pulse>0;
  for(const a of g.level.platforms){
-  if(a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
+  if(a.pcbManaged||a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
   if((a.type==='moving'||a.type==='wave')&&!frozen&&powered){const v=Math.sin(a.clock/a.period*Math.PI*2+(a.phase||0))*a.range;a.x=a.baseX+(a.axis==='x'?v:0);a.y=a.baseY+(a.axis==='y'?v:0);}
   if(a.type==='orbit'&&!frozen&&powered){a.x=a.baseX+Math.cos(a.clock/a.period*Math.PI*2)*a.range;a.y=a.baseY+Math.sin(a.clock/a.period*Math.PI*2)*a.range;}
   if(a.type==='leaf'&&!frozen){if(a.missing>0){a.missing=Math.max(0,a.missing-dt);if(a.missing===0)a.crumble=0;}else if(a.crumble>0){a.crumble+=dt;if(a.crumble>.8){a.missing=3.2;a.crumble=0;}}}
@@ -121,12 +123,12 @@ function simulateGame(g,input={},dt=1/120){
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
- if(g.printer)movePrinterFoes(g,dt);updateMachinery(g,dt);p.oldBottom=p.y+p.h;
+ if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);
  if(!g.printer)tickLab(g,input,activated,dt,damage);
- tickPrinter(g,input,activated,dt,damage);
+ tickPrinter(g,input,activated,dt,damage);tickPCB(g,input,activated,dt,damage);
  if(g.cart)for(const e of g.level.enemies)if(e.alive&&overlap({x:g.cart.x-g.cart.w/2,y:g.cart.y-32,w:g.cart.w,h:60},e)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  for(const e of g.level.enemies){if(!e.alive||!overlap(p,e))continue;if(g.fever){e.alive=false;emit(g,'feverKill',{x:e.x+16,y:e.y+14});continue;}
   if(p.vy>50&&p.oldBottom<=e.y+14&&(e.state!=='discharge'||g.pulse>0)){e.alive=false;if(g.cart){g.cart.vy=-360;g.cart.onRail=false;}else{p.vy=-440;p.jumps=1;}emit(g,'stomp',{x:e.x+16,y:e.y+14});}

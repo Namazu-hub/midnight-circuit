@@ -1,6 +1,6 @@
-import {drawCore} from './core-art.mjs?v=4.9a';
-import {drawAdventure} from './printer-adventure-art.mjs?v=4.9a';
-import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.9a';
+import {drawCore} from './core-art.mjs?v=4.9b';
+import {drawAdventure} from './printer-adventure-art.mjs?v=4.9b';
+import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.9b';
 const line=(c,x,y,xx,yy,color,w=3)=>{c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 function screen(c,x,y,text,small=''){c.fillStyle='#102033';c.fillRect(x,y,240,75);c.strokeStyle='#77a4b2';c.lineWidth=3;c.strokeRect(x,y,240,75);c.fillStyle='#b7e9dc';c.font='bold 15px monospace';c.textAlign='left';c.fillText(text,x+12,y+26);c.fillStyle='#edbd90';c.font='12px sans-serif';c.fillText(small,x+12,y+53);}
 function nozzle(c,x,y){c.fillStyle='#adcccb';c.fillRect(x-28,y-30,56,25);c.fillStyle='#18384b';c.fillRect(x-18,y-24,36,9);c.fillStyle='#ecc291';c.beginPath();c.moveTo(x-12,y-5);c.lineTo(x+12,y-5);c.lineTo(x,y+12);c.fill();}

@@ -1,12 +1,13 @@
-import {drawEquipment} from './equipment-art.mjs?v=4.9a';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9a';
-import {poseScale} from './feel.mjs?v=4.9a';
-import {currentRoom} from './rooms.mjs?v=4.9a';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9a';
-import {drawResearch} from './research.mjs?v=4.9a';
-import {drawPrinter} from './printer-art.mjs?v=4.9a';
-import {drawLab} from './laboratory.mjs?v=4.9a';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9a';
+import {drawPCB,drawPCBOverlay} from './pcb-art.mjs?v=4.9b';
+import {drawEquipment} from './equipment-art.mjs?v=4.9b';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9b';
+import {poseScale} from './feel.mjs?v=4.9b';
+import {currentRoom} from './rooms.mjs?v=4.9b';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9b';
+import {drawResearch} from './research.mjs?v=4.9b';
+import {drawPrinter} from './printer-art.mjs?v=4.9b';
+import {drawLab} from './laboratory.mjs?v=4.9b';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9b';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -106,7 +107,7 @@ function background(c,theme,camera,t,width=VIEW.w,height=VIEW.h){
   for(let i=0;i<15;i++){const x=((i*179-camera*.12)%width+width)%width,y=90+(i*89)%390+Math.sin(t*.5+i)*8;rect(c,x,y,2,2,P.glow+'30');}
 }
 function platform(c,p,P,pulse,t,g=null){
-  const x=p.x,y=p.y,w=p.w;if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
+  const x=p.x,y=p.y,w=p.w;if(g?.pcb&&p.pcbManaged&&!platformSolid(g,p)){c.save();c.strokeStyle='#86afac66';c.setLineDash([5,7]);c.strokeRect(x,y,w,18);c.restore();return;}if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
   if(p.type==='ghost'){
     c.save();if(g?!platformSolid(g,p):pulse<=0){c.globalAlpha=.45;c.setLineDash([7,6]);c.strokeStyle=P.glow;c.lineWidth=2;c.strokeRect(x+1,y+1,w-2,18);c.setLineDash([]);for(let j=12;j<w;j+=22)rect(c,x+j,y+8,3,3,P.glow);c.restore();return;}
     glow(c,x+w/2,y,100,P.glow+'20');rect(c,x,y,w,20,'#418d89');rect(c,x,y,w,4,'#b3fff0');for(let j=10;j<w;j+=20)rect(c,x+j,y+8,4,4,'#9bffe2');c.restore();return;
@@ -176,12 +177,12 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const p of g.level.platforms){if(p.h<60||p.w<350)continue;const x=p.x+p.w-65;if(x<g.camera-100||x>g.camera+VIEW.w+100)continue;
     if(g.level.theme==='garden')plant(c,x,p.y,1.1,'#9ac77a');else{rect(c,x-13,p.y-34,35,34,'#354b5c');rect(c,x-10,p.y-31,29,4,P.edge);rect(c,x-8,p.y-21,8,11,P.glow+'88');rect(c,x+5,p.y-21,10,2,'#748f9b');rect(c,x+5,p.y-16,8,2,'#748f9b');}}
   for(const s of g.level.students){if(g.rooms&&s.room!==g.rooms.active)continue;student(c,s.x,s.y,s.color,t,1);const close=Math.hypot(g.player.x-s.x,g.player.y+40-s.y)<200;rect(c,s.x+18,s.y-87,3,7,g.level.color);rect(c,s.x+18,s.y-77,3,3,g.level.color);
-    if(g.printer){drawPrinterStudentWork(c,g,s);continue;}if(close){const original=s.lines[Math.floor(t/7)%s.lines.length],text=g.touchInput?original.replace(/Xで/g,'PULSEで').replace(/Cか画面ボタン|Cで/g,'ACTIONで'):original,small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
+    if(g.printer){drawPrinterStudentWork(c,g,s);continue;}if(close){const lines=g.pcb&&s.after&&g.level.relays.find(r=>r.id===({A:'power',B:'paste',C:'placement',D:'magnet',E:'reflow',F:'aoi',G:'restored'})[s.room])?.on?s.after:s.lines,original=lines[Math.floor(t/7)%lines.length],text=g.touchInput?original.replace(/Xで/g,'PULSEで').replace(/Cか画面ボタン|Cで/g,'ACTIONで'):original,small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
       round(c,left,top,w,h,6,'#101f32ee');c.strokeStyle=g.level.color+'70';c.lineWidth=1;c.strokeRect(left+.5,top+.5,w,h);c.fillStyle=g.level.color;c.font=`${nameFont}px "Segoe UI",sans-serif`;c.fillText(s.name,left+13,top+(small?28:19));c.fillStyle='#e0ecef';c.font=`${bodyFont}px "Segoe UI",sans-serif`;c.fillText(text,left+13,top+(small?65:44));line(c,s.x+15,top+h,s.x+15,s.y-100,g.level.color+'77');}}
   for(const sign of g.level.signs){if(Math.abs(g.player.x-sign.x)>310||g.level.students.some(s=>Math.abs(g.player.x-s.x)<185&&Math.abs(s.x-sign.x)<240&&sign.y>310&&sign.y<410))continue;c.save();c.globalAlpha=.8;c.font='11px "Segoe UI",sans-serif';const w=c.measureText(sign.text).width+20;round(c,sign.x-w/2,sign.y-13,w,26,4,'#0d1c2bbc');c.fillStyle='#b6ced6';c.textAlign='center';c.fillText(sign.text,sign.x,sign.y+4);c.textAlign='left';c.restore();}
   for(const coin of g.level.chips){if(coin.got||coin.x<g.camera-30||coin.x>g.camera+VIEW.w+30)continue;const yy=coin.y+Math.sin(t*3+coin.x)*3;glow(c,coin.x,yy,18,'#f8d98a10');const ww=4+Math.abs(Math.sin(t*2+coin.x*.01))*3;rect(c,coin.x-ww,yy-7,ww*2,14,'#d0a75e');rect(c,coin.x-ww+2,yy-6,ww*2-3,10,'#ffe3a2');rect(c,coin.x-1,yy-4,2,6,'#fff2ca');}
   for(const item of g.level.gears){if(item.got)continue;glow(c,item.x,item.y,34,'#75efce22');gear(c,item.x,item.y+Math.sin(t*2)*4,t);star(c,item.x+19,item.y-17,2,'#c8ffe5');}
-  for(const r of g.level.relays){if(r.portal||g.printer)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
+  for(const r of g.level.relays){if(r.portal||g.printer||g.pcb)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
   for(const cp of g.level.checkpoints)checkpoint(c,cp,cp.active,t);goal(c,g,t);
   for(const e of g.level.enemies){if(!e.alive||e.x<g.camera-60||e.x>g.camera+VIEW.w+60)continue;
     const x=e.x,y=e.y,freeze=g.pulse>0,col=freeze?'#76eacf':e.kind==='capacitor'?'#a4b5fc':e.kind==='beaker'?'#f19ea6':'#d5b486';
@@ -206,7 +207,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   }
   for(const d of g.level.drinks){if(d.got)continue;const yy=d.y+Math.sin(t*3)*3;glow(c,d.x,yy,36,'#aaff4328');rect(c,d.x-10,yy-18,20,35,'#0a171e');rect(c,d.x-9,yy-20,18,3,'#b7c5bd');rect(c,d.x-9,yy+16,18,3,'#809e8c');c.font='bold 18px monospace';c.fillStyle='#b0ff63';c.textAlign='center';c.fillText('M',d.x,yy+5);c.font='7px monospace';c.fillText('ENA',d.x,yy+13);c.textAlign='left';}
   for(const l of g.level.lasers){if(l.nozzle){rect(c,l.x-25,l.y-52,62,38,'#dde5e4');rect(c,l.x-15,l.y-46,40,19,'#263f52');rect(c,l.x-5,l.y-27,22,20,'#bf875b');line(c,l.baseX-85,l.y-55,l.baseX+110,l.y-55,'#819ba5',7);}rect(c,l.x-8,l.y-11,28,12,'#706276');rect(c,l.x-8,l.y+l.h-1,28,10,'#706276');if(laserActive(g,l)){glow(c,l.x+6,l.y+l.h/2,100,'#ff665a12');rect(c,l.x-5,l.y,22,l.h,'#ff646026');rect(c,l.x+2,l.y,8,l.h,'#ff8676');rect(c,l.x+5,l.y,2,l.h,'#ffdbbc');}else{const warning=g.pulse<=0&&laserPhase(g,l)<.65;for(let y=l.y;y<l.y+l.h;y+=16)rect(c,l.x+5,y,warning?4:2,5,warning?'#ffd88caa':'#90edc740');if(warning){c.font='bold 18px monospace';c.fillStyle='#ffd88c';c.fillText('!',l.x-5,l.y-20);}}}
-  drawLab(c,g);drawResearch(c,g);drawPrinter(c,g);
+  if(!g.pcb)drawLab(c,g);drawResearch(c,g);drawPrinter(c,g);drawPCB(c,g);
   const p=g.player;
   if(p.boost>0){
     for(let i=reduced?1:6;i>0;i--){c.save();c.globalAlpha=.07+(6-i)*.025;c.filter=`hue-rotate(${(t*95+i*45)%360}deg)`;robot(c,p.x-3-p.face*i*9,p.y-3,2,p.walk*.018,true,p.face,!p.onGround);c.restore();}
@@ -228,7 +229,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   if(g.printer){const speaker=g.level.students.filter(s=>s.room===g.rooms.active&&s.chat?.visible).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];if(speaker)drawPrinterChat(c,g,speaker,VIEW.w,VIEW.pixelScale||1);}
   c.restore();if(g.pulse>0){c.strokeStyle='#75efce33';c.lineWidth=7;c.strokeRect(3,3,VIEW.w-6,VIEW.h-6);}
   if(g.warp>0){c.fillStyle=`rgba(171,142,235,${g.warp*.25})`;c.fillRect(0,0,VIEW.w,VIEW.h);}
-  const shade=c.createLinearGradient(0,0,0,100);shade.addColorStop(0,'#07112265');shade.addColorStop(1,'transparent');c.fillStyle=shade;c.fillRect(0,0,VIEW.w,100);drawPrinterOverlay(c,g,VIEW.w,VIEW.h);
+  const shade=c.createLinearGradient(0,0,0,100);shade.addColorStop(0,'#07112265');shade.addColorStop(1,'transparent');c.fillStyle=shade;c.fillRect(0,0,VIEW.w,100);drawPrinterOverlay(c,g,VIEW.w,VIEW.h);drawPCBOverlay(c,g,VIEW.w,VIEW.h);
 }
 export function drawHome(c,t){
   background(c,'bench',0,t);glow(c,883,240,300,'#72cfaa14');

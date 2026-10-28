@@ -1,7 +1,7 @@
-import {PRINT_COST} from './fabrication.mjs?v=4.9a';
-import {coreReady} from './printer-defense.mjs?v=4.9a';
-import {drawDragon} from './dragon.mjs?v=4.9a';
-import {CHASE} from './printer-chase.mjs?v=4.9a';
+import {PRINT_COST} from './fabrication.mjs?v=4.9b';
+import {coreReady} from './printer-defense.mjs?v=4.9b';
+import {drawDragon} from './dragon.mjs?v=4.9b';
+import {CHASE} from './printer-chase.mjs?v=4.9b';
 const line=(c,x,y,xx,yy,col,w=3)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 export function drawAdventure(c,g){if(!g.printer)return;const v=g.printer.adventure,r=g.rooms.active,j=g.printer.journey;c.save();
  if(r==='A2')drawChase(c,g);
@@ -22,7 +22,7 @@ function drawChase(c,g){const s=g.printer.chase,t=g.time,r=CHASE.radius,x=s.x,y=
  if(s.impact>0){c.strokeStyle='#ffe9b2';c.lineWidth=4;c.beginPath();c.arc(s.x,s.y,r+8+(1-s.impact/.5)*25,0,7);c.stroke();}
  c.fillStyle='#e9c798';c.font='bold 15px monospace';c.textAlign='center';c.fillText(s.done?'MATERIAL ONLINE':'3 kg · SILK PLA',CHASE.holder,110);
 }
-export function drawDawnRoom(c,g){if(g.rooms?.active!=='H')return;const x=18800;c.save();c.fillStyle='#7f8c9b';c.fillRect(x,0,1300,510);const sky=c.createLinearGradient(0,60,0,320);sky.addColorStop(0,'#a4b3ca');sky.addColorStop(1,'#f5d1aa');c.fillStyle=sky;c.fillRect(x+480,70,640,255);for(let i=0;i<4;i++)line(c,x+480+i*210,70,x+480+i*210,325,'#4a6072',10);line(c,x+480,200,x+1120,200,'#4a6072',8);c.fillStyle='#e8d0a622';c.beginPath();c.moveTo(x+500,325);c.lineTo(x+1100,325);c.lineTo(x+1290,510);c.lineTo(x+330,510);c.fill();
+export function drawDawnRoom(c,g){if(!g.printer)return;if(g.rooms?.active!=='H')return;const x=18800;c.save();c.fillStyle='#7f8c9b';c.fillRect(x,0,1300,510);const sky=c.createLinearGradient(0,60,0,320);sky.addColorStop(0,'#a4b3ca');sky.addColorStop(1,'#f5d1aa');c.fillStyle=sky;c.fillRect(x+480,70,640,255);for(let i=0;i<4;i++)line(c,x+480+i*210,70,x+480+i*210,325,'#4a6072',10);line(c,x+480,200,x+1120,200,'#4a6072',8);c.fillStyle='#e8d0a622';c.beginPath();c.moveTo(x+500,325);c.lineTo(x+1100,325);c.lineTo(x+1290,510);c.lineTo(x+330,510);c.fill();
  c.fillStyle='#3b5364';c.fillRect(x+550,430,560,14);c.fillRect(x+565,444,10,66);c.fillRect(x+1080,444,10,66);c.fillStyle='#2b4454';c.fillRect(x+560,350,75,60);c.fillStyle='#a7c3bd';c.fillRect(x+567,356,60,45);c.fillStyle='#c1b997';c.fillRect(x+635,410,90,12);
  // A small printer, real tools and a finished articulated toy on the same desk.
  for(const xx of [x+940,x+1050])line(c,xx,310,xx,430,'#435c72',7);line(c,x+940,310,x+1050,310,'#435c72',7);line(c,x+930,423,x+1060,423,'#77999e',7);c.fillStyle='#d1b58e';c.fillRect(x+990,330,25,20);c.fillRect(x+690,414,28,6);c.fillRect(x+725,405,8,18);c.fillStyle='#b7a2cb';c.fillRect(x+430,450,55,60);

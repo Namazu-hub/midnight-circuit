@@ -1,0 +1,13 @@
+import {createGame,updateGame} from '../dist/engine.mjs';
+export function traversePCB({record=false}={}){const g=createGame(5),inputs=[];const step=(input={})=>{if(record)inputs.push(input);const old={x:g.player.x,y:g.player.y,room:g.rooms.active};updateGame(g,input);if(process.env.PCB_TRACE&&g.events.some(e=>e.type==='fall'))console.error('fall',old);g.events=[];if(g.gameOver)throw Error('PCB game over');};const wait=n=>{for(let i=0;i<n*120;i++)step();};
+ function go(target,y){for(let i=0;i<2400;i++){if(g.finished)return;const [x,yy]=typeof target==='function'?target():[target,y],p=g.player,dx=x-p.x-14,dy=yy-p.y-40;if(Math.abs(dx)<18&&Math.abs(dy)<8&&p.onGround)return;step({right:dx>7,left:dx<-7,jump:p.onGround&&(dy<-30||Math.abs(dx)>80&&p.standing!==null&&(dx>0?g.level.platforms[p.standing].x+g.level.platforms[p.standing].w-p.x:p.x-g.level.platforms[p.standing].x)<85)||p.jumps===1&&p.vy>-60&&(dy<-20||Math.abs(dx)>160)});}throw Error('PCB stuck '+g.rooms.active+' target '+target+','+y+' at '+g.player.x+','+g.player.y);}
+ const use=()=>step({interact:true});const door=id=>{const d=g.level.doors.find(d=>d.id==='pcb-'+id);go(d.x,d.y);use();wait(1.3);if(g.rooms.active!==d.to)throw Error('gate '+id+' locked');};
+ go(400,510);for(let i=0;i<1000&&!g.pcb.power;i++)step({right:true});if(!g.pcb.power)throw Error('power');door('A');
+ go(2500,510);use();go(3320,510);wait(1);door('B');
+ go(()=>{const a=g.level.platforms.find(a=>a.pcbRole==='board'&&!a.boardIndex);return[a.x+100,a.y]});wait(8);if(g.pcb.placement<3)throw Error('placement');go(()=>{const a=g.level.platforms.find(a=>a.pcbRole==='board'&&a.boardIndex===1);return[a.x+150,a.y]});go(5680,510);door('C');
+ go(6510,510);use();go(6980,510);use();go(7190,510);use();wait(2);door('D');
+ go(8500,410);use();wait(4);go(9000,510);go(9400,510);door('E');
+ go(11210,510);wait(5);door('F');
+ go(12800,510);for(let i=0;i<7000&&g.pcb.boss.phase<3;i++){const b=g.pcb.boss;step({pulse:b.age>3&&b.clock%4>=2.3&&b.clock%4<2.9&&g.cooldown<=0});}if(g.pcb.boss.phase<3)throw Error('boss damage');
+ go(12400,510);use();wait(.5);use();go(12460,400);go(12700,290);use();wait(3);if(!g.pcb.boss.fixed)throw Error('head not fixed');go(12860,420);go(12980,355);go(13100,290);go(13350,290);use();wait(3);if(g.pcb.boss.phase!==4)throw Error('cool');go(13540,180);use();wait(2);go(13220,225);step({jump:true});wait(.2);step({pulse:true});wait(1);if(!g.pcb.boss.done)throw Error('core final hit');door('G');go(15850,510);if(!g.finished)throw Error('no PCB finish');return {g,inputs};}
+if(process.argv[1]?.endsWith('/pcb-route.mjs')){const {g}=traversePCB();console.log({finish:g.finished,hp:g.player.hp,lives:g.lives,time:g.time,deaths:g.deaths});}

@@ -1,5 +1,5 @@
 // Goals and locked-door explanations read the same live state as transitions.
-import {gateStatus,gateText} from './gate-status.mjs?v=4.9a';
+import {gateStatus,gateText} from './gate-status.mjs?v=4.9b';
 export function configurePrinterGates(L){
  const check=(id,label,path,hint,extra={})=>({id,label,path,hint,...extra});
  const bc=L.doors.find(d=>d.id==='bc');bc.checks=[check('nozzle','ノズル詰まりを除去','printer.nozzle.done','逆転・温調後、詰まりをつかんで左へ引く')];

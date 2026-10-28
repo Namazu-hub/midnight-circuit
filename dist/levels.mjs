@@ -1,5 +1,6 @@
-import {redesignPrinter} from './printer-level.mjs?v=4.9a';
-import {expandRooms} from './laboratory.mjs?v=4.9a';
+import {redesignPCB} from './pcb-level.mjs?v=4.9b';
+import {redesignPrinter} from './printer-level.mjs?v=4.9b';
+import {expandRooms} from './laboratory.mjs?v=4.9b';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],
@@ -128,4 +129,5 @@ const studentQuotes=[['アノードカソード逆につけちゃった！','ネ
 rooms.forEach((L,i)=>studentQuotes[i].forEach((line,j)=>L.students[j%L.students.length].lines.unshift(line)));
 expandRooms(rooms);
 redesignPrinter(rooms[3]);
+redesignPCB(rooms[5]);
 export const LEVELS=rooms;
