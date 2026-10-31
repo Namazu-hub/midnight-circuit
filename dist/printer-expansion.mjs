@@ -1,4 +1,4 @@
-import {extendJourney} from './printer-journey.mjs?v=4.9b';
+import {extendJourney} from './printer-journey.mjs?v=4.9c';
 // v4.5 extends the existing four repairs instead of replacing their state/rewards.
 export const PRINTER_CHAT=[
 '印刷時間が23時間…！？','フィラメントが途中で切れた…','ノズルにフィラメント詰まったらしい','1家に1台3Dプリンター','残り3時間って昨日も言ってなかった？','サポート材の方が本体より重いんだけど','1層目だけは完璧だったのに…','「これ、何に使うの？」「知らん、作りたかった」','印刷失敗したけど、なんか芸術的じゃない？','積層ピッチ0.1mmでやる必要あった？','ベンチーばっかり増えていく…','3Dプリンターで3Dプリンターの部品を作ってる','研究よりプリンターの修理に時間使ってる気がする','これで最後の再印刷にする！','先輩、あのドラゴン誰が設計したんですか？'];

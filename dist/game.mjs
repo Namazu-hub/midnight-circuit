@@ -1,22 +1,22 @@
-import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9b';
-import {roomControl} from './rooms.mjs?v=4.9b';
-import {printerGuidance} from './printer-progress.mjs?v=4.9b';
-import {TOOLS} from './equipment.mjs?v=4.9b';
-import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9b';
-import {FEEL,holdFrame} from './feel.mjs?v=4.9b';
-import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9b';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9b';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9b';
-import {createRepairUI} from './repair-ui.mjs?v=4.9b';
-import {tickResearch} from './research.mjs?v=4.9b';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9b';
-import {bindTouchControls} from './touch-input.mjs?v=4.9b';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9b';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9b';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9b';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.9b';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9b';
-import {drawAwakening} from './awakening.mjs?v=4.9b';
+import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9c';
+import {roomControl} from './rooms.mjs?v=4.9c';
+import {printerGuidance} from './printer-progress.mjs?v=4.9c';
+import {TOOLS} from './equipment.mjs?v=4.9c';
+import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9c';
+import {FEEL,holdFrame} from './feel.mjs?v=4.9c';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9c';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9c';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9c';
+import {createRepairUI} from './repair-ui.mjs?v=4.9c';
+import {tickResearch} from './research.mjs?v=4.9c';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9c';
+import {bindTouchControls} from './touch-input.mjs?v=4.9c';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9c';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9c';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9c';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.9c';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9c';
+import {drawAwakening} from './awakening.mjs?v=4.9c';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -59,7 +59,7 @@ class Synth{
     if(name==='jackpot'){[523,659,784,1047,784,1047,1319,1568].forEach((n,i)=>tone(n,.45,'triangle',.35,i*.12));[131,196,262].forEach((n,i)=>tone(n,.8,'triangle',.2,i*.3));}
   }
   music(){
-    if(!this.enabled||!this.context||mode!=='playing')return;
+    if(!this.enabled||!this.context||mode!=='playing'||game?.pcb?.boss.active&&game.pcb.boss.age<1.2)return;
     const tracks=[
       {root:130.81,tempo:.25,type:'triangle',notes:[0,4,7,12,7,4,9,7,4,7,11,14,12,7,4,2],bass:[0,0,5,7]},
       {root:146.83,tempo:.31,type:'sine',notes:[12,16,19,16,14,9,14,16,12,7,9,12,14,16,19,21],bass:[0,5,9,7]},
@@ -71,7 +71,7 @@ class Synth{
       {root:174.61,tempo:.24,type:'triangle',notes:[12,7,3,0,10,7,2,0,12,15,19,24,22,19,15,12],bass:[0,8,3,7]}
     ];
     const now=this.context.currentTime;if(now<this.nextBeat)return;
-    const tr=game.fever?{root:196,tempo:.13,type:'square',notes:[0,4,7,12,16,12,7,4,5,9,12,17,19,17,12,9],bass:[0,5,7,7]}:game.printer?.boss.active&&!game.printer.boss.done?{root:110,tempo:.17,type:'square',notes:[0,7,12,0,3,10,15,3,5,12,17,5,7,14,19,10],bass:[0,3,5,7]}:tracks[game.index],i=this.step%16;this.nextBeat=now+tr.tempo;
+    const tr=game.fever?{root:196,tempo:.13,type:'square',notes:[0,4,7,12,16,12,7,4,5,9,12,17,19,17,12,9],bass:[0,5,7,7]}:(game.printer?.boss.active&&!game.printer.boss.done||game.pcb?.boss.active&&!game.pcb.boss.done)?{root:110,tempo:.17,type:'square',notes:[0,7,12,0,3,10,15,3,5,12,17,5,7,14,19,10],bass:[0,3,5,7]}:tracks[game.index],i=this.step%16;this.nextBeat=now+tr.tempo;
     this.tone(tr.root*2**(tr.notes[i]/12),tr.tempo*.85,tr.type,.085);
     if(i%4===0)this.tone(tr.root/2*2**(tr.bass[Math.floor(i/4)]/12),tr.tempo*3,'sine',.2);
     if(i%2===0)this.tone(85,.09,'sine',.16,0,35);
@@ -178,7 +178,7 @@ function updateInventoryHUD(g){
  $('inventory-count').textContent=eq?`${touching?'':'B:'}缶${eq.drinks}/飲${eq.consumed}${eq.consumed>=2?' !':''}${eq.weapon?' · '+(touching?'':'V:')+({iron:'鏝',scraper:'剥',heatgun:'熱'})[eq.weapon.id]+eq.weapon.uses:''}`:'';
  $('inventory-count').title=eq?.weapon?TOOLS.find(t=>t.id===eq.weapon.id).name+' '+eq.weapon.uses+'回':db.title;
 }
-function updateHUD(){if(!game)return;const target=pcbControl(game)||printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.includes('cable')?'滑走':target.id==='scraper-pickup'?'回収':target.id==='release-spool'?'解除':target.id?.startsWith('site-')||['pattern','printStart'].includes(target.id)?'造形':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!game.printer?.boss.active!==arenaView||!!game.printer!==printerView){arenaView=!!game.printer?.boss.active;printerView=!!game.printer;resize();}$('repair-open').textContent=(pcbControl(game)||printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(game.pcb?pcbGoal(game):game.printer?printerGuidance(game,roomControl(game)):actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.whiteSpace='pre-line';actionHint.style.opacity=game.printer||game.pcb?'1':worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;updateInventoryHUD(g);document.querySelector('[data-control=pulse]').textContent=g.pulse>0?'PULSE ●':g.cooldown>0?'PULSE '+Math.ceil(g.cooldown):'PULSE';g.touchInput=lastInput==='touch';document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(pcbControl(g)||printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
+function updateHUD(){if(!game)return;const target=pcbControl(game)||printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.includes('cable')?'滑走':target.id==='scraper-pickup'?'回収':target.id==='release-spool'?'解除':target.id?.startsWith('site-')||['pattern','printStart'].includes(target.id)?'造形':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!(game.printer?.boss.active||game.pcb?.boss.active)!==arenaView||!!(game.printer||game.pcb)!==printerView){arenaView=!!(game.printer?.boss.active||game.pcb?.boss.active);printerView=!!(game.printer||game.pcb);resize();}$('repair-open').textContent=(pcbControl(game)||printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(game.pcb?pcbGoal(game):game.printer?printerGuidance(game,roomControl(game)):actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.whiteSpace='pre-line';actionHint.style.opacity=game.printer||game.pcb?'1':worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;updateInventoryHUD(g);document.querySelector('[data-control=pulse]').textContent=g.pulse>0?'PULSE ●':g.cooldown>0?'PULSE '+Math.ceil(g.cooldown):'PULSE';g.touchInput=lastInput==='touch';document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(pcbControl(g)||printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
   const active=g.pulse>0,ready=g.cooldown<=0;$('pulse-status').textContent=active?'ACTIVE':ready?'READY':`${g.cooldown.toFixed(1)}s`;$('pulse-fill').style.width=(active?g.pulse/(g.fever?.pulseDuration||RULES.pulse):ready?1:1-g.cooldown/(g.fever?.attackCooldown||RULES.cooldown))*100+'%';$('pulse-fill').style.background=active?'#c7ffe8':ready?'#75efce':'#698c9e';$('progress-fill').style.width=g.progress*100+'%';
 }
 function burst(x,y,color,count=14){if(progress.reduced)count=Math.min(count,5);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=30+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,size:2+Math.random()*3,color,life:.4+Math.random()*.45,max:.85});}}

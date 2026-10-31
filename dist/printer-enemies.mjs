@@ -1,7 +1,7 @@
-import {octopusPose,drawOctopus} from './octopus.mjs?v=4.9b';
-import {toolHit} from './equipment.mjs?v=4.9b';
-import {clamp,overlap} from './world.mjs?v=4.9b';
-import {grant} from './research.mjs?v=4.9b';
+import {octopusPose,drawOctopus} from './octopus.mjs?v=4.9c';
+import {toolHit} from './equipment.mjs?v=4.9c';
+import {clamp,overlap} from './world.mjs?v=4.9c';
+import {grant} from './research.mjs?v=4.9c';
 const near=(p,e,r)=>Math.hypot(p.x+14-e.x-e.w/2,p.y+20-e.y-e.h/2)<r;
 export function createPrinterFoe(kind,x,y,extra={}){return {kind,x,y,origin:x,baseY:y,alive:true,clock:0,v:0,vy:0,reach:15,warning:false,dx:0,dy:0,w:['benchy','badBenchy'].includes(kind)?64:48,h:48,...extra};}
 export function attachPrinterSurface(g,e){

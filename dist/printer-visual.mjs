@@ -1,6 +1,6 @@
-import {drawDawn} from './printer-journey-art.mjs?v=4.9b';
-import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.9b';
-import {drawBenchy} from './printer-enemies.mjs?v=4.9b';
+import {drawDawn} from './printer-journey-art.mjs?v=4.9c';
+import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.9c';
+import {drawBenchy} from './printer-enemies.mjs?v=4.9c';
 const line=(c,x,y,xx,yy,col,w=2)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 export function printerPlatform(c,p,g,solid){const {x,y,w,h}=p,t=g.time;if(p.printerEnemy)return;
  if(p.benchy){drawBenchy(c,x-10,y,w+20,t);line(c,x,y,x+w,y,'#d9fff2',4);return;}
@@ -34,7 +34,8 @@ export function drawPrinterGuides(c,g){const s=g.printer,b=s.boss,t=g.time,r=cur
  c.restore();}
 export function drawPrinterOverlay(c,g,w,h){if(!g.rooms)return;const alpha=roomFade(g);if(alpha>0){c.fillStyle=`rgba(7,17,29,${Math.min(1,alpha)})`;c.fillRect(0,0,w,h);}drawDawn(c,g,w,h);}
 // Dialogues advance on proximity, not global time; a return visit does not repeat the last line.
-export function tickPrinterChat(g,dt){if(!g.printer)return;for(const s of g.level.students){const nearby=s.room===g.rooms.active&&Math.hypot(g.player.x-s.x,g.player.y+40-s.y)<155;const repaired=s.react==='boss'?g.printer.boss.done:g.level.relays.find(r=>r.id===s.react)?.on;const key=repaired?'after':'lines';s.chat??={index:-1,remaining:0,cooldown:0,key};s.chat.cooldown=Math.max(0,s.chat.cooldown-dt);s.chat.remaining=Math.max(0,s.chat.remaining-dt);if(s.chat.key!==key){s.chat.key=key;s.chat.remaining=0;s.chat.cooldown=0;s.chat.index=-1;}if(nearby&&!s.chat.remaining&&!s.chat.cooldown){s.chat.index=(s.chat.index+1)%s[key].length;s.chat.remaining=6;s.chat.cooldown=10;}s.chat.visible=nearby&&s.chat.remaining>0;s.chat.text=s[key][s.chat.index]||'';}}
+// Shared non-blocking student dialogue; printer and PCB rooms use the same wrapping pass.
+export function tickPrinterChat(g,dt){if(!g.printer&&!g.pcb)return;for(const s of g.level.students){const nearby=s.room===g.rooms.active&&Math.hypot(g.player.x-s.x,g.player.y+40-s.y)<155;const repaired=s.react==='boss'?g.printer?.boss.done:g.level.relays.find(r=>r.id===s.react)?.on;const key=repaired?'after':'lines';s.chat??={index:-1,remaining:0,cooldown:0,key};s.chat.cooldown=Math.max(0,s.chat.cooldown-dt);s.chat.remaining=Math.max(0,s.chat.remaining-dt);if(s.chat.key!==key){s.chat.key=key;s.chat.remaining=0;s.chat.cooldown=0;s.chat.index=-1;}if(nearby&&!s.chat.remaining&&!s.chat.cooldown){s.chat.index=(s.chat.index+1)%s[key].length;s.chat.remaining=6;s.chat.cooldown=10;}s.chat.visible=nearby&&s.chat.remaining>0;s.chat.text=s[key][s.chat.index]||'';}}
 export function drawPrinterChat(c,g,s,w,scale=1){if(!s.chat?.visible)return;const text=s.chat.text,font=Math.max(15,Math.min(40,14/scale)),maxWidth=Math.min(w-40,Math.max(300,240/scale));c.save();c.font=`${font}px sans-serif`;const lines=[];let row='';for(const char of text){if(c.measureText(row+char).width>maxWidth-28){lines.push(row);row=char;}else row+=char;}if(row)lines.push(row);const width=Math.min(maxWidth,Math.max(170,...lines.map(l=>c.measureText(l).width+28))),height=30+font*.8+lines.length*(font+6),left=Math.max(g.camera+15,Math.min(s.x-width/2,g.camera+w-width-15)),top=Math.max(g.cameraY+105,Math.min(s.y-180-height,g.cameraY+325));c.fillStyle='#0d2135f2';c.fillRect(left,top,width,height);c.strokeStyle='#6fa395';c.strokeRect(left,top,width,height);c.font=`${Math.max(12,font*.8)}px sans-serif`;c.fillStyle='#e8b98c';c.textAlign='left';c.fillText(s.name,left+13,top+12+font*.8);c.font=`${font}px sans-serif`;c.fillStyle='#ecf4e8';lines.forEach((l,i)=>c.fillText(l,left+13,top+20+font*1.8+i*(font+6)));c.restore();}
 
 // Small task-specific gestures and props distinguish students from idle scenery.

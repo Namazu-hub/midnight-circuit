@@ -1,11 +1,17 @@
-import {configurePrinterGates} from './printer-progress.mjs?v=4.9b';
-import {extendNozzle} from './printer-nozzle.mjs?v=4.9b';
-import {extendPeeling} from './printer-peeling.mjs?v=4.9b';
+import {configurePrinterGates} from './printer-progress.mjs?v=4.9c';
+import {extendNozzle} from './printer-nozzle.mjs?v=4.9c';
+import {extendPeeling} from './printer-peeling.mjs?v=4.9c';
 // Stage-local v4.8 layout; preserves the old room graph and repair identities.
 export function extendWorkshop(L){
  extendPeeling(L);extendNozzle(L);configurePrinterGates(L);
  const pad=(x,y,w=120,extra={})=>L.platforms.push({x,y,w,h:18,type:'platform',recovery:true,...extra});
  for(const [x,y] of [[2100,600],[2230,520],[3470,590],[3610,500],[11800,400],[11900,290]])pad(x,y);
+ // Return shelves on the far side of tall obstacles. A floor landing must not
+ // require a 210–250px jump or an already completed print job to escape.
+ for(const [x,y] of [[15120,400],[15220,290],[18280,400]])pad(x,y);
+ // The shelf in S is optional and may be unprinted. Its far side therefore
+ // needs a free maintenance exit, not a return path requiring that purchase.
+ L.doors.push({id:'secret-service',room:'S',x:8180,y:510,to:'A',toX:830,toY:510,label:'研究棟への保守扉'});
  for(const [x,y] of [[2040,650],[2390,650],[3430,650],[3820,650]])L.chips.push({x,y});
  L.recoveryRoutes=[{room:'B',from:[2150,680],steps:[[2150,600],[2280,520],[2460,510]]},{room:'C',from:[3500,680],steps:[[3520,590],[3660,500],[3860,510]]}];
  L.printerControls.push({id:'recall-cargo',x:11000,y:480,label:'搬送船を呼ぶ'});

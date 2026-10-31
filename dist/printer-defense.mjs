@@ -1,7 +1,7 @@
-import {overlap,clamp} from './world.mjs?v=4.9b';
-import {grant} from './research.mjs?v=4.9b';
-import {toolHit} from './equipment.mjs?v=4.9b';
-import {startFabrication} from './fabrication.mjs?v=4.9b';
+import {overlap,clamp} from './world.mjs?v=4.9c';
+import {grant} from './research.mjs?v=4.9c';
+import {toolHit} from './equipment.mjs?v=4.9c';
+import {startFabrication} from './fabrication.mjs?v=4.9c';
 export const DEFENSE=Object.freeze({turrets:2,minis:2,coreOpen:8,build:2,shotPeriod:3.2,rainPeriod:3.8});
 export const coreReady=b=>b.cooled&&!!b.defense&&b.defense.age>=DEFENSE.coreOpen;
 export function beginDefense(g){const b=g.printer.boss;if(b.defense)return;b.defense={age:0,wave:1,miniStarted:false,rainClock:0,rain:[],wall:{progress:0,active:false},sequence:0};b.jobs=[];b.minions=[];

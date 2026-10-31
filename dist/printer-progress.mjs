@@ -1,11 +1,11 @@
 // Goals and locked-door explanations read the same live state as transitions.
-import {gateStatus,gateText} from './gate-status.mjs?v=4.9b';
+import {gateStatus,gateText} from './gate-status.mjs?v=4.9c';
 export function configurePrinterGates(L){
  const check=(id,label,path,hint,extra={})=>({id,label,path,hint,...extra});
  const bc=L.doors.find(d=>d.id==='bc');bc.checks=[check('nozzle','ノズル詰まりを除去','printer.nozzle.done','逆転・温調後、詰まりをつかんで左へ引く')];
  const cd=L.doors.find(d=>d.id==='cd');cd.checks=[check('peel','3DBenchyを剥がす','printer.peeling.targets.benchy.done','スクレーパーで床のベンチーを剥がそう'),check('runaway','暴走造形を停止','printer.journey.runawaySolved','C2の非常用巻戻しを操作しよう',{when:'printer.incident'})];
  // Readable relay labels are gate-specific; relay identities/rewards stay unchanged.
- for(const d of L.doors)d.gateLabels={feed:'材料供給を復旧',drive:'ギア駆動を復旧',print:'造形橋を完成',cool:'冷却設備を復旧'};
+ for(const d of L.doors){d.gateHints={feed:'ロールか重りを重量プレートへ',drive:'搬送ダクトのギアを装着し、駆動レバーへ',print:'上部制御室を復旧し、橋を造形',cool:'配線・送風・安全インターロックを確認'};d.gateLabels={feed:'材料供給を復旧',drive:'ギア駆動を復旧',print:'造形橋を完成',cool:'冷却設備を復旧'};}
  L.lowerAreas=L.rooms.map(r=>({room:r.id,kind:['B','C'].includes(r.id)?'exploration':'pit',floorY:['B','C'].includes(r.id)?680:null,fallY:755}));
 }
 export function printerGoal(g){if(!g?.printer)return '';const s=g.printer,b=s.boss,room=g.rooms.active;

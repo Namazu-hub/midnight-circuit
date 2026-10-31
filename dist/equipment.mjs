@@ -1,4 +1,4 @@
-import {overlap} from './world.mjs?v=4.9b';
+import {overlap} from './world.mjs?v=4.9c';
 // Attempt-local inventory: room travel and HP falls retain it; game-over/new stage clears it.
 export const EQUIPMENT=Object.freeze({drinkCap:3,duration:9,speed:1.55});
 export const TOOLS=Object.freeze([

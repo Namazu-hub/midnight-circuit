@@ -1,7 +1,7 @@
 // Shared source for gate collision/transition permission and player-facing requirements.
 const valueAt=(root,path)=>path.split('.').reduce((v,k)=>v?.[k],root);
 export function gateStatus(g,door){
- const checks=(door.requires||[]).map(id=>({id,label:door.gateLabels?.[id]||g.level.relays.find(r=>r.id===id)?.label||id,done:!!g.level.relays.find(r=>r.id===id)?.on}));
+ const checks=(door.requires||[]).map(id=>({id,hint:door.gateHints?.[id],label:door.gateLabels?.[id]||g.level.relays.find(r=>r.id===id)?.label||id,done:!!g.level.relays.find(r=>r.id===id)?.on}));
  for(const spec of door.checks||[]){const value=valueAt(g,spec.path);checks.push({...spec,done:spec.when&&!valueAt(g,spec.when)?true:spec.equals===undefined?!!value:value===spec.equals});}
  if(door.requiresChase)checks.push({id:'chase',label:'巨大スプールを充填',done:!!g.printer?.chase.done});
  if(door.requiresBoss)checks.push({id:'boss',label:'コアを停止',done:!!g.printer?.boss.done});

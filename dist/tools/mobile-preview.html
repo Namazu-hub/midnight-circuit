@@ -3,7 +3,7 @@
 <h1>画面サイズ確認</h1><p>実際のゲームを指定サイズで表示します。スマートフォンのタッチやSafariの再現ではありません。セーブは通常のゲームと共通です。</p>
 <button data-size="844,390">横 844 × 390</button><button data-size="667,375">横 667 × 375</button><button data-size="568,320">横 568 × 320</button><button data-size="390,844">縦 390 × 844</button><button data-size="320,568">縦 320 × 568</button><button id="reload">ゲームを再読み込み</button><span id="size">844 × 390</span>
 <label><input id="all-controls" type="checkbox"> 全アイテム操作を表示（寸法検査用・使用不可）</label>
-<iframe id="preview" title="ゲームの画面サイズ確認" src="../index.html?v=4.9b"></iframe>
+<iframe id="preview" title="ゲームの画面サイズ確認" src="../index.html?v=4.9c"></iframe>
 <script>
 document.getElementById("reload").addEventListener("click",()=>{document.getElementById("preview").src="../index.html?preview="+Date.now();});
 document.querySelector('#all-controls').onchange=e=>{
