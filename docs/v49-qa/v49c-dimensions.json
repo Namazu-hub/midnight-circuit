@@ -1,0 +1,587 @@
+[
+  {
+    "buttons": [
+      {
+        "label": "",
+        "rect": {
+          "bottom": 384,
+          "height": 52,
+          "left": 8,
+          "right": 56,
+          "top": 332,
+          "width": 48,
+          "x": 8,
+          "y": 332
+        }
+      },
+      {
+        "label": "",
+        "rect": {
+          "bottom": 384,
+          "height": 52,
+          "left": 56,
+          "right": 104,
+          "top": 332,
+          "width": 48,
+          "x": 56,
+          "y": 332
+        }
+      },
+      {
+        "label": "ACTION",
+        "rect": {
+          "bottom": 384,
+          "height": 52,
+          "left": 241.328125,
+          "right": 289.328125,
+          "top": 332,
+          "width": 48,
+          "x": 241.328125,
+          "y": 332
+        }
+      },
+      {
+        "label": "TOOL",
+        "rect": {
+          "bottom": 384,
+          "height": 44,
+          "left": 430.671875,
+          "right": 488.671875,
+          "top": 340,
+          "width": 58,
+          "x": 430.671875,
+          "y": 340
+        }
+      },
+      {
+        "label": "B 0",
+        "rect": {
+          "bottom": 384,
+          "height": 44,
+          "left": 498.671875,
+          "right": 556.671875,
+          "top": 340,
+          "width": 58,
+          "x": 498.671875,
+          "y": 340
+        }
+      },
+      {
+        "label": "PULSE",
+        "rect": {
+          "bottom": 384,
+          "height": 52,
+          "left": 698,
+          "right": 774,
+          "top": 332,
+          "width": 76,
+          "x": 698,
+          "y": 332
+        }
+      },
+      {
+        "label": "JUMP",
+        "rect": {
+          "bottom": 384,
+          "height": 52,
+          "left": 778,
+          "right": 836,
+          "top": 332,
+          "width": 58,
+          "x": 778,
+          "y": 332
+        }
+      }
+    ],
+    "canvas": {
+      "bottom": 325,
+      "height": 251,
+      "left": 0,
+      "right": 844,
+      "top": 74,
+      "width": 844,
+      "x": 0,
+      "y": 74
+    },
+    "hint": {
+      "bottom": 105.9375,
+      "height": 27.9375,
+      "left": 292.921875,
+      "right": 551.078125,
+      "top": 78,
+      "width": 258.15625,
+      "x": 292.921875,
+      "y": 78
+    },
+    "mode": "playing",
+    "size": "横 844 × 390"
+  },
+  {
+    "buttons": [
+      {
+        "label": "",
+        "rect": {
+          "bottom": 369,
+          "height": 52,
+          "left": 8,
+          "right": 56,
+          "top": 317,
+          "width": 48,
+          "x": 8,
+          "y": 317
+        }
+      },
+      {
+        "label": "",
+        "rect": {
+          "bottom": 369,
+          "height": 52,
+          "left": 56,
+          "right": 104,
+          "top": 317,
+          "width": 48,
+          "x": 56,
+          "y": 317
+        }
+      },
+      {
+        "label": "ACTION",
+        "rect": {
+          "bottom": 369,
+          "height": 52,
+          "left": 182.328125,
+          "right": 230.328125,
+          "top": 317,
+          "width": 48,
+          "x": 182.328125,
+          "y": 317
+        }
+      },
+      {
+        "label": "TOOL",
+        "rect": {
+          "bottom": 369,
+          "height": 44,
+          "left": 312.671875,
+          "right": 370.671875,
+          "top": 325,
+          "width": 58,
+          "x": 312.671875,
+          "y": 325
+        }
+      },
+      {
+        "label": "B 0",
+        "rect": {
+          "bottom": 369,
+          "height": 44,
+          "left": 380.671875,
+          "right": 438.671875,
+          "top": 325,
+          "width": 58,
+          "x": 380.671875,
+          "y": 325
+        }
+      },
+      {
+        "label": "PULSE",
+        "rect": {
+          "bottom": 369,
+          "height": 52,
+          "left": 521,
+          "right": 597,
+          "top": 317,
+          "width": 76,
+          "x": 521,
+          "y": 317
+        }
+      },
+      {
+        "label": "JUMP",
+        "rect": {
+          "bottom": 369,
+          "height": 52,
+          "left": 601,
+          "right": 659,
+          "top": 317,
+          "width": 58,
+          "x": 601,
+          "y": 317
+        }
+      }
+    ],
+    "canvas": {
+      "bottom": 310,
+      "height": 236,
+      "left": 0,
+      "right": 667,
+      "top": 74,
+      "width": 667,
+      "x": 0,
+      "y": 74
+    },
+    "hint": {
+      "bottom": 105.9375,
+      "height": 27.9375,
+      "left": 204.421875,
+      "right": 462.578125,
+      "top": 78,
+      "width": 258.15625,
+      "x": 204.421875,
+      "y": 78
+    },
+    "mode": "playing",
+    "size": "横 667 × 375"
+  },
+  {
+    "buttons": [
+      {
+        "label": "",
+        "rect": {
+          "bottom": 314,
+          "height": 52,
+          "left": 8,
+          "right": 56,
+          "top": 262,
+          "width": 48,
+          "x": 8,
+          "y": 262
+        }
+      },
+      {
+        "label": "",
+        "rect": {
+          "bottom": 314,
+          "height": 52,
+          "left": 56,
+          "right": 104,
+          "top": 262,
+          "width": 48,
+          "x": 56,
+          "y": 262
+        }
+      },
+      {
+        "label": "ACTION",
+        "rect": {
+          "bottom": 314,
+          "height": 52,
+          "left": 149.328125,
+          "right": 197.328125,
+          "top": 262,
+          "width": 48,
+          "x": 149.328125,
+          "y": 262
+        }
+      },
+      {
+        "label": "TOOL",
+        "rect": {
+          "bottom": 314,
+          "height": 44,
+          "left": 246.671875,
+          "right": 304.671875,
+          "top": 270,
+          "width": 58,
+          "x": 246.671875,
+          "y": 270
+        }
+      },
+      {
+        "label": "B 0",
+        "rect": {
+          "bottom": 314,
+          "height": 44,
+          "left": 314.671875,
+          "right": 372.671875,
+          "top": 270,
+          "width": 58,
+          "x": 314.671875,
+          "y": 270
+        }
+      },
+      {
+        "label": "PULSE",
+        "rect": {
+          "bottom": 314,
+          "height": 52,
+          "left": 422,
+          "right": 498,
+          "top": 262,
+          "width": 76,
+          "x": 422,
+          "y": 262
+        }
+      },
+      {
+        "label": "JUMP",
+        "rect": {
+          "bottom": 314,
+          "height": 52,
+          "left": 502,
+          "right": 560,
+          "top": 262,
+          "width": 58,
+          "x": 502,
+          "y": 262
+        }
+      }
+    ],
+    "canvas": {
+      "bottom": 255,
+      "height": 181,
+      "left": 0,
+      "right": 568,
+      "top": 74,
+      "width": 568,
+      "x": 0,
+      "y": 74
+    },
+    "hint": {
+      "bottom": 105.9375,
+      "height": 27.9375,
+      "left": 154.921875,
+      "right": 413.078125,
+      "top": 78,
+      "width": 258.15625,
+      "x": 154.921875,
+      "y": 78
+    },
+    "mode": "playing",
+    "size": "横 568 × 320"
+  },
+  {
+    "buttons": [
+      {
+        "label": "",
+        "rect": {
+          "bottom": 790,
+          "height": 52,
+          "left": 8,
+          "right": 56,
+          "top": 738,
+          "width": 48,
+          "x": 8,
+          "y": 738
+        }
+      },
+      {
+        "label": "",
+        "rect": {
+          "bottom": 790,
+          "height": 52,
+          "left": 56,
+          "right": 104,
+          "top": 738,
+          "width": 48,
+          "x": 56,
+          "y": 738
+        }
+      },
+      {
+        "label": "ACTION",
+        "rect": {
+          "bottom": 790,
+          "height": 52,
+          "left": 162,
+          "right": 210,
+          "top": 738,
+          "width": 48,
+          "x": 162,
+          "y": 738
+        }
+      },
+      {
+        "label": "TOOL",
+        "rect": {
+          "bottom": 838,
+          "height": 44,
+          "left": 123,
+          "right": 193,
+          "top": 794,
+          "width": 70,
+          "x": 123,
+          "y": 794
+        }
+      },
+      {
+        "label": "B 0",
+        "rect": {
+          "bottom": 838,
+          "height": 44,
+          "left": 197,
+          "right": 267,
+          "top": 794,
+          "width": 70,
+          "x": 197,
+          "y": 794
+        }
+      },
+      {
+        "label": "PULSE",
+        "rect": {
+          "bottom": 790,
+          "height": 52,
+          "left": 272,
+          "right": 320,
+          "top": 738,
+          "width": 48,
+          "x": 272,
+          "y": 738
+        }
+      },
+      {
+        "label": "JUMP",
+        "rect": {
+          "bottom": 790,
+          "height": 52,
+          "left": 324,
+          "right": 382,
+          "top": 738,
+          "width": 58,
+          "x": 324,
+          "y": 738
+        }
+      }
+    ],
+    "canvas": {
+      "bottom": 731,
+      "height": 657,
+      "left": 0,
+      "right": 390,
+      "top": 74,
+      "width": 390,
+      "x": 0,
+      "y": 74
+    },
+    "hint": {
+      "bottom": 105.9375,
+      "height": 27.9375,
+      "left": 65.921875,
+      "right": 324.078125,
+      "top": 78,
+      "width": 258.15625,
+      "x": 65.921875,
+      "y": 78
+    },
+    "mode": "playing",
+    "size": "縦 390 × 844"
+  },
+  {
+    "buttons": [
+      {
+        "label": "",
+        "rect": {
+          "bottom": 514,
+          "height": 52,
+          "left": 8,
+          "right": 56,
+          "top": 462,
+          "width": 48,
+          "x": 8,
+          "y": 462
+        }
+      },
+      {
+        "label": "",
+        "rect": {
+          "bottom": 514,
+          "height": 52,
+          "left": 56,
+          "right": 104,
+          "top": 462,
+          "width": 48,
+          "x": 56,
+          "y": 462
+        }
+      },
+      {
+        "label": "ACTION",
+        "rect": {
+          "bottom": 514,
+          "height": 52,
+          "left": 127,
+          "right": 175,
+          "top": 462,
+          "width": 48,
+          "x": 127,
+          "y": 462
+        }
+      },
+      {
+        "label": "TOOL",
+        "rect": {
+          "bottom": 562,
+          "height": 44,
+          "left": 88,
+          "right": 158,
+          "top": 518,
+          "width": 70,
+          "x": 88,
+          "y": 518
+        }
+      },
+      {
+        "label": "B 0",
+        "rect": {
+          "bottom": 562,
+          "height": 44,
+          "left": 162,
+          "right": 232,
+          "top": 518,
+          "width": 70,
+          "x": 162,
+          "y": 518
+        }
+      },
+      {
+        "label": "PULSE",
+        "rect": {
+          "bottom": 514,
+          "height": 52,
+          "left": 202,
+          "right": 250,
+          "top": 462,
+          "width": 48,
+          "x": 202,
+          "y": 462
+        }
+      },
+      {
+        "label": "JUMP",
+        "rect": {
+          "bottom": 514,
+          "height": 52,
+          "left": 254,
+          "right": 312,
+          "top": 462,
+          "width": 58,
+          "x": 254,
+          "y": 462
+        }
+      }
+    ],
+    "canvas": {
+      "bottom": 455,
+      "height": 381,
+      "left": 0,
+      "right": 320,
+      "top": 74,
+      "width": 320,
+      "x": 0,
+      "y": 74
+    },
+    "hint": {
+      "bottom": 105.9375,
+      "height": 27.9375,
+      "left": 30.921875,
+      "right": 289.078125,
+      "top": 78,
+      "width": 258.15625,
+      "x": 30.921875,
+      "y": 78
+    },
+    "mode": "playing",
+    "size": "縦 320 × 568"
+  }
+]
