@@ -1,11 +1,12 @@
-import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.9c';
-import {drawPCBTransport} from './pcb-transport.mjs?v=4.9c';
-import {drawPCBFoes} from './pcb-enemies.mjs?v=4.9c';
-import {doorReady} from './rooms.mjs?v=4.9c';
+import {drawCircuitTower} from './circuit-art.mjs?v=4.9d';
+import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.9d';
+import {drawPCBTransport} from './pcb-transport.mjs?v=4.9d';
+import {drawPCBFoes} from './pcb-enemies.mjs?v=4.9d';
+import {doorReady} from './rooms.mjs?v=4.9d';
 const box=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
 function board(c,x,y,w){box(c,x,y,w,24,'#174e46');box(c,x,y,w,4,'#c0f3cf');for(let i=0;i<w-40;i+=60){c.strokeStyle='#d9bc74';c.lineWidth=2;c.beginPath();c.moveTo(x+i+14,y+18);c.lineTo(x+i+14,y+9);c.lineTo(x+i+49,y+9);c.stroke();box(c,x+i+45,y+7,6,5,'#d8e9cd');}}
 function component(c,a){const i=a.slot%3;if(i===0){box(c,a.x,a.y,a.w,a.h,'#cfb78c');for(let x=a.x+15;x<a.x+a.w;x+=25)box(c,x,a.y,5,a.h,'#895a65');}else if(i===1){box(c,a.x,a.y,a.w,a.h,'#7a98b3');box(c,a.x+a.w-14,a.y,8,a.h,'#d7e7dd');}else{box(c,a.x,a.y,a.w,a.h,'#263b4d');for(let x=a.x;x<a.x+a.w;x+=12){box(c,x,a.y+a.h-4,5,10,'#cbd3c8');}box(c,a.x+12,a.y+8,a.w-24,3,'#a9c7c3');}}
-export function drawPCB(c,g){const s=g.pcb;if(!s)return;const r=g.level.rooms.find(r=>r.id===g.rooms.active),t=g.time,b=s.boss;c.save();c.font='bold 16px monospace';c.textAlign='left';c.fillStyle='#d5eacb';c.fillText(r.id+' / '+r.name,r.left+40,90);
+export function drawPCB(c,g){const s=g.pcb;if(!s)return;if(g.rooms.active==='S'){drawCircuitTower(c,g);return;}const r=g.level.rooms.find(r=>r.id===g.rooms.active),t=g.time,b=s.boss;c.save();c.font='bold 16px monospace';c.textAlign='left';c.fillStyle='#d5eacb';c.fillText(r.id+' / '+r.name,r.left+40,90);
  // Huge PCB traces and silkscreen make ordinary parts architectural at PICO scale.
  for(let x=r.left+80;x<r.right;x+=230){c.strokeStyle=s.power?'#709f7c':'#475c58';c.lineWidth=4;c.beginPath();c.moveTo(x,510);c.lineTo(x,390);c.lineTo(x+100,390);c.lineTo(x+100,180);c.stroke();c.strokeStyle='#d6d0a9';c.lineWidth=2;c.strokeRect(x+78,170,44,30);c.fillStyle='#9bbaac';c.font='12px monospace';c.fillText('R'+Math.floor(x/230)+' / REV.8',x+70,150);}
  for(const a of g.level.platforms){if(a.x<r.left||a.x>=r.right)continue;if(a.pcbRole==='board')board(c,a.x,a.y,a.w);if(a.pcbRole==='component'&&a.slot<s.placement||a.pcbRole==='boss-component'&&a.slot<b.parts)component(c,a);if(a.pcbRole==='solder'){box(c,a.x,a.y,a.w,22,s.temp>55?'#ffb18d':'#afc9cb');if(s.temp>55){for(let x=a.x;x<a.x+a.w;x+=35)box(c,x,a.y-9-Math.sin(t*3+x)*6,18,8,'#ffc58c');}}if(a.pcbRole==='stencil'){box(c,a.x,a.y,a.w,20,'#81969c');for(let x=a.x+20;x<a.x+a.w;x+=65)box(c,x,a.y+4,38,10,'#243d46');}if(a.pcbRole==='magnet-frame'){c.strokeStyle='#bbccd1';c.lineWidth=10;c.strokeRect(a.x,a.y,220,80);} }
@@ -18,7 +19,7 @@ export function drawPCB(c,g){const s=g.pcb;if(!s)return;const r=g.level.rooms.fi
  if(r.id==='G')drawPlacementMachine(c,g);
  if(r.id==='H'){board(c,14500,440,500);c.font='15px monospace';c.fillStyle='#b7e6ce';c.fillText(g.player.x>15600?'COMPONENT NOT FOUND: PICO':'ASSEMBLY COMPLETE',14800,170);}
  for(const o of g.level.pcbControls){if(o.x<r.left||o.x>=r.right)continue;box(c,o.x-22,o.y-22,44,44,'#1b3c4d');c.strokeStyle='#95dbc7';c.strokeRect(o.x-22,o.y-22,44,44);c.font='18px monospace';c.fillStyle='#d0e8cb';c.fillText(o.id.includes('magnet')?'M':o.id.includes('cool')?'✣':o.id.includes('belt')?'↔':'ϟ',o.x-10,o.y+6);if(Math.hypot(g.player.x-o.x,g.player.y-o.y)<110){c.font='14px sans-serif';c.fillText(o.label,o.x-70,o.y-38);}}
- for(const d of g.level.doors.filter(d=>d.room===r.id)){box(c,d.x-35,d.y-90,70,90,'#203b4c');c.strokeStyle=doorReady(g,d)?'#90e5c3':'#d1a288';c.lineWidth=4;c.strokeRect(d.x-35,d.y-90,70,90);c.font='16px monospace';c.fillStyle='#d8eaca';c.fillText(d.to,d.x-8,d.y-108);}
+ for(const d of g.level.doors.filter(d=>d.room===r.id)){box(c,d.x-35,d.y-90,70,90,'#203b4c');c.strokeStyle=doorReady(g,d)?'#90e5c3':'#d1a288';c.lineWidth=4;c.strokeRect(d.x-35,d.y-90,70,90);c.font='16px monospace';c.fillStyle='#d8eaca';c.fillText(d.id==='pcb-circuit-in'?'RC / 回路試験塔':d.to,d.x-8,d.y-108);}
  drawPCBTransport(c,g);drawPCBFoes(c,g);c.restore();}
 
 export function drawPCBOverlay(c,g,w,h){const b=g.pcb?.boss;if(!b?.active||b.done)return;c.save();c.fillStyle='#0e2033ee';c.fillRect(15,75,w-30,50);c.fillStyle='#e0bedf';c.font='bold 14px monospace';c.textAlign='center';c.fillText('PLACE-MASTER 9000 · PHASE '+b.phase,w/2,94);c.fillStyle='#35465c';c.fillRect(30,105,w-60,8);c.fillStyle=b.phase===4?'#c597ea':'#efb18f';c.fillRect(30,105,(w-60)*(b.phase<3?b.hp/6:b.phase===3?1-b.temp/245:1),8);c.restore();}

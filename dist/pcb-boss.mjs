@@ -1,5 +1,5 @@
-import {clamp,overlap} from './world.mjs?v=4.9c';
-import {grant} from './research.mjs?v=4.9c';
+import {clamp,overlap} from './world.mjs?v=4.9d';
+import {grant} from './research.mjs?v=4.9d';
 // Keep PICO and the active machine in view instead of following only PICO.
 // The player always gets a margin even when a narrow test viewport cannot fit both.
 export function pcbCameraTarget(g,width){const b=g.pcb?.boss;if(!b?.active||b.done)return null;

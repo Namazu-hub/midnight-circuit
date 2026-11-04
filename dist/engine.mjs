@@ -1,21 +1,22 @@
-import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9c';
-import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9c';
-import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9c';
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9c';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9c';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.9c';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9c';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.9c';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9c';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9c';
-import {setupRepairStations} from './repair-stations.mjs?v=4.9c';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9c';
-import {setupResearch,tickResearch} from './research.mjs?v=4.9c';
-import {tickLab} from './laboratory.mjs?v=4.9c';
-import {LEVELS} from './levels.mjs?v=4.9c';
-import {clamp,overlap,approach} from './world.mjs?v=4.9c';
-import {tickEnemies} from './enemies.mjs?v=4.9c';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9c';
+import {resetCircuitTower} from './circuit-tower.mjs?v=4.9d';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9d';
+import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9d';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9d';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9d';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9d';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.9d';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9d';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.9d';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9d';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9d';
+import {setupRepairStations} from './repair-stations.mjs?v=4.9d';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9d';
+import {setupResearch,tickResearch} from './research.mjs?v=4.9d';
+import {tickLab} from './laboratory.mjs?v=4.9d';
+import {LEVELS} from './levels.mjs?v=4.9d';
+import {clamp,overlap,approach} from './world.mjs?v=4.9d';
+import {tickEnemies} from './enemies.mjs?v=4.9d';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9d';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -30,6 +31,7 @@ export function createGame(index=0,customLevel=null){
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
+ resetCircuitTower(g);
  resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
