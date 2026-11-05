@@ -1,12 +1,12 @@
-import {overlap,clamp} from './world.mjs?v=4.9d';
-import {toolHit} from './equipment.mjs?v=4.9d';
-import {grant} from './research.mjs?v=4.9d';
+import {overlap,clamp} from './world.mjs?v=4.9e';
+import {toolHit} from './equipment.mjs?v=4.9e';
+import {grant} from './research.mjs?v=4.9e';
 // Motion and rideable surfaces update BEFORE walk; attacks resolve AFTER walk.
 // Paid survives conversions, so using an enemy as terrain cannot farm money.
 export function setupPCBFoes(g){if(!g.pcb)return;g.pcb.foes=[
  ['ball',3400,'B'],['tombstone',3540,'B'],['tombstone',3650,'B'],['tombstone',3760,'B'],
  ['qfp',5300,'C'],['wick',6740,'D'],['feeder',6610,'D'],['drone',7650,'D'],['ball',7560,'D'],
- ['bridge',9050,'E'],['wick',8740,'E'],['popcorn',9580,'E'],['whisker',10850,'F']
+ ['bridge',9050,'E'],['wick',8740,'E'],['popcorn',9580,'E'],['whisker',10850,'F'],['ball',1520,'A'],['ball',2400,'B'],['whisker',11820,'F']
  ].map(([kind,x,room],i)=>({id:i,kind,room,x,y:470,w:40,h:40,baseX:x,clock:0,alive:true,paid:false,down:0,converted:false,tip:0,burst:0}));
  for(const e of g.pcb.foes){if(!['qfp','tombstone','bridge','feeder'].includes(e.kind))continue;const a={x:e.x,y:e.y,w:e.w,h:12,type:'platform',pcbManaged:true,pcbRole:'foe-surface',foe:e.id};g.level.platforms.push(a);}
  g.pcb.heatDrops=[];

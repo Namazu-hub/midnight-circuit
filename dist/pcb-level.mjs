@@ -1,4 +1,4 @@
-import {addCircuitTower} from './circuit-level.mjs?v=4.9d';
+import {addCircuitTower} from './circuit-level.mjs?v=4.9e';
 // Stage 06: production creates the terrain; no player fabrication menu.
 export const PCB_ROOMS=[['A','停止したライン'],['B','ペースト印刷'],['C','部品実装'],['D','部品供給・電磁石'],['E','リフロー炉'],['F','外観検査 AOI'],['G','出荷ヤード'],['H','夜明けの研究室']];
 export function redesignPCB(L){
@@ -31,6 +31,10 @@ export function redesignPCB(L){
  for(const [i,r] of L.rooms.entries())L.students.push({x:r.id==='G'?12025:r.left+210,y:510,room:r.id,react:['power','paste','placement','magnet','reflow','aoi','restored','restored',null][i],name:i===7?'デモ担当の学生':'実装班の学生',color:'#f4bd90',lines:quotes[i],after:i===0?['……あれ、勝手に動いてない？','自動復旧機能なんて付けたっけ？']:quotes[i]});
  for(let i=0;i<7;i++)L.chips.push({x:9830+i*14,y:345});pad(9820,380,140);
  const gateLabels={power:'電源接続完了',paste:'ペースト印刷完了',placement:'部品実装完了',magnet:'ジャンパ線・搬送復旧',reflow:'冷却・はんだ硬化',aoi:'AOI検査完了',restored:'侵食コアを停止'};const gateHints={power:'電源ユニットをソケットへ',paste:'ステンシルを切り替えて印刷機の先へ',placement:'基板に乗り、ノズルの実装を待とう',magnet:'ジャンパ線と電磁石を確認',reflow:'上層の冷却ファンを操作',aoi:'検査床でしばらく静止',restored:'制御部のコアを停止'};for(const d of L.doors){d.gateLabels=gateLabels;d.gateHints=gateHints;}
+ // Deliberate, visible voids. No rescue floors are hidden below these spans.
+ const gaps=[[1220,1450],[2160,2320],[7520,7730],[10500,10720],[13690,13850]];
+ L.pitSpans=gaps;for(const [start,end] of gaps){const floor=L.platforms.find(a=>a.h===200&&a.x<=start&&a.x+a.w>=end);if(!floor)throw Error('missing floor for pit '+start);const right=floor.x+floor.w;floor.w=start-floor.x;pad(end,510,right-end,200);}
+ for(const a of L.platforms)if(a.h===200&&a.x>=6000&&a.x<8000)a.pcbMainFloor=true;
  addCircuitTower(L);
  L.tip='ACTIONで装置操作。製造工程とゲートのチェックを見よう。';L.mechanic='巨大PCB · 実装 · リフロー · AOI · PLACE-MASTER';
 }

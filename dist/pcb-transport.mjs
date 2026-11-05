@@ -1,4 +1,4 @@
-import {clamp,overlap} from './world.mjs?v=4.9d';
+import {clamp,overlap} from './world.mjs?v=4.9e';
 // Stage-local reusable feeder objects. Loss returns the object, never money.
 export const PCB_SUPPLY={tray:{x:6740,y:300,w:64,h:24,material:'iron'},puck:{x:7590,y:470,w:46,h:40,material:'magnet',pole:1}};
 export function resetPCBPart(p){const spec=PCB_SUPPLY[p.kind];Object.assign(p,spec,{vx:0,vy:0,held:false,returns:(p.returns||0)+1});}
@@ -21,7 +21,7 @@ export function movePCBTransport(g,dt){const s=g.pcb;if(!s)return;
   if(nearMagnet){p.vx=clamp((7420-p.x-p.w/2)*(attraction?1:-1),-120,120);p.vy=clamp((190-p.y)*(attraction?.6:-.5),-110,160);}else{p.vy=Math.min(300,p.vy+600*dt);p.vx=s.belt*50;}
   const oldBottom=p.y+p.h;p.x+=p.vx*dt;p.y+=p.vy*dt;
   // Bodies rest on delivered tape or the floor. PICO cannot permanently lose them.
-  if(p.vy>=0)for(const a of g.level.platforms){if(a.pcbRole!=='carrier'&&!(a.baseX===6000&&a.h===200))continue;if(p.x+p.w>a.x&&p.x<a.x+a.w&&oldBottom<=a.y+4&&p.y+p.h>=a.y){p.y=a.y-p.h;p.vy=0;}}
+  if(p.vy>=0)for(const a of g.level.platforms){if(a.pcbRole!=='carrier'&&!(a.pcbMainFloor))continue;if(p.x+p.w>a.x&&p.x<a.x+a.w&&oldBottom<=a.y+4&&p.y+p.h>=a.y){p.y=a.y-p.h;p.vy=0;}}
   if(p.x<6200||p.x>7970||p.y>720)resetPCBPart(p);
  }
  if(g.rooms.active==='E'){

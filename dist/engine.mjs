@@ -1,22 +1,22 @@
-import {resetCircuitTower} from './circuit-tower.mjs?v=4.9d';
-import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9d';
-import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9d';
-import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9d';
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9d';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9d';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.9d';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9d';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.9d';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9d';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9d';
-import {setupRepairStations} from './repair-stations.mjs?v=4.9d';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9d';
-import {setupResearch,tickResearch} from './research.mjs?v=4.9d';
-import {tickLab} from './laboratory.mjs?v=4.9d';
-import {LEVELS} from './levels.mjs?v=4.9d';
-import {clamp,overlap,approach} from './world.mjs?v=4.9d';
-import {tickEnemies} from './enemies.mjs?v=4.9d';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9d';
+import {resetCircuitTower} from './circuit-tower.mjs?v=4.9e';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9e';
+import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9e';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9e';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9e';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9e';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.9e';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9e';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.9e';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9e';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9e';
+import {setupRepairStations} from './repair-stations.mjs?v=4.9e';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9e';
+import {setupResearch,tickResearch} from './research.mjs?v=4.9e';
+import {tickLab} from './laboratory.mjs?v=4.9e';
+import {LEVELS} from './levels.mjs?v=4.9e';
+import {clamp,overlap,approach} from './world.mjs?v=4.9e';
+import {tickEnemies} from './enemies.mjs?v=4.9e';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9e';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -89,7 +89,7 @@ function walk(g,input,dt){
  p.coyote=p.onGround?.12:Math.max(0,p.coyote-dt);p.buffer=input.jump?.13:Math.max(0,p.buffer-dt);
  const icy=p.standing!==null&&L.platforms[p.standing]?.type==='ice';
  const zone=L.gravityZones.find(z=>overlap(p,z));
- const speed=(g.fever?.speed||RULES.speed)*(p.boost>0&&!g.fever?RULES.boostSpeed:1),dir=(input.right?1:0)-(input.left?1:0);
+ const speed=(g.circuit?.dash>0?g.circuit.boostSpeed||800:g.fever?.speed||RULES.speed)*(p.boost>0&&!g.fever?RULES.boostSpeed:1),dir=(input.right?1:0)-(input.left?1:0);
  if(dir){p.vx=clamp(p.vx+dir*(p.onGround?(icy?650:2400):1850)*dt,-speed,speed);p.face=dir;}else p.vx=approach(p.vx,0,(p.onGround?(icy?170:2300):450)*dt);
  if(p.buffer>0&&(p.coyote>0||p.jumps<2)){const first=p.coyote>0||p.onGround;p.vy=-(first?RULES.jump:RULES.airJump)*(zone?.jumpScale||1);p.jumps=first?1:2;p.coyote=0;p.onGround=false;p.standing=null;p.buffer=0;emit(g,first?'jump':'doublejump',{x:p.x+14,y:p.y+40});}
  if(input.jumpRelease&&p.vy<-220)p.vy*=.5;
@@ -144,7 +144,7 @@ function simulateGame(g,input={},dt=1/120){
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
  if(g.printer?.forceFall||p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){if(g.printer)g.printer.forceFall=false;respawn(g,'fall');return;}
- const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??0):0);
+ const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.circuit?.dash>0?180:g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??0):0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  const pcbFocus=pcbCameraTarget(g,VIEW.w);if(pcbFocus!==null){g.camera+=(pcbFocus-g.camera)*Math.min(1,dt*6);g.cameraY+=(0-g.cameraY)*Math.min(1,dt*4);return;}
  g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);

@@ -1,11 +1,11 @@
-import {setupCircuitTower,towerControl,towerSolid,towerAction,moveCircuitTower,tickCircuitTower,towerGoal} from './circuit-tower.mjs?v=4.9d';
-import {setupPCBTransport,movePCBTransport,tickPCBTransport,pcbTransportAction} from './pcb-transport.mjs?v=4.9d';
-import {setupPCBFoes,tickPCBFoes,movePCBFoes,foeSurface} from './pcb-enemies.mjs?v=4.9d';
-import {clamp,overlap} from './world.mjs?v=4.9d';
-import {roomControl} from './rooms.mjs?v=4.9d';
-import {gateStatus,gateText} from './gate-status.mjs?v=4.9d';
-import {tetherAction} from './tether.mjs?v=4.9d';
-import {tickPCBBoss} from './pcb-boss.mjs?v=4.9d';
+import {setupCircuitTower,towerControl,towerSolid,towerAction,moveCircuitTower,tickCircuitTower,towerGoal} from './circuit-tower.mjs?v=4.9e';
+import {setupPCBTransport,movePCBTransport,tickPCBTransport,pcbTransportAction} from './pcb-transport.mjs?v=4.9e';
+import {setupPCBFoes,tickPCBFoes,movePCBFoes,foeSurface} from './pcb-enemies.mjs?v=4.9e';
+import {clamp,overlap} from './world.mjs?v=4.9e';
+import {roomControl} from './rooms.mjs?v=4.9e';
+import {gateStatus,gateText} from './gate-status.mjs?v=4.9e';
+import {tetherAction} from './tether.mjs?v=4.9e';
+import {tickPCBBoss} from './pcb-boss.mjs?v=4.9e';
 export const PCB_RULES=Object.freeze({batterySpeed:85,boardSpeed:85,coolRate:65,pasteSpeed:.48});
 const near=(p,x,y,r=78)=>Math.hypot(p.x+14-x,p.y+20-y)<r;
 export function pcbRestore(g,id){const r=g.level.relays.find(r=>r.id===id);if(r&&!r.on){r.on=true;g.events.push({type:'repairComplete',x:r.x,y:r.y,text:'✓ '+r.label});}}
@@ -13,7 +13,7 @@ export function setupPCB(g){if(!g.level.pcb)return;g.pcb={battery:{x:430,y:410,w
 export function pcbControl(g){if(!g?.pcb)return null;const door=roomControl(g);if(door)return {...door,door:true};const tower=towerControl(g);if(tower)return tower;return g.level.pcbControls.filter(o=>o.x>=g.level.rooms.find(r=>r.id===g.rooms.active).left&&o.x<g.level.rooms.find(r=>r.id===g.rooms.active).right&&near(g.player,o.x,o.y)).sort((a,b)=>Math.hypot(g.player.x-a.x,g.player.y-a.y)-Math.hypot(g.player.x-b.x,g.player.y-b.y))[0]||null;}
 export function pcbSolid(g,a){if(!g.pcb)return null;const tower=towerSolid(g,a);if(tower!==null)return tower;if(a.pcbRole==='scrap')return !g.pcb.popcornOpen;if(a.pcbRole==='foe-surface')return foeSurface(g,a);if(a.pcbRole==='component')return a.slot<g.pcb.placement;if(a.pcbRole==='solder')return g.pcb.temp<=55;if(a.pcbRole==='boss-component')return a.slot<g.pcb.boss.parts;return null;}
 export function pcbAction(g,id){const s=g.pcb;if(towerAction(g,id))return;if(pcbTransportAction(g,id))return;if(tetherAction(g,id))return;if(id==='recall-power'&&!s.power)s.battery={x:430,y:410,w:70,h:100};if(id==='stencil')s.stencil=1-s.stencil;if(id==='fiducial'&&s.placement===0)s.fiducial=1-s.fiducial;if(id==='belt')s.belt=s.belt===1?0:s.belt===0?-1:1;if(id==='magnet')s.magnet=!s.magnet;if(id==='cool')s.fan=!s.fan;if(id==='aoi-mode')s.aoiMode=!s.aoiMode;if(id==='aoi-recall'&&s.inspected){s.inspected=false;s.scan=0;s.lift=510;}if(id==='rework')s.aoiMode=false;if(id==='ground')s.charge=0;
- const b=s.boss;if(id==='boss-fiducial')b.aimOffset=b.aimOffset?0:200;if(id==='boss-belt')b.belt=b.belt===1?0:b.belt===0?-1:1;if(id==='boss-magnet')b.magnet=!b.magnet;if(id==='boss-cool')b.cool=!b.cool;if(id==='boss-aoi'&&b.phase===4)b.ng=true;if(id==='feeder')b.feed=12;
+ const b=s.boss;if(id==='boss-fiducial'){if(b.phase>=3)b.driveReverse=!b.driveReverse;else b.aimOffset=b.aimOffset?0:200;}if(id==='boss-belt')b.belt=b.belt===1?0:b.belt===0?-1:1;if(id==='boss-magnet')b.magnet=!b.magnet;if(id==='boss-cool')b.cool=!b.cool;if(id==='boss-aoi'&&b.phase===4)b.ng=true;if(id==='feeder')b.feed=12;
 }
 export function movePCB(g,dt){const s=g.pcb;if(!s)return;s.clock+=dt;
  for(const a of g.level.platforms){if(!a.pcbManaged||['foe-surface','carrier','cover'].includes(a.pcbRole))continue;const ox=a.x,oy=a.y;
@@ -25,7 +25,7 @@ export function movePCB(g,dt){const s=g.pcb;if(!s)return;s.clock+=dt;
  a.dx=a.x-ox;a.dy=a.y-oy;
  }
  movePCBFoes(g,dt);movePCBTransport(g,dt);moveCircuitTower(g,dt);
- for(const a of g.level.platforms){if(a.pcbBelt)a.belt=s.power?90:0;if(a.baseX===6000&&a.h===200)a.belt=s.belt*65;}
+ for(const a of g.level.platforms){if(a.pcbBelt)a.belt=s.power?90:0;if(a.pcbMainFloor)a.belt=s.belt*65;}
 }
 export function tickPCB(g,input,activated,dt,hit){const s=g.pcb;if(!s)return;const p=g.player,room=g.rooms.active;
  const ctl=pcbControl(g);if(input.interact&&ctl&&!ctl.door)pcbAction(g,ctl.id);
@@ -39,7 +39,7 @@ export function tickPCB(g,input,activated,dt,hit){const s=g.pcb;if(!s)return;con
  if(room==='G')tickPCBBoss(g,input,activated,dt,hit);
 }
 export function pcbGoal(g){const tower=towerGoal(g);if(tower)return tower;const s=g.pcb,b=s.boss,d=roomControl(g);if(d&&!gateStatus(g,d).ready)return gateText(g,d);
- if(b.active&&!b.done)return b.phase===1?'照準を避け、停止したヘッドを攻撃':b.phase===2?'実装された部品を足場に、ヘッドを狙う':b.phase===3?!b.fixed?'搬送を逆転し、左の固定位置で電磁石を作動':'局所冷却ではんだを固める':!b.ng?'上層のAOIをボスへ向ける':'露出したコアへ最後のパルス';
+ if(b.active&&!b.done)return b.phase===1?'照準を避け、停止したヘッドを攻撃':b.phase===2?'実装された部品を足場に、ヘッドを狙う':b.phase===3?g.circuit.complete&&!b.motorLatched?'駆動電源：整流方向とBASEのパルスを確認':!b.fixed?'搬送を逆転し、左の固定位置で電磁石を作動':'局所冷却ではんだを固める':!b.ng?'上層のAOIをボスへ向ける':'露出したコアへ最後のパルス';
  const relay={A:'power',B:'paste',C:'placement',D:'magnet',E:'reflow',F:'aoi',G:'restored'}[g.rooms.active];
  if(relay&&g.level.relays.find(r=>r.id===relay)?.on)return '製造工程 '+g.rooms.active+' 完了：'+(g.rooms.active==='F'&&s.aoiMode?'NG搬送で不良品保管庫へ（任意）':'次の工程のゲートへ');
  const goals={A:s.power?'次の製造工程へ':'電源ユニットを右のソケットへ押す',B:'ステンシルをずらし、スキージの先へ',C:'基板へ乗って部品の実装を進める',D:'ジャンパ線を接続し、金属フレームを持ち上げる',E:'上層ファンで溶融はんだを冷やす',F:s.inspected?'検査された基板と出荷ゲートへ':'カメラ下の測定床で静止する',G:'出荷ラインの奥へ',H:'完成した基板を見届け、出口へ',S:'不良品を再検査し、検査ラインへ戻る'};return '製造工程 '+g.rooms.active+'：'+goals[g.rooms.active];}

@@ -1,22 +1,22 @@
-import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9d';
-import {roomControl} from './rooms.mjs?v=4.9d';
-import {printerGuidance} from './printer-progress.mjs?v=4.9d';
-import {TOOLS} from './equipment.mjs?v=4.9d';
-import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9d';
-import {FEEL,holdFrame} from './feel.mjs?v=4.9d';
-import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9d';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9d';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9d';
-import {createRepairUI} from './repair-ui.mjs?v=4.9d';
-import {tickResearch} from './research.mjs?v=4.9d';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9d';
-import {bindTouchControls} from './touch-input.mjs?v=4.9d';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9d';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9d';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9d';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.9d';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9d';
-import {drawAwakening} from './awakening.mjs?v=4.9d';
+import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9e';
+import {roomControl} from './rooms.mjs?v=4.9e';
+import {printerGuidance} from './printer-progress.mjs?v=4.9e';
+import {TOOLS} from './equipment.mjs?v=4.9e';
+import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9e';
+import {FEEL,holdFrame} from './feel.mjs?v=4.9e';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9e';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9e';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9e';
+import {createRepairUI} from './repair-ui.mjs?v=4.9e';
+import {tickResearch} from './research.mjs?v=4.9e';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9e';
+import {bindTouchControls} from './touch-input.mjs?v=4.9e';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9e';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9e';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9e';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.9e';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9e';
+import {drawAwakening} from './awakening.mjs?v=4.9e';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -50,6 +50,8 @@ class Synth{
     if(name==='pulse'){tone(110,.5,'sawtooth',.11,0,440);tone(660,.7,'sine',.22,.1,220);}
     if(name==='stomp')tone(160,.14,'square',.2,0,70);
     if(name==='hurt'){tone(200,.22,'sawtooth',.16,0,80);}
+    if(name==='resistance')tone(440,.12,'triangle',.15,0,880);
+    if(name==='coilLaunch'){tone(140,.4,'sawtooth',.12,0,1200);tone(900,.45,'triangle',.1,0,180);}
     if(name==='spring')tone(140,.35,'triangle',.3,0,1100);
     if(name==='respawn'){tone(310,.25,'triangle',.3,0,120);}
     if(name==='checkpoint'||name==='relay'){[440,554,660,880].forEach((n,i)=>tone(n,.3,'triangle',.24,i*.1));}
@@ -178,7 +180,7 @@ function updateInventoryHUD(g){
  $('inventory-count').textContent=eq?`${touching?'':'B:'}缶${eq.drinks}/飲${eq.consumed}${eq.consumed>=2?' !':''}${eq.weapon?' · '+(touching?'':'V:')+({iron:'鏝',scraper:'剥',heatgun:'熱'})[eq.weapon.id]+eq.weapon.uses:''}`:'';
  $('inventory-count').title=eq?.weapon?TOOLS.find(t=>t.id===eq.weapon.id).name+' '+eq.weapon.uses+'回':db.title;
 }
-function updateHUD(){if(!game)return;const target=pcbControl(game)||printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.startsWith('ct-')?(target.id.startsWith('ct-pad-')?'固定 / 解除':target.id==='ct-color'?'帯切替':target.id==='ct-diode'?'反転':target.id==='ct-transistor'?'運搬':target.id==='ct-socket'?'装着':target.id==='ct-hint'?'ヒント':'再供給'):target.id?.includes('cable')?'滑走':target.id==='scraper-pickup'?'回収':target.id==='release-spool'?'解除':target.id?.startsWith('site-')||['pattern','printStart'].includes(target.id)?'造形':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!(game.printer?.boss.active||game.pcb?.boss.active)!==arenaView||!!(game.printer||game.pcb)!==printerView){arenaView=!!(game.printer?.boss.active||game.pcb?.boss.active);printerView=!!(game.printer||game.pcb);resize();}$('repair-open').textContent=(pcbControl(game)||printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(game.pcb?pcbGoal(game):game.printer?printerGuidance(game,roomControl(game)):actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.whiteSpace='pre-line';actionHint.style.opacity=game.printer||game.pcb?'1':worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;updateInventoryHUD(g);document.querySelector('[data-control=pulse]').textContent=g.pulse>0?'PULSE ●':g.cooldown>0?'PULSE '+Math.ceil(g.cooldown):'PULSE';g.touchInput=lastInput==='touch';document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(pcbControl(g)||printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
+function updateHUD(){if(!game)return;const target=pcbControl(game)||printerControl(game)||nearbyAction(game)||nearbyRepair(game,true);const action=$('context-action');action.disabled=!target&&!nearVendor(game);action.textContent=target?(target.door?'扉':target.id?.startsWith('ct-')?(target.id.startsWith('ct-pad-')?'固定 / 解除':target.id==='ct-color'?'帯切替':target.id.startsWith('ct-diode')?'反転':target.id==='ct-transistor'?'運搬':target.id==='ct-socket'?'装着':target.id==='ct-hint'?'ヒント':target.id==='ct-source'?'電源切替':'再供給'):target.id?.includes('cable')?'滑走':target.id==='scraper-pickup'?'回収':target.id==='release-spool'?'解除':target.id?.startsWith('site-')||['pattern','printStart'].includes(target.id)?'造形':'修理'):nearVendor(game)?'¥ 補給':'ACTION';action.setAttribute('aria-label','ACTION '+action.textContent);document.body.classList.toggle('has-cart',!!game.cart);if(!!(game.printer?.boss.active||game.pcb?.boss.active)!==arenaView||!!(game.printer||game.pcb)!==printerView){arenaView=!!(game.printer?.boss.active||game.pcb?.boss.active);printerView=!!(game.printer||game.pcb);resize();}$('repair-open').textContent=(pcbControl(game)||printerControl(game)||nearbyAction(game))?.label||'⚙ 修理／再調整';actionHint.textContent=inputText(game.pcb?pcbGoal(game):game.printer?printerGuidance(game,roomControl(game)):actionObjective(game));actionHint.hidden=mode!=='playing'||!actionHint.textContent;if(actionHint.textContent!==actionHint.dataset.text){actionHint.dataset.text=actionHint.textContent;actionHint.dataset.until=String(worldTime+5);}actionHint.style.whiteSpace='pre-line';actionHint.style.opacity=game.printer||game.pcb?'1':worldTime>Number(actionHint.dataset.until)?'.15':'1';const g=game;updateInventoryHUD(g);document.querySelector('[data-control=pulse]').textContent=g.pulse>0?'PULSE ●':g.cooldown>0?'PULSE '+Math.ceil(g.cooldown):'PULSE';g.touchInput=lastInput==='touch';document.querySelectorAll('[data-control^=lane]').forEach(b=>b.hidden=!g.cart);document.querySelector('.gear-stat').hidden=!!g.fever;document.querySelector('.pulse-label>span').textContent=g.fever?'BURST':'PULSE';$('hearts').textContent=g.fever?'∞ INVINCIBLE':`HP ${g.player.hp}/${RULES.maxHP} · 残機 ${g.lives}`;$('hearts').style.color=g.player.hp>3?'#a5f082':g.player.hp>1?'#ffd66b':'#ff727a';$('hearts').setAttribute('aria-label',`ライフ${g.player.hp}`);$('repair-open').hidden=mode!=='playing'||!(pcbControl(g)||printerControl(g)||nearbyAction(g)||nearbyRepair(g,true));$('shop-open').hidden=mode!=='playing'||!nearVendor(g);$('chip-count').textContent=String(g.fever?g.chips:g.research?.funds||0);$('gear-count').textContent=g.gears;$('relay-count').innerHTML=`ϟ <b>${g.level.relays.filter(r=>!r.optional&&r.on).length}/${g.level.relays.filter(r=>!r.optional).length}</b>`;
   const active=g.pulse>0,ready=g.cooldown<=0;$('pulse-status').textContent=active?'ACTIVE':ready?'READY':`${g.cooldown.toFixed(1)}s`;$('pulse-fill').style.width=(active?g.pulse/(g.fever?.pulseDuration||RULES.pulse):ready?1:1-g.cooldown/(g.fever?.attackCooldown||RULES.cooldown))*100+'%';$('pulse-fill').style.background=active?'#c7ffe8':ready?'#75efce':'#698c9e';$('progress-fill').style.width=g.progress*100+'%';
 }
 function burst(x,y,color,count=14){if(progress.reduced)count=Math.min(count,5);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,s=30+Math.random()*150;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,size:2+Math.random()*3,color,life:.4+Math.random()*.45,max:.85});}}
@@ -205,7 +207,8 @@ function processEvents(){
     if(e.type==='boost'){burst(e.x,e.y,'#b6ff6b',30);toast('モンエナ！ 9秒間の虹色スピードアップ ×1.55',3);}
     if(e.type==='chip')burst(e.x,e.y,'#ffe0a0',6);
     if(e.type==='gear'){burst(e.x,e.y,'#9bffdc',26);toast(`ひみつのパーツを発見！ ${game.gears} / 3`,2.6);}
-    if(e.type==='doublejump'||e.type==='spring')burst(e.x,e.y,'#9ffad8',10);
+    if(e.type==='resistance'){particles.push({x:e.x,y:e.y-30,vx:0,vy:-25,text:['1 kΩ','10 kΩ','100 kΩ'][e.band],color:'#ffe3a4',life:1,max:1});audio.tone(330*2**(e.band/3),.15,'triangle',.15);}
+    if(e.type==='doublejump'||e.type==='spring'||e.type==='coilLaunch')burst(e.x,e.y,'#9ffad8',10);
     if(e.type==='stomp'){burst(e.x,e.y,'#efb5be',17);if(e.combo>1){particles.push({x:e.x,y:e.y-50,vx:0,vy:-25,text:e.combo+' COMBO',color:'#adffdf',life:.7,max:.7});audio.tone(440*2**(Math.min(8,e.combo)/12),.12,'triangle',.2);}}if(e.type==='land'||e.type==='runStart')burst(e.x,e.y,'#aec2c2',e.type==='land'?9:4);
     if(e.type==='pulse'){particles.push({x:e.x,y:e.y,vx:0,vy:0,ring:true,radius:progress.reduced?140:450,color:'#9affde',life:.8,max:.8});burst(e.x,e.y,'#75efce',20);}
     if(e.type==='checkpoint'){burst(e.x,e.y,'#75efce',30);toast('チェックポイント！ ライフも全回復。');}
