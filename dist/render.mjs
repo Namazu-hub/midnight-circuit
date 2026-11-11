@@ -1,13 +1,14 @@
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9e';
-import {drawEquipment} from './equipment-art.mjs?v=4.9e';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9e';
-import {poseScale} from './feel.mjs?v=4.9e';
-import {currentRoom} from './rooms.mjs?v=4.9e';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9e';
-import {drawResearch} from './research.mjs?v=4.9e';
-import {drawPrinter} from './printer-art.mjs?v=4.9e';
-import {drawLab} from './laboratory.mjs?v=4.9e';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9e';
+import {benchSurface,drawBenchRooms} from './bench-art.mjs?v=4.9f';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9f';
+import {drawEquipment} from './equipment-art.mjs?v=4.9f';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9f';
+import {poseScale} from './feel.mjs?v=4.9f';
+import {currentRoom} from './rooms.mjs?v=4.9f';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9f';
+import {drawResearch} from './research.mjs?v=4.9f';
+import {drawPrinter} from './printer-art.mjs?v=4.9f';
+import {drawLab} from './laboratory.mjs?v=4.9f';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9f';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -108,6 +109,7 @@ function background(c,theme,camera,t,width=VIEW.w,height=VIEW.h){
 }
 function platform(c,p,P,pulse,t,g=null){
   const x=p.x,y=p.y,w=p.w;if(g?.pcb&&p.pcbManaged&&!platformSolid(g,p)){c.save();c.strokeStyle='#86afac66';c.setLineDash([5,7]);c.strokeRect(x,y,w,18);c.restore();return;}if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
+  if(g?.level.benchMap&&['ground','platform'].includes(p.type)){benchSurface(c,p);return;}
   if(p.type==='ghost'){
     c.save();if(g?!platformSolid(g,p):pulse<=0){c.globalAlpha=.45;c.setLineDash([7,6]);c.strokeStyle=P.glow;c.lineWidth=2;c.strokeRect(x+1,y+1,w-2,18);c.setLineDash([]);for(let j=12;j<w;j+=22)rect(c,x+j,y+8,3,3,P.glow);c.restore();return;}
     glow(c,x+w/2,y,100,P.glow+'20');rect(c,x,y,w,20,'#418d89');rect(c,x,y,w,4,'#b3fff0');for(let j=10;j<w;j+=20)rect(c,x+j,y+8,4,4,'#9bffe2');c.restore();return;
@@ -160,7 +162,7 @@ function goal(c,g,t){
 export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else background(c,g.level.theme,g.camera,t);
   c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,-1000,room.right-room.left,3000);c.clip();}
-  drawDawnRoom(c,g);
+  drawDawnRoom(c,g);drawBenchRooms(c,g);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}
   for(const a of g.level.platforms){if(a.x+a.w<g.camera-30||a.x>g.camera+VIEW.w+30)continue;platform(c,a,P,g.pulse,t,g);}
   for(const z of g.level.gravityZones){c.save();c.fillStyle='#75ebce0b';c.fillRect(z.x,z.y,z.w,z.h);c.strokeStyle='#7bedd357';c.setLineDash([7,10]);c.strokeRect(z.x,z.y,z.w,z.h);c.setLineDash([]);c.fillStyle='#9bded0';c.font='13px monospace';c.fillText('LOW GRAVITY / 0.38 G',z.x+30,z.y+40);for(let i=0;i<25;i++){const x=z.x+(i*149)%z.w,y=z.y+((i*87-t*18)%z.h+z.h)%z.h;star(c,x,y,2,'#b7ffe555');}c.restore();}

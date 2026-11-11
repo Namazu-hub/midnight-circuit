@@ -1,6 +1,7 @@
-import {redesignPCB} from './pcb-level.mjs?v=4.9e';
-import {redesignPrinter} from './printer-level.mjs?v=4.9e';
-import {expandRooms} from './laboratory.mjs?v=4.9e';
+import {redesignBench} from './bench-level.mjs?v=4.9f';
+import {redesignPCB} from './pcb-level.mjs?v=4.9f';
+import {redesignPrinter} from './printer-level.mjs?v=4.9f';
+import {expandRooms} from './laboratory.mjs?v=4.9f';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],
@@ -128,6 +129,7 @@ for(const L of rooms){
 const studentQuotes=[['アノードカソード逆につけちゃった！','ネジの箱ひっくり返しちゃった'],['起きたら15時だったんだよね'],['俺って夜が1番集中できっからさ'],['AIが無くなったら研究どうしよう'],['大丈夫！レポート提出までのこり10時間もある！'],['ここからは魂のヤスリがけだ'],['なんでうちの大学はクリスマスも授業あるんだろう'],['酒を飲んで進捗出すぞ〜']];
 rooms.forEach((L,i)=>studentQuotes[i].forEach((line,j)=>L.students[j%L.students.length].lines.unshift(line)));
 expandRooms(rooms);
+redesignBench(rooms[0]);
 redesignPrinter(rooms[3]);
 redesignPCB(rooms[5]);
 export const LEVELS=rooms;

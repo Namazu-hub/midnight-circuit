@@ -1,6 +1,6 @@
-import {overlap,clamp} from './world.mjs?v=4.9e';
-import {toolHit} from './equipment.mjs?v=4.9e';
-import {grant} from './research.mjs?v=4.9e';
+import {overlap,clamp} from './world.mjs?v=4.9f';
+import {toolHit} from './equipment.mjs?v=4.9f';
+import {grant} from './research.mjs?v=4.9f';
 // Motion and rideable surfaces update BEFORE walk; attacks resolve AFTER walk.
 // Paid survives conversions, so using an enemy as terrain cannot farm money.
 export function setupPCBFoes(g){if(!g.pcb)return;g.pcb.foes=[

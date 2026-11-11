@@ -1,8 +1,8 @@
-import {moveRelayYard,tickRelayYard,relayYard} from './circuit-challenge.mjs?v=4.9e';
-import {createCircuit,stepCircuit,circuitPower,RESISTORS,bridgeState,filterStatus,drivePower} from './circuit-model.mjs?v=4.9e';
-import {clamp,overlap} from './world.mjs?v=4.9e';
-import {toolHit} from './equipment.mjs?v=4.9e';
-import {grant} from './research.mjs?v=4.9e';
+import {moveRelayYard,tickRelayYard,relayYard} from './circuit-challenge.mjs?v=4.9f';
+import {createCircuit,stepCircuit,circuitPower,RESISTORS,bridgeState,filterStatus,drivePower} from './circuit-model.mjs?v=4.9f';
+import {clamp,overlap} from './world.mjs?v=4.9f';
+import {toolHit} from './equipment.mjs?v=4.9f';
+import {grant} from './research.mjs?v=4.9f';
 export const TOWER=Object.freeze({coilVelocity:980,coilSpeed:800,coilDuration:.68,liftSpeed:100,stun:2.2,respawnDelay:2});
 const active=g=>g.rooms?.active===g.level.circuit?.room;
 const close=(p,x,y,r=70)=>Math.hypot(p.x+14-x,p.y+20-y)<r;
