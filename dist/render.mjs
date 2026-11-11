@@ -1,15 +1,15 @@
-import {drawBenchWiring} from './bench-wiring.mjs?v=4.9g';
-import {benchSurface,drawBenchRooms} from './bench-art.mjs?v=4.9g';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9g';
-import {drawEquipment} from './equipment-art.mjs?v=4.9g';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9g';
-import {poseScale} from './feel.mjs?v=4.9g';
-import {currentRoom} from './rooms.mjs?v=4.9g';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9g';
-import {drawResearch} from './research.mjs?v=4.9g';
-import {drawPrinter} from './printer-art.mjs?v=4.9g';
-import {drawLab} from './laboratory.mjs?v=4.9g';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9g';
+import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.0';
+import {benchSurface,drawBenchRooms} from './bench-art.mjs?v=4.9.0';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.0';
+import {drawEquipment} from './equipment-art.mjs?v=4.9.0';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.0';
+import {poseScale} from './feel.mjs?v=4.9.0';
+import {currentRoom} from './rooms.mjs?v=4.9.0';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.0';
+import {drawResearch} from './research.mjs?v=4.9.0';
+import {drawPrinter} from './printer-art.mjs?v=4.9.0';
+import {drawLab} from './laboratory.mjs?v=4.9.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
