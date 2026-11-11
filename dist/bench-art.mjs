@@ -12,7 +12,8 @@ export function drawBenchRooms(c,g){
  if(!g.level.benchMap)return;c.save();
  for(const r of g.level.benchRooms){
   c.fillStyle='#0c1a29';c.fillRect(r.x-30,r.y-100,r.w+200,r.h+100);
-  c.strokeStyle='#29404d';c.lineWidth=5;c.strokeRect(r.x-30,r.y-100,r.w+200,r.h+100);
+  c.strokeStyle='#29404d';c.lineWidth=5;// Background recess is not a structural wall; solid boundaries use benchSurface.
+
   // Muted conduits are background: no luminous horizontal top edges.
   for(let i=0;i<3;i++){c.strokeStyle=['#38465b','#345b5b','#665744'][i];c.lineWidth=6;c.beginPath();c.moveTo(r.x+30+i*20,510);c.lineTo(r.x+30+i*20,r.y+r.h-55);c.lineTo(r.x+r.w-60,r.y+r.h-55);c.stroke();}
   c.fillStyle='#6a919d';c.font='16px monospace';c.fillText(r.name,r.x+170,r.y+20);

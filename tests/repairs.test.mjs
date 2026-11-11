@@ -1,3 +1,4 @@
+import {legacyRepairGame} from './legacy-repair-fixture.mjs';
 import {completeHand} from './action-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -38,11 +39,11 @@ test('logic circuit truth table and NOT handle all inputs',()=>{
  assert.deepEqual(truthTable({gates:['XOR'],invert:false},1),[0,1,1,0]);assert.deepEqual(truthTable({gates:['AND'],invert:true},1),[1,1,1,0]);
 });
 test('repair pauses physics, failed commit stays open, cancelled draft survives reopening',()=>{
- const g=createGame(0),r=g.level.relays.find(r=>r.puzzleType);approach(g,r);assert.ok(beginRepair(g,r));const time=g.time,x=g.player.x;updateGame(g,{right:true},1);assert.equal(g.time,time);assert.equal(g.player.x,x);
+ const g=legacyRepairGame(),r=g.level.relays.find(r=>r.puzzleType);approach(g,r);assert.ok(beginRepair(g,r));const time=g.time,x=g.player.x;updateGame(g,{right:true},1);assert.equal(g.time,time);assert.equal(g.player.x,x);
  assert.equal(commitRepair(g).ok,false);assert.ok(g.repairSession);changePuzzle(r.puzzle,'wire',0,0);g.repairSession=null;beginRepair(g,r);assert.equal(r.puzzle.connections[0],0);
 });
 test('complete repair rewards and grades persist through death and cannot pay twice',()=>{
- const g=createGame(0),r=g.level.relays.find(r=>r.puzzleType);approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);assert.equal(g.research.fullRepairs,1);
+ const g=legacyRepairGame(),r=g.level.relays.find(r=>r.puzzleType);approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);assert.equal(g.research.fullRepairs,1);
  beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);respawn(g,'fall');tickResearch(g);assert.equal(r.repairRank,2);assert.equal(g.research.funds,70);
 });
 test('hand repair builds a bridge; lift calibration is idempotent; press and turret controls work',()=>{
@@ -59,7 +60,7 @@ test('gear repair restores a full brake without breaking cart rider or lane mech
  const g=createGame(2),r=g.level.relays.find(r=>r.puzzleType==='gears');approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);for(let i=0;i<240;i++)updateGame(g,{left:true});assert.equal(g.cart.speed,0);const x=g.cart.x;for(let i=0;i<60;i++)updateGame(g,{left:true});assert.equal(g.cart.x,x);
 });
 test('every repair family is placed in a course; repairs work with zero funds',()=>{
- const types=new Set();for(let i=0;i<8;i++){const g=createGame(i);for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
+ const types=new Set();for(const g of [legacyRepairGame(),...Array.from({length:8},(_,i)=>createGame(i))]){for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
  assert.deepEqual([...types].sort(),Object.keys(REPAIR_NAMES).sort());
 });
 test('emergency repair upgrades once; full-repair cache stays locked until upgraded',()=>{

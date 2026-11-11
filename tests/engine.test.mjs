@@ -1,3 +1,4 @@
+import {legacyRepairGame} from './legacy-repair-fixture.mjs';
 import {solveSession} from './repair-inputs.mjs';
 import {changePuzzle} from '../dist/repairs.mjs';
 import assert from 'node:assert/strict';
@@ -30,7 +31,7 @@ test('final room never awards fever; other rooms guarantee one draw in any order
  assert.equal(recordClear(blankProgress(1),0,()=>0),false);
 });
 test('repairs require fresh local input, persist after falling and gate the exit',()=>{
- const g=createGame(0),r=g.level.relays.find(r=>r.puzzleType);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.pulse=2;step(g);assert.equal(g.repairSession,undefined);
+ const g=legacyRepairGame(),r=g.level.relays.find(r=>r.puzzleType);Object.assign(g.player,{x:r.x-14,y:r.y-20,vx:0,vy:0});g.pulse=2;step(g);assert.equal(g.repairSession,undefined);
  g.cooldown=0;step(g,{pulse:true});assert.ok(g.repairSession);assert.equal(r.on,false);solveSession(g);
  assert.equal(r.on,true);respawn(g,'fall');assert.equal(r.on,true);
  const locked=createGame(7);locked.level.relays.forEach(r=>r.on=true);Object.assign(locked.player,{x:locked.level.goal.x-14,y:locked.level.goal.y-40});step(locked);assert.equal(locked.finished,false);

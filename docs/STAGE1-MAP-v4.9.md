@@ -55,3 +55,29 @@ collectibles are unchanged. Other stages receive only cache URL updates.
   browser, mobile touch/real devices, audio quality, first-play completion time.
 
 This is a working-branch/private-test update, not a GitHub Pages release.
+
+## 2026-11-12: floor-button wiring (4.9g)
+
+The user's revised specification supersedes the earlier preservation of the
+three required repair IDs. Stage 1 now has exactly one required world repair,
+`bench-wire`, on the final upper deck. Three physical floor buttons use the
+symbols triangle, circle, square; the server logs in both optional basements
+show their startup order. An incorrect contact resets progress with feedback.
+Holding a button does not repeat it. A jump can skip a button on the way across.
+Pulse and purchased assistance cannot solve this repair. Completion powers both
+existing light bridges and grants the standard repair reward once.
+
+Removed the x260/y400 introductory overhead tray and its pickup, together with
+obsolete repair-menu-generated ghost stairs. Added eight enemies across surface
+and basement routes. Server-room structural side walls now have actual solid
+geometry and thick floors. Decorative background outlines no longer masquerade
+as colliding walls; return shafts stay open.
+
+Validation: 193 tests pass; all eight input-driven main routes finish with zero
+deaths. Both basement return paths still pass. New tests cover wrong order,
+repeat contact, pulse bypass, single reward, actual wall collision, hint presence
+and enemy density. Existing menu-repair tests retain their assertions against
+an explicit legacy wiring fixture because that menu was intentionally removed
+from live Stage 1. The route driver now physically walks and jumps onto buttons;
+it does not set repair flags. Browser and real-device checks of this revision
+have not been performed. Human puzzle readability remains to be playtested.
