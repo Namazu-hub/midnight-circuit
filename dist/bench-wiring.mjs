@@ -19,6 +19,6 @@ export function drawBenchWiring(c,g){
   c.fillStyle=lit?'#91ffce':r.flash>.5?'#ff936f':'#a1bdd2';c.fillRect(b.x,b.y-9,b.w,9);c.fillText(labels[i],b.x+b.w/2,b.y-20);
  }
  c.fillStyle='#152c38';c.fillRect(r.x-100,r.y-145,200,42);c.fillStyle='#b5f8df';c.font='16px sans-serif';c.fillText(r.on?'通電 / 光の橋 開通':`配線 ${r.step}/3 · 床ボタン`,r.x,r.y-118);
- for(const h of g.level.wireHints){c.fillStyle='#152e3b';c.fillRect(h.x-115,h.y-80,230,80);c.strokeStyle='#7899aa';c.strokeRect(h.x-115,h.y-80,230,80);c.fillStyle='#b5f8df';c.font='14px sans-serif';c.fillText('起動順序 / SERVER LOG',h.x,h.y-56);c.font='24px sans-serif';c.fillText(WIRE_ORDER.map(i=>labels[i]).join(' → '),h.x,h.y-20);}
+ for(const h of g.level.wireHints){c.fillStyle='#152e3b';c.fillRect(h.x-150,h.y-120,300,120);c.strokeStyle='#7899aa';c.strokeRect(h.x-150,h.y-120,300,120);c.fillStyle='#b5f8df';c.font='15px sans-serif';c.fillText('起動順序 / SERVER LOG',h.x,h.y-91);c.font='30px sans-serif';c.fillText(WIRE_ORDER.map(i=>labels[i]).join(' → '),h.x,h.y-48);c.font='12px monospace';c.fillText('STARTUP SEQUENCE · 3 NODES',h.x,h.y-18);}
  c.restore();
 }

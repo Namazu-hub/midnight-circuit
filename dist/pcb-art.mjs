@@ -1,8 +1,8 @@
-import {drawCircuitTower} from './circuit-art.mjs?v=4.9.0';
-import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.9.0';
-import {drawPCBTransport} from './pcb-transport.mjs?v=4.9.0';
-import {drawPCBFoes} from './pcb-enemies.mjs?v=4.9.0';
-import {doorReady} from './rooms.mjs?v=4.9.0';
+import {drawCircuitTower} from './circuit-art.mjs?v=4.9.1';
+import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.9.1';
+import {drawPCBTransport} from './pcb-transport.mjs?v=4.9.1';
+import {drawPCBFoes} from './pcb-enemies.mjs?v=4.9.1';
+import {doorReady} from './rooms.mjs?v=4.9.1';
 const box=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
 function board(c,x,y,w){box(c,x,y,w,24,'#174e46');box(c,x,y,w,4,'#c0f3cf');for(let i=0;i<w-40;i+=60){c.strokeStyle='#d9bc74';c.lineWidth=2;c.beginPath();c.moveTo(x+i+14,y+18);c.lineTo(x+i+14,y+9);c.lineTo(x+i+49,y+9);c.stroke();box(c,x+i+45,y+7,6,5,'#d8e9cd');}}
 function component(c,a){const i=a.slot%3;if(i===0){box(c,a.x,a.y,a.w,a.h,'#cfb78c');for(let x=a.x+15;x<a.x+a.w;x+=25)box(c,x,a.y,5,a.h,'#895a65');}else if(i===1){box(c,a.x,a.y,a.w,a.h,'#7a98b3');box(c,a.x+a.w-14,a.y,8,a.h,'#d7e7dd');}else{box(c,a.x,a.y,a.w,a.h,'#263b4d');for(let x=a.x;x<a.x+a.w;x+=12){box(c,x,a.y+a.h-4,5,10,'#cbd3c8');}box(c,a.x+12,a.y+8,a.w-24,3,'#a9c7c3');}}

@@ -1,15 +1,15 @@
-import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.0';
-import {benchSurface,drawBenchRooms} from './bench-art.mjs?v=4.9.0';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.0';
-import {drawEquipment} from './equipment-art.mjs?v=4.9.0';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.0';
-import {poseScale} from './feel.mjs?v=4.9.0';
-import {currentRoom} from './rooms.mjs?v=4.9.0';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.0';
-import {drawResearch} from './research.mjs?v=4.9.0';
-import {drawPrinter} from './printer-art.mjs?v=4.9.0';
-import {drawLab} from './laboratory.mjs?v=4.9.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.0';
+import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.1';
+import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.9.1';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.1';
+import {drawEquipment} from './equipment-art.mjs?v=4.9.1';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.1';
+import {poseScale} from './feel.mjs?v=4.9.1';
+import {currentRoom} from './rooms.mjs?v=4.9.1';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.1';
+import {drawResearch} from './research.mjs?v=4.9.1';
+import {drawPrinter} from './printer-art.mjs?v=4.9.1';
+import {drawLab} from './laboratory.mjs?v=4.9.1';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.1';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -110,7 +110,7 @@ function background(c,theme,camera,t,width=VIEW.w,height=VIEW.h){
 }
 function platform(c,p,P,pulse,t,g=null){
   const x=p.x,y=p.y,w=p.w;if(g?.pcb&&p.pcbManaged&&!platformSolid(g,p)){c.save();c.strokeStyle='#86afac66';c.setLineDash([5,7]);c.strokeRect(x,y,w,18);c.restore();return;}if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
-  if(g?.level.benchMap&&['ground','platform'].includes(p.type)){benchSurface(c,p);return;}
+  if(g?.level.benchMap&&['ground','platform'].includes(p.type)){benchSurface(c,p,g);return;}
   if(p.type==='ghost'){
     c.save();if(g?!platformSolid(g,p):pulse<=0){c.globalAlpha=.45;c.setLineDash([7,6]);c.strokeStyle=P.glow;c.lineWidth=2;c.strokeRect(x+1,y+1,w-2,18);c.setLineDash([]);for(let j=12;j<w;j+=22)rect(c,x+j,y+8,3,3,P.glow);c.restore();return;}
     glow(c,x+w/2,y,100,P.glow+'20');rect(c,x,y,w,20,'#418d89');rect(c,x,y,w,4,'#b3fff0');for(let j=10;j<w;j+=20)rect(c,x+j,y+8,4,4,'#9bffe2');c.restore();return;
@@ -161,9 +161,9 @@ function goal(c,g,t){
   c.font='9px monospace';c.textAlign='center';c.fillStyle=col;c.fillText(ready?'RESTORE':`${g.level.relays.filter(r=>!r.optional&&!r.on).length} TO REPAIR`,x,y-120);c.textAlign='left';
 }
 export function drawWorld(c,g,t,effects=[],reduced=false){
-  const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else background(c,g.level.theme,g.camera,t);
+  const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else if(!g.level.benchMap)background(c,g.level.theme,g.camera,t);
   c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,-1000,room.right-room.left,3000);c.clip();}
-  drawDawnRoom(c,g);drawBenchRooms(c,g);
+  if(g.level.benchMap)drawBenchBackdrop(c,g,VIEW.w,VIEW.h);drawDawnRoom(c,g);drawBenchRooms(c,g,VIEW.w);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}
   for(const a of g.level.platforms){if(a.x+a.w<g.camera-30||a.x>g.camera+VIEW.w+30)continue;platform(c,a,P,g.pulse,t,g);}
   for(const z of g.level.gravityZones){c.save();c.fillStyle='#75ebce0b';c.fillRect(z.x,z.y,z.w,z.h);c.strokeStyle='#7bedd357';c.setLineDash([7,10]);c.strokeRect(z.x,z.y,z.w,z.h);c.setLineDash([]);c.fillStyle='#9bded0';c.font='13px monospace';c.fillText('LOW GRAVITY / 0.38 G',z.x+30,z.y+40);for(let i=0;i<25;i++){const x=z.x+(i*149)%z.w,y=z.y+((i*87-t*18)%z.h+z.h)%z.h;star(c,x,y,2,'#b7ffe555');}c.restore();}
@@ -177,10 +177,10 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const portal of g.level.portals){const col=portal.on?'#8affd5':'#d5adff';glow(c,portal.x,portal.y,90,col+'24');c.save();c.translate(portal.x,portal.y);c.strokeStyle=col;c.lineWidth=5;c.beginPath();c.ellipse(0,0,30,60,0,0,Math.PI*2);c.stroke();c.lineWidth=1;c.beginPath();c.ellipse(0,0,40,69,0,0,Math.PI*2);c.stroke();for(let i=0;i<5;i++)star(c,Math.cos(t+i*1.25)*28,Math.sin(t+i*1.25)*56,3,col);c.font='11px monospace';c.fillStyle=col;c.textAlign='center';c.fillText('X / TRANSFER',0,-82);c.restore();}
   for(const q of g.projectiles){if(q.kind==='screw'){rect(c,q.x,q.y,12,5,'#d0e0ed');rect(c,q.x+4,q.y+5,4,17,'#a2b9cd');for(let k=0;k<4;k++)line(c,q.x+2,q.y+7+k*4,q.x+10,q.y+5+k*4,'#e1ebef',2);}else if(q.kind==='acid'){round(c,q.x,q.y,q.w,q.h,4,'#acdf72');glow(c,q.x+q.w/2,q.y,28,'#b4ff5226');for(let i=0;i<3;i++)rect(c,q.x+9+i*17,q.y-4-Math.sin(t*6+i)*3,3,3,'#cbf590');}else{glow(c,q.x+4,q.y+4,17,'#ffab773d');rect(c,q.x,q.y,q.w,q.h,'#ffb78b');rect(c,q.x+2,q.y+2,4,4,'#fff0c9');}}
   // Small details make each room feel inhabited.
-  for(const p of g.level.platforms){if(p.h<60||p.w<350)continue;const x=p.x+p.w-65;if(x<g.camera-100||x>g.camera+VIEW.w+100)continue;
+  for(const p of g.level.platforms){if(g.level.benchMap||p.h<60||p.w<350)continue;const x=p.x+p.w-65;if(x<g.camera-100||x>g.camera+VIEW.w+100)continue;
     if(g.level.theme==='garden')plant(c,x,p.y,1.1,'#9ac77a');else{rect(c,x-13,p.y-34,35,34,'#354b5c');rect(c,x-10,p.y-31,29,4,P.edge);rect(c,x-8,p.y-21,8,11,P.glow+'88');rect(c,x+5,p.y-21,10,2,'#748f9b');rect(c,x+5,p.y-16,8,2,'#748f9b');}}
   for(const s of g.level.students){if(g.rooms&&s.room!==g.rooms.active)continue;student(c,s.x,s.y,s.color,t,1);const close=Math.hypot(g.player.x-s.x,g.player.y+40-s.y)<200;rect(c,s.x+18,s.y-87,3,7,g.level.color);rect(c,s.x+18,s.y-77,3,3,g.level.color);
-    if(g.printer||g.pcb){if(g.printer)drawPrinterStudentWork(c,g,s);continue;}if(close){const lines=g.pcb&&s.after&&g.level.relays.find(r=>r.id===({A:'power',B:'paste',C:'placement',D:'magnet',E:'reflow',F:'aoi',G:'restored'})[s.room])?.on?s.after:s.lines,original=lines[Math.floor(t/7)%lines.length],text=g.touchInput?original.replace(/Xで/g,'PULSEで').replace(/Cか画面ボタン|Cで/g,'ACTIONで'):original,small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
+    if(g.printer||g.pcb||g.level.benchMap){if(g.printer)drawPrinterStudentWork(c,g,s);continue;}if(close){const lines=g.pcb&&s.after&&g.level.relays.find(r=>r.id===({A:'power',B:'paste',C:'placement',D:'magnet',E:'reflow',F:'aoi',G:'restored'})[s.room])?.on?s.after:s.lines,original=lines[Math.floor(t/7)%lines.length],text=g.touchInput?original.replace(/Xで/g,'PULSEで').replace(/Cか画面ボタン|Cで/g,'ACTIONで'):original,small=VIEW.w<1000,bodyFont=small?20:12,nameFont=small?15:9,top=s.y-(small?215:184),h=small?92:65;c.font=`${bodyFont}px "Segoe UI",sans-serif`;const w=Math.max(c.measureText(text).width+28,180),left=clamp(s.x-w/2,g.camera+10,g.camera+VIEW.w-w-10);
       round(c,left,top,w,h,6,'#101f32ee');c.strokeStyle=g.level.color+'70';c.lineWidth=1;c.strokeRect(left+.5,top+.5,w,h);c.fillStyle=g.level.color;c.font=`${nameFont}px "Segoe UI",sans-serif`;c.fillText(s.name,left+13,top+(small?28:19));c.fillStyle='#e0ecef';c.font=`${bodyFont}px "Segoe UI",sans-serif`;c.fillText(text,left+13,top+(small?65:44));line(c,s.x+15,top+h,s.x+15,s.y-100,g.level.color+'77');}}
   for(const sign of g.level.signs){if(Math.abs(g.player.x-sign.x)>310||g.level.students.some(s=>Math.abs(g.player.x-s.x)<185&&Math.abs(s.x-sign.x)<240&&sign.y>310&&sign.y<410))continue;c.save();c.globalAlpha=.8;c.font='11px "Segoe UI",sans-serif';const w=c.measureText(sign.text).width+20;round(c,sign.x-w/2,sign.y-13,w,26,4,'#0d1c2bbc');c.fillStyle='#b6ced6';c.textAlign='center';c.fillText(sign.text,sign.x,sign.y+4);c.textAlign='left';c.restore();}
   for(const coin of g.level.chips){if(coin.got||coin.x<g.camera-30||coin.x>g.camera+VIEW.w+30)continue;const yy=coin.y+Math.sin(t*3+coin.x)*3;glow(c,coin.x,yy,18,'#f8d98a10');const ww=4+Math.abs(Math.sin(t*2+coin.x*.01))*3;rect(c,coin.x-ww,yy-7,ww*2,14,'#d0a75e');rect(c,coin.x-ww+2,yy-6,ww*2-3,10,'#ffe3a2');rect(c,coin.x-1,yy-4,2,6,'#fff2ca');}
@@ -210,7 +210,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   }
   for(const d of g.level.drinks){if(d.got)continue;const yy=d.y+Math.sin(t*3)*3;glow(c,d.x,yy,36,'#aaff4328');rect(c,d.x-10,yy-18,20,35,'#0a171e');rect(c,d.x-9,yy-20,18,3,'#b7c5bd');rect(c,d.x-9,yy+16,18,3,'#809e8c');c.font='bold 18px monospace';c.fillStyle='#b0ff63';c.textAlign='center';c.fillText('M',d.x,yy+5);c.font='7px monospace';c.fillText('ENA',d.x,yy+13);c.textAlign='left';}
   for(const l of g.level.lasers){if(l.nozzle){rect(c,l.x-25,l.y-52,62,38,'#dde5e4');rect(c,l.x-15,l.y-46,40,19,'#263f52');rect(c,l.x-5,l.y-27,22,20,'#bf875b');line(c,l.baseX-85,l.y-55,l.baseX+110,l.y-55,'#819ba5',7);}rect(c,l.x-8,l.y-11,28,12,'#706276');rect(c,l.x-8,l.y+l.h-1,28,10,'#706276');if(laserActive(g,l)){glow(c,l.x+6,l.y+l.h/2,100,'#ff665a12');rect(c,l.x-5,l.y,22,l.h,'#ff646026');rect(c,l.x+2,l.y,8,l.h,'#ff8676');rect(c,l.x+5,l.y,2,l.h,'#ffdbbc');}else{const warning=g.pulse<=0&&laserPhase(g,l)<.65;for(let y=l.y;y<l.y+l.h;y+=16)rect(c,l.x+5,y,warning?4:2,5,warning?'#ffd88caa':'#90edc740');if(warning){c.font='bold 18px monospace';c.fillStyle='#ffd88c';c.fillText('!',l.x-5,l.y-20);}}}
-  drawBenchWiring(c,g);if(!g.pcb&&!g.level.benchMap)drawLab(c,g);drawResearch(c,g);drawPrinter(c,g);drawPCB(c,g,reduced);
+  drawBenchSupplies(c,g);drawBenchWiring(c,g);if(!g.pcb&&!g.level.benchMap)drawLab(c,g);drawResearch(c,g);drawPrinter(c,g);drawPCB(c,g,reduced);
   const p=g.player;
   if(p.boost>0){
     for(let i=reduced?1:6;i>0;i--){c.save();c.globalAlpha=.07+(6-i)*.025;c.filter=`hue-rotate(${(t*95+i*45)%360}deg)`;robot(c,p.x-3-p.face*i*9,p.y-3,2,p.walk*.018,true,p.face,!p.onGround);c.restore();}
@@ -229,6 +229,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   }
   if(p.boost>0){c.save();c.textAlign='center';c.fillStyle='#baff89';c.font='bold 10px monospace';c.fillText('BOOST '+p.boost.toFixed(1)+'s',hx,notice?hy-48:hy+10);c.restore();}
   for(const e of effects){const a=clamp(e.life/e.max,0,1);c.save();c.globalAlpha=a;if(e.text){c.font='bold 22px monospace';c.fillStyle=e.color;c.textAlign='center';c.fillText(e.text,e.x,e.y);}else if(e.ring){c.strokeStyle=e.color;c.lineWidth=3*a;c.beginPath();c.arc(e.x,e.y,(1-a)*e.radius,0,Math.PI*2);c.stroke();}else rect(c,e.x,e.y,e.size,e.size,e.color);c.restore();}
+  drawBenchChat(c,g,VIEW.w,VIEW.h,t);
   if(g.printer||g.pcb){const speaker=g.level.students.filter(s=>s.room===g.rooms.active&&s.chat?.visible).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];if(speaker)drawPrinterChat(c,g,speaker,VIEW.w,VIEW.pixelScale||1);}
   c.restore();if(g.pulse>0){c.strokeStyle='#75efce33';c.lineWidth=7;c.strokeRect(3,3,VIEW.w-6,VIEW.h-6);}
   if(g.warp>0){c.fillStyle=`rgba(171,142,235,${g.warp*.25})`;c.fillRect(0,0,VIEW.w,VIEW.h);}
