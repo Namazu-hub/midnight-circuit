@@ -1,4 +1,4 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.10.0';
+import {installBenchMachines} from './bench-machines.mjs?v=4.10.1';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
@@ -89,6 +89,30 @@ export function redesignBench(L){
   else merged.push({...p});
  }
  L.platforms=other.concat(merged);
+ extendCarrierCrossing(L);
  installBenchMachines(L);
- L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'サーバー記録室'},{x:5930,name:'夜勤の保守室'},{x:7150,name:'制御盤デッキ'}];
+ L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'サーバー記録室'},{x:5930,name:'夜勤の保守室'},{x:7500,name:'空中搬送・3台乗継'},{x:10500,name:'制御盤デッキ'}];
+}
+
+// A mandatory crossing AFTER both basement exits, with no underground bypass.
+function extendCarrierCrossing(L){
+ const cut=7500,extra=3000;
+ const shift=o=>{for(const key of ['x','min','max','baseX','entry','exit'])if(typeof o[key]==='number'&&o[key]>=cut)o[key]+=extra;};
+ const platforms=[];
+ for(const a of L.platforms){
+  if(a.x<cut&&a.x+a.w>cut){const right={...a,x:cut+extra,w:a.x+a.w-cut};platforms.push({...a,w:cut-a.x},right);}
+  else{shift(a);platforms.push(a);}
+ }
+ L.platforms=platforms;
+ for(const name of ['enemies','chips','gears','drinks','students','checkpoints','relays','wireButtons','signs','rain','vendorSites','wireHints'])for(const o of L[name]||[])shift(o);
+ L.route=L.route.filter(r=>r.x<7350||r.x>=cut);for(const r of L.route)shift(r);
+ shift(L.goal);L.width+=extra;
+ // Supply and a recovery checkpoint stay on solid ground before boarding.
+ L.checkpoints.push({x:7350,y:510});L.vendorSites.push({x:7250,y:510});
+ L.carrierGap={x:cut,end:cut+extra,y:700};
+ L.fallZones=L.fallZones.filter(z=>z.x!==7150).concat({x:7150,y:800,w:350,h:850},{x:10500,y:800,w:900,h:850});
+ L.rain=L.rain.filter(z=>z.x!==5300);
+ for(let i=0;i<6;i++)L.rain.push({x:7500+i*500,y:550,w:500,clock:i*.35,phase:0,top:-100,spacing:130,count:4,life:2.1});
+ L.signs.push({x:7330,y:350,text:'充電キャリア 3連接 / 乗車ごと ¥10 / 落下危険'});
+ L.sections.push({x:7500,name:'空中搬送・3台乗継'});
 }

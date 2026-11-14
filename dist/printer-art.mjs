@@ -1,8 +1,8 @@
-import {drawService,drawCage} from './printer-service-art.mjs?v=4.10.0';
-import {drawJourney} from './printer-journey-art.mjs?v=4.10.0';
-import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.10.0';
-import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.10.0';
-import {drawPrinterGuides} from './printer-visual.mjs?v=4.10.0';
+import {drawService,drawCage} from './printer-service-art.mjs?v=4.10.1';
+import {drawJourney} from './printer-journey-art.mjs?v=4.10.1';
+import {drawDragon as dragon,dragonPose} from './dragon.mjs?v=4.10.1';
+import {drawNewPrinterFoes,drawBenchy} from './printer-enemies.mjs?v=4.10.1';
+import {drawPrinterGuides} from './printer-visual.mjs?v=4.10.1';
 // Original procedural pixel art: silhouette polygons, mechanical joints and
 // layered resin plates rendered on a 2px grid, with no external assets.
 const poly=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};

@@ -1,4 +1,4 @@
-import {overlap,clamp} from './world.mjs?v=4.10.0';
+import {overlap,clamp} from './world.mjs?v=4.10.1';
 export const LAB_RULES={repairCooldown:.65,bossHP:6,bossImmunity:1.1,magnetCooldown:3,stickyDuration:12};
 export function expandRooms(rooms){
  const kinds=[['spring','coil'],['mouse-hop','silicone-a','silicone-b'],[],['silicone-a','silicone-b','coil'],['spring','mouse-erratic'],['mouse-dash','coil'],['coil','mouse-chase'],['mouse-chase','spring']];
@@ -22,7 +22,7 @@ export function repairPhase(g,r){return (g.time*.42+(r.x%7)*.1)%1;}
 export function tickLab(g,input,activated,dt,hit){
  const L=g.level,p=g.player;
  for(const r of L.relays){if(!r.mode||r.on||r.puzzleType)continue;if(activated&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<110){if(r.mode==='sequence'){r.step++;r.on=r.step>=3;}if(r.mode==='titration'){r.amount=clamp((r.amount||0)+2,0,6);r.on=r.amount===6;}if(r.mode==='timing')r.on=repairPhase(g,r)>=.35&&repairPhase(g,r)<=.7;g.cooldown=LAB_RULES.repairCooldown;if(r.on){p.hp=Math.min(6,p.hp+1);g.respawn={x:p.x,y:p.y};g.checkpoint=true;}g.events.push({type:r.on?'relay':'repairStep',x:r.x,y:r.y,text:r.mode==='timing'?'緑の帯でX！':r.mode==='titration'?`pH ${1+r.amount} → 目標7`:`接続 ${r.step}/3`});}}
- for(const z of L.rain||[]){if(Math.abs(p.x-(z.x+z.w/2))>800)continue;const old=z.clock;z.clock+=dt;z.phase=z.clock%2.6;if(Math.floor(old/2.6)!==Math.floor(z.clock/2.6)&&g.pulse<=0)for(let j=0;j<4;j++)g.projectiles.push({kind:'screw',x:z.x+50+j*135,y:z.y-520,w:12,h:22,vx:0,vy:340,life:1.6});}
+ for(const z of L.rain||[]){if(Math.abs(p.x-(z.x+z.w/2))>800)continue;const old=z.clock;z.clock+=dt;z.phase=z.clock%2.6;if(Math.floor(old/2.6)!==Math.floor(z.clock/2.6)&&g.pulse<=0)for(let j=0;j<(z.count||4);j++)g.projectiles.push({kind:'screw',x:z.x+50+j*(z.spacing||135),y:z.top??z.y-520,w:12,h:22,vx:0,vy:340,life:z.life||1.6});}
  for(const wall of L.sticky||[]){wall.life-=dt;if(g.pulse>0&&Math.abs(p.x-wall.x)<200)wall.life=0;if(wall.life>0&&overlap(p,wall)){p.vx*=.15;p.x=p.x+14<wall.x+wall.w/2?wall.x-p.w:wall.x+wall.w;}}L.sticky=(L.sticky||[]).filter(w=>w.life>0);
  const b=L.boss;if(!b||b.repaired)return;b.invul=Math.max(0,b.invul-dt);const ctl=L.bossConsole;ctl.cooldown=Math.max(0,ctl.cooldown-dt);if(p.x<7100)return;
  b.clock+=dt;const phase=b.clock%6.5;b.state=b.hp<=0?'disabled':phase<1?'charge':phase<2.4?'rush':'recover';if(b.state==='charge')b.dir=p.x>b.x?1:-1;if(b.state==='rush')b.x=clamp(b.x+(b.dir||-1)*300*dt,7240,7950);
@@ -39,7 +39,7 @@ export function drawLab(c,g){const L=g.level;c.save();c.textAlign='center';
  }
  if(r.mode==='sequence'){for(let i=0;i<3;i++){c.fillStyle=i<(r.step||0)?'#80ffca':'#546579';c.fillRect(r.x-45+i*34,r.y+38,25,8);c.font='9px sans-serif';c.fillText(['電源','信号','接地'][i],r.x-32+i*34,r.y+59);}}
  if(r.mode==='timing'&&!r.on){c.fillStyle='#344659';c.fillRect(r.x-80,r.y-80,160,10);c.fillStyle='#72d8ac';c.fillRect(r.x-24,r.y-80,56,10);c.fillStyle='white';c.fillRect(r.x-80+160*repairPhase(g,r),r.y-84,3,18);}else c.fillText(r.mode==='titration'?`pH ${1+(r.amount||0)} / 7 · Xで一滴`:`${r.step||0}/3 · Xで順番に接続`,r.x,r.y-70);}
- for(const z of L.rain||[])if(z.phase>1.7){c.strokeStyle='#ffcf77';c.setLineDash([5,8]);for(let i=0;i<4;i++){const x=z.x+56+i*135;c.beginPath();c.moveTo(x,z.y-500);c.lineTo(x,z.y);c.stroke();}c.setLineDash([]);c.fillStyle='#ffcf77';c.font='16px sans-serif';c.fillText('⚠ ネジ落下！',z.x+z.w/2,z.y-260);}
+ for(const z of L.rain||[])if(z.phase>1.7){c.strokeStyle='#ffcf77';c.setLineDash([5,8]);for(let i=0;i<4;i++){const x=z.x+56+i*(z.spacing||135);c.beginPath();c.moveTo(x,z.top??z.y-500);c.lineTo(x,z.y);c.stroke();}c.setLineDash([]);c.fillStyle='#ffcf77';c.font='16px sans-serif';c.fillText('⚠ ネジ落下！',z.x+z.w/2,z.y-260);}
  for(const w of L.sticky||[]){c.fillStyle='#db9fea99';c.fillRect(w.x,w.y,w.w,w.h);c.strokeStyle='#ffe1fd';c.strokeRect(w.x,w.y,w.w,w.h);c.fillStyle='white';c.font='12px sans-serif';c.fillText('粘着壁 · Xで除去',w.x+w.w/2,w.y-12);}
  const b=L.boss;if(b){
  if(L.bossConsole.cooldown>2.4){c.strokeStyle='#9af6ff';c.lineWidth=6;c.beginPath();c.moveTo(L.bossConsole.x,L.bossConsole.y-20);c.lineTo(b.x+23,b.y-130);c.lineTo(b.x+23,b.y);c.stroke();}

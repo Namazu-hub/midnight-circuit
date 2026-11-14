@@ -72,11 +72,11 @@ test('expired trays retain a standing rider, then retract, and can be retriggere
  // Returning to the same apparatus after a checkpoint reset has no consumed resource.
  Object.assign(g.player,{x:1916,y:470,vx:0,vy:0});frames(g,5);assert.ok(m.timer>9);
 });
-test('charging carrier transports a standing rider, permits a destination jump, and returns empty',()=>{
- const g=fixture(5180,430),m=g.level.benchMachines.find(m=>m.id==='shuttle'),a=g.level.platforms.find(a=>a.benchMachine==='shuttle');
- go(g,5255,430);frames(g,80);assert.ok(m.charge>0&&m.charge<1);
- frames(g,650);assert.equal(m.phase,'wait');assert.equal(a.x,m.endX);assert.equal(g.player.y+40,m.top);assert.ok(g.player.x>5650);
- go(g,5810,220);assert.ok(g.chips>0);frames(g,1100);assert.equal(m.phase,'idle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.deaths,0);
+test('charging carrier follows a long vertical path and charges exactly once per boarding',()=>{
+ const g=fixture(7560,510);g.level.rain=[];const m=g.level.benchMachines.find(m=>m.id==='shuttle'),a=g.level.platforms.find(a=>a.benchMachine==='shuttle');
+ frames(g,200);assert.ok(m.charge>0&&m.charge<1);assert.equal(g.research.funds,10);
+ frames(g,2200);assert.equal(m.phase,'wait');assert.equal(a.x,m.endX);assert.equal(g.player.y+40,m.top);assert.equal(g.research.funds,10);assert.equal(g.deaths,0);
+ step(g,{jump:true});frames(g,95);assert.equal(g.research.funds,0); // landing again pays again
 });
 test('descent camera keeps PICO visible at 900px/s and static scenery cannot alter gameplay',()=>{
  const g=fixture(3370,550);g.player.vy=900;
@@ -84,16 +84,23 @@ test('descent camera keeps PICO visible at 900px/s and static scenery cannot alt
  assert.equal(g.deaths,0);assert.equal(g.level.relays.length,1);assert.equal(g.level.gears.length,3);
 });
 test('new controls work with the ordinary enemy population, with clear initial contact zones',()=>{
- for(const [id,x,y,n] of [['lift',885,470,330],['bridge',1916,470,60],['shuttle',5245,390,850]]){
+ for(const [id,x,y,n] of [['lift',885,470,330],['bridge',1916,470,60]]){
   const g=createGame(0);g.research.funds=20;Object.assign(g.player,{x,y});frames(g,n);const m=g.level.benchMachines.find(m=>m.id===id);
   assert.equal(g.deaths,0);assert.equal(g.player.hp,6);assert.ok(id==='lift'?m.on:id==='bridge'?m.extended:m.phase==='wait');
  }
 });
-test('partial charge drains when stepping away; retry resets the carrier and costs no funds',()=>{
- const g=fixture(5255,430),m=g.level.benchMachines.find(m=>m.id==='shuttle');frames(g,65);assert.ok(m.charge>0&&m.charge<1);
- frames(g,35,{left:true});frames(g,180);assert.equal(m.phase,'idle');assert.equal(m.charge,0);
- respawn(g,'fall');const a=g.level.platforms.find(a=>a.benchMachine==='shuttle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.research.funds,20);
- Object.assign(g.player,{x:5245,y:390});frames(g,850);assert.equal(m.phase,'wait');assert.equal(g.research.funds,20);
+test('carrier fall is lethal, resets all cars, and recovery plus boarding both cost funds',()=>{
+ const g=fixture(7560,510);g.research.funds=100;frames(g,400);assert.equal(g.research.funds,90);
+ Object.assign(g.player,{x:8000,y:710,vy:0});step(g);assert.equal(g.player.hp,6);assert.equal(g.deaths,1);assert.equal(g.research.funds,40);
+ for(const m of g.level.benchMachines.filter(m=>m.kind==='shuttle')){const a=g.level.platforms.find(a=>a.benchMachine===m.id);assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(m.phase,'idle');}
+ Object.assign(g.player,{x:7545,y:470});frames(g,20);assert.equal(g.research.funds,30);
+});
+test('carrier crossing has no terrain or basement bypass and fresh games start at zero funds',()=>{
+ const g=createGame(0),L=g.level;assert.equal(g.research.funds,0);assert.equal(L.width,11400);
+ assert.ok(L.benchRooms.every(r=>r.x+r.w<7500));assert.equal(L.benchMachines.filter(m=>m.kind==='shuttle').length,3);
+ assert.ok(!L.platforms.some(a=>!a.benchMachine&&a.x<10500&&a.x+a.w>7500));
+ assert.ok(L.rain.filter(z=>z.x>=7500&&z.x<10500).reduce((n,z)=>n+z.w,0)>=3000);
+ const before=g.player.x;Object.assign(g.player,{x:7545,y:470});frames(g,20);assert.equal(g.research.funds,0);assert.ok(g.player.x<7500);assert.equal(L.benchMachines.find(m=>m.id==='shuttle').phase,'idle');
 });
 test('cabinet requires the paid lift, and a fall cannot charge its fare twice',()=>{
  const g=createGame(0),wall=g.level.platforms.find(a=>a.benchBarrier),m=g.level.benchMachines.find(a=>a.id==='lift');

@@ -29,7 +29,7 @@ export function drawBenchWiring(c,g){
   c.fillStyle='#152630';c.fillRect(tx-5,ty-4,10,10);
   c.fillStyle=lit?'#91ffce':r.flash>.5?'#ff936f':'#a1bdd2';c.fillRect(b.x,b.y-9,b.w,9);c.fillText(labels[i],b.x+b.w/2,b.y-20);
  }
- c.strokeStyle=r.on?'#a0ffe2':'#475966';c.lineWidth=11;c.beginPath();c.moveTo(r.x+93,panelY+42);c.lineTo(r.x+165,panelY+42);c.lineTo(r.x+165,panelY+73);c.lineTo(r.x+285,panelY+73);c.lineTo(r.x+285,80);c.lineTo(8300,80);c.stroke();
+ c.strokeStyle=r.on?'#a0ffe2':'#475966';c.lineWidth=11;c.beginPath();c.moveTo(r.x+93,panelY+42);c.lineTo(r.x+165,panelY+42);c.lineTo(r.x+165,panelY+73);c.lineTo(r.x+285,panelY+73);c.lineTo(r.x+285,80);c.lineTo(g.level.goal.x-50,80);c.stroke();
  c.strokeStyle=r.on?'#e4fff3':'#6b7983';c.lineWidth=4;c.stroke();
  c.fillStyle=r.on?'#a0ffe2':'#718992';c.fillRect(r.x+274,panelY+52,30,42);
  c.fillStyle='#b5f8df';c.font='16px sans-serif';c.fillText(r.on?'通電 / 光の橋 開通':`配線 ${r.step}/3 · 床ボタン`,r.x,panelY+70);
