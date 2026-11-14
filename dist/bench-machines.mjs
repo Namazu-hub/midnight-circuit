@@ -1,5 +1,5 @@
 // Stage 1's optional physical experiments. Never count as another wiring repair.
-import {approach} from './world.mjs?v=4.9.2';
+import {approach} from './world.mjs?v=4.9.3';
 export function installBenchMachines(L){
  const add=(id,x,y,w=120)=>{const p={x,y,w,h:20,type:'platform',benchMachine:id,benchSurface:true};L.platforms.push(p);return p;};
  // Leave a readable approach to each new experiment; combat resumes on the exit.
@@ -7,7 +7,7 @@ export function installBenchMachines(L){
  const coil=L.enemies.find(e=>e.x===1750);if(coil)Object.assign(coil,{x:1650,min:1630,max:1680});
  const beaker=L.enemies.find(e=>e.x===5260);if(beaker)Object.assign(beaker,{x:5570,y:442,baseY:442,min:5500,max:5580});
  L.benchMachines=[
-  {id:'lift',kind:'lift',label:'工具リフト',x:850,y:510,w:110,top:290,on:false,contact:false},
+  {id:'lift',kind:'lift',label:'工具リフト',x:850,y:510,w:110,top:290,on:false,contact:false,price:10,paid:false},
   {id:'bridge',kind:'bridge',label:'延長トレー',x:1900,y:510,w:64,timer:0,contact:false,duration:10},
   {id:'shuttle',kind:'shuttle',label:'充電キャリア',x:5200,y:430,w:120,endX:5680,top:280,charge:0,phase:'idle',wait:0,contact:false}
  ];
@@ -35,7 +35,15 @@ export function moveBenchMachines(g,dt){
   const edge=down&&!m.contact;m.contact=down;m.flash=Math.max(0,(m.flash||0)-dt);
   if(edge){m.flash=.5;g.events.push({type:'benchButton',x:p.x+14,y:p.y+p.h});}
   if(m.kind==='lift'){
-   if(edge)m.on=!m.on;
+   if(edge){
+    // One fare per attempt; paid access survives a fall so a checkpoint
+    // cannot strand PICO after all nearby one-time coins were collected.
+    if(m.on)m.on=false;
+    else if(m.paid||g.research?.funds>=m.price){
+     if(!m.paid){g.research.funds-=m.price;m.paid=true;g.events.push({type:'funds',text:`リフト -¥${m.price}`,x:m.x+55,y:a.y-30});}
+     m.on=true;
+    }else g.events.push({type:'actionStep',text:`リフト ¥${m.price}：科研費を集めよう`,x:m.x+55,y:a.y-30});
+   }
    const old=a.y;a.y=approach(a.y,m.on?m.top:m.y,105*dt);a.dy=a.y-old;a.dx=0;
   }else if(m.kind==='bridge'){
    if(edge)m.timer=m.duration;

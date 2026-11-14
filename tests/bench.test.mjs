@@ -35,7 +35,7 @@ test('supply box pays once, retains a can when full, and remains collected throu
  Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});updateGame(g,{});assert.equal(g.events.some(e=>e.type==='gear'),false);g.events=[];
  assert.equal(b.opened,true);assert.equal(b.drinkTaken,false);assert.equal(g.research.funds,50);
  step(g);assert.equal(g.research.funds,50);step(g,{drink:true});assert.equal(b.drinkTaken,true);assert.equal(g.equipment.drinks,3);
- respawn(g,'fall');Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});step(g);assert.equal(g.research.funds,50);assert.equal(g.equipment.drinks,3);
+ respawn(g,'fall');Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});step(g);assert.equal(g.research.funds,40);assert.equal(g.equipment.drinks,3);
 });
 test('continuous workbench undersides, merged shelves, and furniture clear of risers',()=>{
  const L=createGame(0).level,decks=L.platforms.filter(p=>p.benchDeck),trays=L.platforms.filter(p=>p.type==='platform'&&p.h===20);
@@ -48,7 +48,7 @@ test('continuous workbench undersides, merged shelves, and furniture clear of ri
 });
 
 import {platformSolid,VIEW} from '../dist/engine.mjs';
-function fixture(x,y){const g=createGame(0);g.level.enemies=[];Object.assign(g.player,{x:x-14,y:y-40,vx:0,vy:0});return g;}
+function fixture(x,y){const g=createGame(0);g.level.enemies=[];g.research.funds=20;Object.assign(g.player,{x:x-14,y:y-40,vx:0,vy:0});return g;}
 const frames=(g,n,input={})=>{for(let i=0;i<n;i++)step(g,input);};
 test('rider-triggered tool lift reaches the collectible and toggles only on a new landing',()=>{
  const g=fixture(820,510),m=g.level.benchMachines[0];
@@ -85,13 +85,33 @@ test('descent camera keeps PICO visible at 900px/s and static scenery cannot alt
 });
 test('new controls work with the ordinary enemy population, with clear initial contact zones',()=>{
  for(const [id,x,y,n] of [['lift',885,470,330],['bridge',1916,470,60],['shuttle',5245,390,850]]){
-  const g=createGame(0);Object.assign(g.player,{x,y});frames(g,n);const m=g.level.benchMachines.find(m=>m.id===id);
+  const g=createGame(0);g.research.funds=20;Object.assign(g.player,{x,y});frames(g,n);const m=g.level.benchMachines.find(m=>m.id===id);
   assert.equal(g.deaths,0);assert.equal(g.player.hp,6);assert.ok(id==='lift'?m.on:id==='bridge'?m.extended:m.phase==='wait');
  }
 });
 test('partial charge drains when stepping away; retry resets the carrier and costs no funds',()=>{
  const g=fixture(5255,430),m=g.level.benchMachines.find(m=>m.id==='shuttle');frames(g,65);assert.ok(m.charge>0&&m.charge<1);
  frames(g,35,{left:true});frames(g,180);assert.equal(m.phase,'idle');assert.equal(m.charge,0);
- respawn(g,'fall');const a=g.level.platforms.find(a=>a.benchMachine==='shuttle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.research.funds,0);
- Object.assign(g.player,{x:5245,y:390});frames(g,850);assert.equal(m.phase,'wait');assert.equal(g.research.funds,0);
+ respawn(g,'fall');const a=g.level.platforms.find(a=>a.benchMachine==='shuttle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.research.funds,20);
+ Object.assign(g.player,{x:5245,y:390});frames(g,850);assert.equal(m.phase,'wait');assert.equal(g.research.funds,20);
+});
+test('cabinet requires the paid lift, and a fall cannot charge its fare twice',()=>{
+ const g=createGame(0),wall=g.level.platforms.find(a=>a.benchBarrier),m=g.level.benchMachines.find(a=>a.id==='lift');
+ assert.ok(wall.y<290&&wall.y+wall.h===510);assert.ok(!g.level.platforms.some(a=>a.type==='ghost'));
+ Object.assign(g.player,{x:885,y:470,onGround:true,standing:g.level.platforms.find(a=>a.benchMachine==='lift').id});
+ step(g);assert.equal(m.on,false);assert.equal(m.paid,false);
+ g.research.funds=10;step(g,{jump:true});frames(g,100);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);
+ assert.equal(m.on,true);assert.equal(m.paid,true);assert.equal(g.research.funds,0);
+ respawn(g,'fall');assert.equal(m.paid,true);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);assert.equal(m.on,true);assert.equal(g.research.funds,0);
+});
+test('Stage 1 drink consumes funds only on pickup and leaves a can if unaffordable',()=>{
+ const g=createGame(0);g.level.enemies=[];g.level.drinks=[{x:104,y:490}];
+ step(g);assert.equal(g.equipment.drinks,0);assert.equal(g.level.drinks[0].got,undefined);
+ g.research.funds=10;step(g);assert.equal(g.equipment.drinks,1);assert.equal(g.research.funds,0);
+});
+test('Stage 1 enemies return offscreen on a timer without repeating the defeat grant',()=>{
+ const g=createGame(0),e=g.level.enemies[0];g.level.enemies=[e];g.level.chips=[];g.level.drinks=[];Object.assign(g.player,{x:2500,y:470});e.alive=false;
+ frames(g,5);assert.equal(e.rewardPaid,true);const earned=g.research.earned;
+ frames(g,2200);assert.equal(e.alive,true);assert.equal(g.research.earned,earned);
+ e.alive=false;frames(g,5);assert.equal(g.research.earned,earned);
 });

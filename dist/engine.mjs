@@ -1,25 +1,25 @@
-import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.9.2';
-import {tickBenchRoom} from './bench-room.mjs?v=4.9.2';
-import {tickBenchWiring} from './bench-wiring.mjs?v=4.9.2';
-import {resetCircuitTower} from './circuit-tower.mjs?v=4.9.2';
-import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9.2';
-import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9.2';
-import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9.2';
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9.2';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9.2';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.9.2';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9.2';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.9.2';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9.2';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9.2';
-import {setupRepairStations} from './repair-stations.mjs?v=4.9.2';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9.2';
-import {setupResearch,tickResearch} from './research.mjs?v=4.9.2';
-import {tickLab} from './laboratory.mjs?v=4.9.2';
-import {LEVELS} from './levels.mjs?v=4.9.2';
-import {clamp,overlap,approach} from './world.mjs?v=4.9.2';
-import {tickEnemies} from './enemies.mjs?v=4.9.2';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9.2';
+import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.9.3';
+import {tickBenchRoom} from './bench-room.mjs?v=4.9.3';
+import {tickBenchWiring} from './bench-wiring.mjs?v=4.9.3';
+import {resetCircuitTower} from './circuit-tower.mjs?v=4.9.3';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9.3';
+import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9.3';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9.3';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9.3';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9.3';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.9.3';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9.3';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.9.3';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9.3';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9.3';
+import {setupRepairStations} from './repair-stations.mjs?v=4.9.3';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9.3';
+import {setupResearch,tickResearch} from './research.mjs?v=4.9.3';
+import {tickLab} from './laboratory.mjs?v=4.9.3';
+import {LEVELS} from './levels.mjs?v=4.9.3';
+import {clamp,overlap,approach} from './world.mjs?v=4.9.3';
+import {tickEnemies} from './enemies.mjs?v=4.9.3';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9.3';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -115,7 +115,10 @@ function walk(g,input,dt){
 function interactions(g,activated){
  const p=g.player,L=g.level;
  for(const c of L.chips)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<30){c.got=true;g.chips++;emit(g,'chip',c);}
- for(const c of L.drinks)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<36){if(collectDrink(g,c))c.got=true;}
+ for(const c of L.drinks)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<36){
+  const cost=L.benchMap?10:0;
+  if(g.research.funds>=cost&&g.equipment.drinks<3&&collectDrink(g,c)){g.research.funds-=cost;c.got=true;if(cost)emit(g,'funds',{text:`モンエナ -¥${cost}`,x:c.x,y:c.y});}
+ }
  for(const c of L.gears)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<34){c.got=true;g.gears++;emit(g,'gear',c);}
  for(const r of L.relays)if(!r.portal&&!r.mode&&!r.on&&g.pulse>0&&Math.hypot(p.x+14-r.x,p.y+20-r.y)<190){r.on=true;emit(g,'relay',r);}
  if(activated){const portal=L.portals.find(r=>Math.hypot(p.x+14-r.x,p.y+20-r.y)<115);if(portal){portal.on=true;L.relays.find(r=>r.id===portal.id).on=true;p.x=portal.toX;p.y=portal.toY;p.vx=0;p.vy=0;p.onGround=false;p.standing=null;p.invul=1.5;g.respawn={x:p.x,y:p.y};g.checkpoint=true;g.warp=.6;g.camera=clamp(p.x-VIEW.w*.32,0,L.width-VIEW.w);g.cameraY=clamp(p.y-310,L.minY,0);emit(g,'portal',{x:p.x+14,y:p.y+20});}}
@@ -148,6 +151,13 @@ function simulateGame(g,input={},dt=1/120){
  interactions(g,activated);
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
+ if(g.level.benchMap)for(const e of g.level.enemies){
+  if(e.alive){e.defeatedAt=undefined;continue;}
+  e.defeatedAt??=g.time;
+  // Reappear only beyond the visible camera, not abruptly in the current fight.
+  if(g.time-e.defeatedAt<18||Math.abs(p.x-e.baseX)<300||e.baseX>=g.camera-80&&e.baseX<=g.camera+VIEW.w+80)continue;
+  Object.assign(e,{alive:true,x:e.baseX,y:e.baseY,state:'patrol',stateTime:0,clock:0,aim:null,defeatedAt:undefined});
+ }
  if(g.printer?.forceFall||p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){if(g.printer)g.printer.forceFall=false;respawn(g,'fall');return;}
  const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.circuit?.dash>0?180:g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??g.level.maxY??0):0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}

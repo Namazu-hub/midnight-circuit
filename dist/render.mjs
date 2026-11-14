@@ -1,16 +1,16 @@
-import {drawBenchMachines} from './bench-machine-art.mjs?v=4.9.2';
-import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.2';
-import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.9.2';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.2';
-import {drawEquipment} from './equipment-art.mjs?v=4.9.2';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.2';
-import {poseScale} from './feel.mjs?v=4.9.2';
-import {currentRoom} from './rooms.mjs?v=4.9.2';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.2';
-import {drawResearch} from './research.mjs?v=4.9.2';
-import {drawPrinter} from './printer-art.mjs?v=4.9.2';
-import {drawLab} from './laboratory.mjs?v=4.9.2';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.2';
+import {drawBenchMachines} from './bench-machine-art.mjs?v=4.9.3';
+import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.3';
+import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.9.3';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.3';
+import {drawEquipment} from './equipment-art.mjs?v=4.9.3';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.3';
+import {poseScale} from './feel.mjs?v=4.9.3';
+import {currentRoom} from './rooms.mjs?v=4.9.3';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.3';
+import {drawResearch} from './research.mjs?v=4.9.3';
+import {drawPrinter} from './printer-art.mjs?v=4.9.3';
+import {drawLab} from './laboratory.mjs?v=4.9.3';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.3';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},

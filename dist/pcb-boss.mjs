@@ -1,6 +1,6 @@
-import {stepCircuit,drivePower} from './circuit-model.mjs?v=4.9.2';
-import {clamp,overlap} from './world.mjs?v=4.9.2';
-import {grant} from './research.mjs?v=4.9.2';
+import {stepCircuit,drivePower} from './circuit-model.mjs?v=4.9.3';
+import {clamp,overlap} from './world.mjs?v=4.9.3';
+import {grant} from './research.mjs?v=4.9.3';
 // Keep PICO and the active machine in view instead of following only PICO.
 // The player always gets a margin even when a narrow test viewport cannot fit both.
 export function pcbCameraTarget(g,width){const b=g.pcb?.boss;if(!b?.active||b.done)return null;

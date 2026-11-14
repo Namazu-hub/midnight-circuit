@@ -1,13 +1,13 @@
-import {initNozzle,tickNozzle,nozzleAction} from './printer-nozzle.mjs?v=4.9.2';
-import {tetherAction} from './tether.mjs?v=4.9.2';
-import {initPeeling,tickPeeling,peelAction} from './printer-peeling.mjs?v=4.9.2';
-import {extendWorkshop,workshopAction} from './printer-workshop.mjs?v=4.9.2';
-import {extendChase,initChase,chaseAction,chaseSolid,tickChase} from './printer-chase.mjs?v=4.9.2';
-import {extendAdventure,initAdventure,adventureAction,adventureSolid,tickAdventure} from './printer-adventure.mjs?v=4.9.2';
-import {startFabrication} from './fabrication.mjs?v=4.9.2';
+import {initNozzle,tickNozzle,nozzleAction} from './printer-nozzle.mjs?v=4.9.3';
+import {tetherAction} from './tether.mjs?v=4.9.3';
+import {initPeeling,tickPeeling,peelAction} from './printer-peeling.mjs?v=4.9.3';
+import {extendWorkshop,workshopAction} from './printer-workshop.mjs?v=4.9.3';
+import {extendChase,initChase,chaseAction,chaseSolid,tickChase} from './printer-chase.mjs?v=4.9.3';
+import {extendAdventure,initAdventure,adventureAction,adventureSolid,tickAdventure} from './printer-adventure.mjs?v=4.9.3';
+import {startFabrication} from './fabrication.mjs?v=4.9.3';
 // Stage-local story and fabrication state survives rooms and ordinary retries.
-import {overlap} from './world.mjs?v=4.9.2';
-import {grant} from './research.mjs?v=4.9.2';
+import {overlap} from './world.mjs?v=4.9.3';
+import {grant} from './research.mjs?v=4.9.3';
 export function extendJourney(L){
  L.fallZones=L.rooms.map(r=>({room:r.id,x:r.left,y:755,w:r.right-r.left,h:220}));
  for(const r of L.rooms)r.maxY=210;

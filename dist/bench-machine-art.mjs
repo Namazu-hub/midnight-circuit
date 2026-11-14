@@ -24,7 +24,7 @@ export function drawBenchMachines(c,g,reduced=false){
   const mx=m.kind==='bridge'?m.x+32:m.x+60,my=m.kind==='lift'?m.top-100:m.kind==='bridge'?m.y-106:m.top-77;
   box(c,mx-67,my-28,134,49,'#102633');c.strokeStyle='#47616a';c.strokeRect(mx-67,my-28,134,49);
   c.font='13px sans-serif';c.fillStyle=col;c.fillText(m.label,mx,my-10);c.font='12px monospace';
-  c.fillText(bridge?(m.timer>0?`${Math.ceil(m.timer)} s`:m.extended?'乗客待ち':'10 s'):shuttle?(m.phase==='idle'?`${Math.round(m.charge*100)}%`:m.phase==='back'?'← RETURN':m.phase==='wait'?'停車 3s':'→ MOVE'):(m.on?'↑ UP':'↓ DOWN'),mx,my+10);
+  c.fillText(bridge?(m.timer>0?`${Math.ceil(m.timer)} s`:m.extended?'乗客待ち':'10 s'):shuttle?(m.phase==='idle'?`${Math.round(m.charge*100)}%`:m.phase==='back'?'← RETURN':m.phase==='wait'?'停車 3s':'→ MOVE'):(m.on?'↑ UP':m.paid?'↓ DOWN / 再使用可':`¥${m.price} / ↑ UP`),mx,my+10);
   if(shuttle){box(c,mx-48,my+16,96,3,'#314550');box(c,mx-48,my+16,96*m.charge,3,col);}
   if(m.flash>0&&!reduced){c.globalAlpha=m.flash*.45;box(c,x-5,y-10,w+10,15,col);c.globalAlpha=1;}
  }

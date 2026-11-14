@@ -1,4 +1,4 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.9.2';
+import {installBenchMachines} from './bench-machines.mjs?v=4.9.3';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
@@ -6,7 +6,8 @@ export function redesignBench(L){
  // Remove the introductory overhead tray and obsolete invisible repair stairs.
  L.platforms=L.platforms.filter(p=>!(p.x===260&&p.y===400));
  L.chips=L.chips.filter(p=>!(p.x===325&&p.y===365));
- for(const p of L.platforms)if(p.type==='ghost')p.group='bench-wire';
+ // The old pulse-only trays neither teach the wiring sequence nor form useful routes.
+ L.platforms=L.platforms.filter(p=>p.type!=='ghost');
  L.wireButtons=[7780,7900,8020].map(x=>({x,y:70,w:64}));
  L.platforms.push({x:7740,y:70,w:450,h:20,type:'platform'});
  L.wireHints=[{x:3980,y:1320}];
@@ -20,6 +21,9 @@ export function redesignBench(L){
  }
  const surface=x=>spans.find(p=>x>=p.x&&x<p.x+p.w)?.y??510;
  L.platforms=L.platforms.filter(p=>p.type!=='ground').concat(spans);
+ // A tall insulated cabinet blocks the first floor route. Its top is above
+ // normal double-jump reach; the tool lift provides the actual passage.
+ L.platforms.push({x:1010,y:230,w:70,h:280,type:'ground',benchSurface:true,benchBarrier:true});
  // Move floor-bound objects with their supporting bench; keep upper shelves intact.
  for(const e of L.enemies)if(e.y===482){e.y=surface(e.x)-e.h;e.baseY=e.y;const p=spans.find(p=>e.x>=p.x&&e.x<p.x+p.w);if(p){e.min=Math.max(e.min,p.x+15);e.max=Math.min(e.max,p.x+p.w-e.w-15);}}
  for(const a of [...L.students,...L.checkpoints])if(a.y===510)a.y=surface(a.x);
@@ -28,6 +32,9 @@ export function redesignBench(L){
  for(const r of L.relays)if(r.y===480)r.y=surface(r.x)-30;
  for(const r of L.route)if(r.y===510)r.y=surface(r.x);
  const pad=(x,y,w=150,extra={})=>L.platforms.push({x,y,w,h:20,type:'platform',benchSurface:true,...extra});
+ // Former pulse-only trays become ordinary maintenance decking; the narrow
+ // remaining openings still admit deliberate access to the basements.
+ pad(4530,500,120);pad(5930,500,140);
  // Visible shafts occupy existing breaks in the surface route. Shelves catch a
  // missed jump; all return rises <=120px and all exit gaps <=180px.
  const rooms=[{id:'archive',role:'hint',x:3210,y:740,w:1510,h:640,floorY:1380,name:'01 / SERVER ARCHIVE',subtitle:'配線記録室',entry:3330,exit:4535,accent:'#88d9d7'},

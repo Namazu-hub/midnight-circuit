@@ -33,6 +33,13 @@ export function traverse(index,{limit=180,trace=false}={}){
    const order=[1,0,2],b=L.wireButtons[order[L.relays[0].step]],tx=b.x+b.w/2;
    left=p.x+14>tx+5;right=p.x+14<tx-5;jump=L.relays[0].step===2&&p.onGround&&p.x<7920;
   }
+  // First cabinet cannot be cleared from the floor. Use the paid pressure
+  // lift, wait for its ride, then jump its top; this remains ordinary input.
+  if(index===0&&p.x>760&&p.x<1090&&wp>=1){
+   const lift=L.benchMachines.find(m=>m.id==='lift');
+   if(p.x<990&&(p.y+p.h>350||!lift.on||L.platforms.find(a=>a.benchMachine==='lift').y>300)){const tx=905;left=p.x+14>tx+6;right=p.x+14<tx-6;jump=false;}
+   else{left=false;right=true;jump=p.onGround;}
+  }
   updateGame(g,{left,right,jump,pulse},1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(wp===lastWP)stuck++;else{lastWP=wp;stuck=0;}
   if(trace&&f%1200===0)console.log(index+1,(f/120).toFixed(0),wp,Math.round(p.x),Math.round(p.y),p.hp,g.deaths,'target',target.x,target.y);

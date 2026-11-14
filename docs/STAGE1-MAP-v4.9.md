@@ -182,3 +182,49 @@ No manual start-to-goal completion, actual iPhone/Android test, audio quality
 check, player enjoyment study or performance benchmark is claimed. The normal
 public entry is still index.html; no test URL is needed to use these machines.
 Runtime entry/import URL versions and package version advance to 4.9.2.
+
+## v4.9.3 — mandatory lift, paid supplies and visible terminal wiring (2026-11-14)
+
+The tool lift at x850 is now the only viable passage past a solid, 280px-tall
+insulated cabinet at x1010. The top is above the ordinary double-jump from
+the ground. Landing on the lift pad raises it from y510 to y290; PICO rides it
+and jumps over the cabinet. The first upward activation deducts ¥10. After
+payment, reversing and retrying the lift are free, including after a fall, so
+one-time pickups cannot leave a player stranded. An unaffordable activation
+leaves the lift still and displays the missing fare. The cabinet's drawn shape
+matches its collision. The ordinary input route crosses the cabinet through
+this lift, with no coordinate teleport or repair-flag injection.
+
+Stage 1 can pickups cost ¥10 each at collection, including the workshop supply
+box. A can remains on the ground or in the opened box when the player lacks
+funds or inventory space. The box's ¥50 one-time reward therefore yields ¥40
+net if its can is taken immediately. Other stages' pickup costs are unchanged.
+Periodic Stage 1 enemy replacements become eligible 18 seconds after defeat,
+then reappear at their original patrol position only after that location is
+outside the camera. Their first reward flag persists, preventing repeated
+research-fund farming. Death still uses the normal checkpoint behavior.
+
+The two obsolete pulse-only trays were removed. Short fixed maintenance decks
+cover their former accidental holes without claiming to be pulse platforms.
+The archive wall-panel material, seams and trim continue past its right wall;
+the general workshop wall grid also continues through the visible shaft below.
+At the last wiring station, three differently colored insulated conductors run
+from the physical floor buttons into clamped terminals under the walkable deck.
+The completed circuit lights a thicker outgoing trunk toward the exit. The
+order and one required repair remain unchanged; the server archive still gives
+its optional symbol hint.
+
+`bench-level` owns the collision and routes; `bench-art` and `bench-wiring`
+own the material and wiring visuals; `bench-machines`, `bench-machine-art`,
+`bench-room` and `engine` own the fares and timed replacements. There is no new
+save key or RULES change. The isolated render review fixture includes the end
+terminal, but the feature is in the ordinary game and the route test drives the
+lift with regular movement/jump inputs.
+
+Validation: `npm run check`, `npm test`, `tests/routes.mjs`,
+`tests/printer-route.mjs` and `tests/pcb-route.mjs` pass. Chromium visual review
+covered the archive, lift, and final terminal at 1200x600 plus a 700x600
+logical viewport. This does not constitute a full human playthrough or actual
+iPhone/Android touch validation. Enemy replacement and affordability are
+exercised by automated state/input tests; combat pacing and audio need a human
+playtest.

@@ -18,6 +18,10 @@ export function drawBenchBackdrop(c,g,width,height,reduced=false){
   fill(c,xx+48,307,420,5,'#253e4c');
  }
  for(const yy of [338,350,704,716]){line(c,x,yy,x+width,yy,'#304653',3);}
+ // Keep the same wall material below the server-room shell and past both
+ // vertical shaft boundaries; the camera can see well below the safe floor.
+ for(let yy=768;yy<1700;yy+=96)line(c,x,yy,x+width,yy,'#203542',1);
+ for(let xx=Math.floor(x/144)*144;xx<x+width;xx+=144)line(c,xx,768,xx,1700,'#203542',1);
  // Low-contrast recessed access panels, not freestanding climbable furniture.
  for(let xx=Math.floor(x/288)*288;xx<x+width;xx+=288){fill(c,xx+32,388,224,100,'#142633');fill(c,xx+38,395,212,2,'#2e4653');for(let i=0;i<5;i++)fill(c,xx+52,412+i*9,64,2,'#263b47');}
  c.restore();
@@ -29,6 +33,7 @@ export function benchSurface(c,p,g){
   for(let yy=Math.ceil(y/48)*48;yy<y+h;yy+=48){fill(c,x+5,yy,w-10,3,warm?'#796a4e':'#52717b');fill(c,x+8,yy+7,3,3,'#97a8a4');}
   fill(c,x+(x<room?.x?24:2),y+10,3,h-20,warm?'#a18b5f':'#6d9eaa');c.restore();return;
  }
+ if(p.benchBarrier){fill(c,x,y,w,h,'#293c45');for(let yy=y+20;yy<y+h;yy+=28){fill(c,x+8,yy,w-16,4,'#51727a');fill(c,x+14,yy+8,5,5,'#9cbaad');}fill(c,x+4,y+4,w-8,5,'#d7f7d7');c.restore();return;}
  fill(c,x,y,w,h,h>60?(warm?'#383c37':'#203844'):(warm?'#535649':'#344f5a'));
  c.beginPath();c.rect(x,y,w,h);c.clip();
  if(h>60){
@@ -56,15 +61,18 @@ export function drawBenchRooms(c,g,width=1200){
  for(const r of g.level.benchRooms){
   if(r.x+r.w<g.camera||r.x>g.camera+width+180)continue;
   const warm=r.role==='supply';
-  fill(c,r.x,r.y,r.w,r.h,warm?'#252d2d':'#101f2b');
+  // The archive's panel material continues behind its far wall, so looking
+  // past the shaft edge never reveals an abruptly unfinished backdrop.
+  const wallWidth=r.w+(warm?0:260);
+  fill(c,r.x,r.y,wallWidth,r.h,warm?'#252d2d':'#101f2b');
   c.save();c.beginPath();c.rect(r.x,r.y,r.w,r.h);c.clip();
   // Static pools of light add depth, never obscure platforms or flash on camera motion.
   for(let xx=r.x+300;xx<r.x+r.w;xx+=390){const lamp=c.createRadialGradient(xx,r.y+35,10,xx,r.y+35,360);lamp.addColorStop(0,warm?'#e2be6820':'#81c9df18');lamp.addColorStop(1,'transparent');c.fillStyle=lamp;c.fillRect(xx-360,r.y,720,r.h);}
   c.restore();
   // Matching panel seams continue through the room and the return shaft.
-  for(let yy=Math.ceil(r.y/96)*96;yy<r.floorY;yy+=96)line(c,r.x,yy,r.x+r.w,yy,warm?'#35403d':'#263a47');
-  for(let xx=Math.ceil(r.x/144)*144;xx<r.x+r.w;xx+=144)line(c,xx,r.y,xx,r.floorY,warm?'#343f3d':'#233744');
-  fill(c,r.x,r.y+8,r.w,10,warm?'#655d49':'#3c5f6a');fill(c,r.x,r.y+21,r.w,2,warm?'#beaa7a':'#6ea4ac');
+  for(let yy=Math.ceil(r.y/96)*96;yy<r.floorY;yy+=96)line(c,r.x,yy,r.x+wallWidth,yy,warm?'#35403d':'#263a47');
+  for(let xx=Math.ceil(r.x/144)*144;xx<r.x+wallWidth;xx+=144)line(c,xx,r.y,xx,r.floorY,warm?'#343f3d':'#233744');
+  fill(c,r.x,r.y+8,wallWidth,10,warm?'#655d49':'#3c5f6a');fill(c,r.x,r.y+21,wallWidth,2,warm?'#beaa7a':'#6ea4ac');
   // Conduits connect the surface opening to the room's perimeter, with no seams.
   for(let i=0;i<3;i++){const xx=r.x+22+i*14;line(c,xx,510,xx,r.floorY-18,warm?'#5c614c':'#355666',5);line(c,xx,r.floorY-18-i*8,r.x+r.w-30,r.floorY-18-i*8,warm?'#5c614c':'#355666',4);}
   c.textAlign='left';c.font='16px monospace';c.fillStyle=r.accent;c.fillText(r.name,r.x+300,r.y+65);c.font='14px sans-serif';c.fillText(r.subtitle,r.x+300,r.y+90);
