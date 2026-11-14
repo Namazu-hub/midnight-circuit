@@ -1,6 +1,6 @@
-import {configurePrinterGates} from './printer-progress.mjs?v=4.10.1';
-import {extendNozzle} from './printer-nozzle.mjs?v=4.10.1';
-import {extendPeeling} from './printer-peeling.mjs?v=4.10.1';
+import {configurePrinterGates} from './printer-progress.mjs?v=4.10.2';
+import {extendNozzle} from './printer-nozzle.mjs?v=4.10.2';
+import {extendPeeling} from './printer-peeling.mjs?v=4.10.2';
 // Stage-local v4.8 layout; preserves the old room graph and repair identities.
 export function extendWorkshop(L){
  extendPeeling(L);extendNozzle(L);configurePrinterGates(L);

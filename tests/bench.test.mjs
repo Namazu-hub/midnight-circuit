@@ -96,7 +96,7 @@ test('carrier fall is lethal, resets all cars, and recovery plus boarding both c
  Object.assign(g.player,{x:7545,y:470});frames(g,20);assert.equal(g.research.funds,30);
 });
 test('carrier crossing has no terrain or basement bypass and fresh games start at zero funds',()=>{
- const g=createGame(0),L=g.level;assert.equal(g.research.funds,0);assert.equal(L.width,11400);
+ const g=createGame(0),L=g.level;assert.equal(g.research.funds,0);assert.equal(L.width,11400);assert.ok(L.enemies.every(e=>e.x<7500?e.max<7500:e.min>=10500));
  assert.ok(L.benchRooms.every(r=>r.x+r.w<7500));assert.equal(L.benchMachines.filter(m=>m.kind==='shuttle').length,3);
  assert.ok(!L.platforms.some(a=>!a.benchMachine&&a.x<10500&&a.x+a.w>7500));
  assert.ok(L.rain.filter(z=>z.x>=7500&&z.x<10500).reduce((n,z)=>n+z.w,0)>=3000);

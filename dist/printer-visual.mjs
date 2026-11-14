@@ -1,6 +1,6 @@
-import {drawDawn} from './printer-journey-art.mjs?v=4.10.1';
-import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.10.1';
-import {drawBenchy} from './printer-enemies.mjs?v=4.10.1';
+import {drawDawn} from './printer-journey-art.mjs?v=4.10.2';
+import {currentRoom,doorReady,roomFade} from './rooms.mjs?v=4.10.2';
+import {drawBenchy} from './printer-enemies.mjs?v=4.10.2';
 const line=(c,x,y,xx,yy,col,w=2)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 export function printerPlatform(c,p,g,solid){const {x,y,w,h}=p,t=g.time;if(p.printerEnemy)return;
  if(p.benchy){drawBenchy(c,x-10,y,w+20,t);line(c,x,y,x+w,y,'#d9fff2',4);return;}

@@ -1,4 +1,4 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.10.1';
+import {installBenchMachines} from './bench-machines.mjs?v=4.10.2';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
@@ -105,6 +105,7 @@ function extendCarrierCrossing(L){
  }
  L.platforms=platforms;
  for(const name of ['enemies','chips','gears','drinks','students','checkpoints','relays','wireButtons','signs','rain','vendorSites','wireHints'])for(const o of L[name]||[])shift(o);
+ for(const e of L.enemies){if(e.x>7300&&e.x<cut){e.x=7230;e.min=7190;e.max=7260;e.y=482;e.baseY=482;}else if(e.x<cut)e.max=Math.min(e.max,cut-e.w-15);else e.min=Math.max(e.min,cut+extra+15);}
  L.route=L.route.filter(r=>r.x<7350||r.x>=cut);for(const r of L.route)shift(r);
  shift(L.goal);L.width+=extra;
  // Supply and a recovery checkpoint stay on solid ground before boarding.

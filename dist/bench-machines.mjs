@@ -1,5 +1,5 @@
 // Stage 1's paid lift, mandatory carriers and optional tray. Never count as another wiring repair.
-import {approach} from './world.mjs?v=4.10.1';
+import {approach} from './world.mjs?v=4.10.2';
 export function installBenchMachines(L){
  const add=(id,x,y,w=120)=>{const p={x,y,w,h:20,type:'platform',benchMachine:id,benchSurface:true};L.platforms.push(p);return p;};
  // Leave a readable approach to each new experiment; combat resumes on the exit.

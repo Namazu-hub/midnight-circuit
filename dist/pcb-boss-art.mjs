@@ -1,5 +1,5 @@
-import {drawCore} from './core-art.mjs?v=4.10.1';
-import {pcbBossHeads} from './pcb-boss.mjs?v=4.10.1';
+import {drawCore} from './core-art.mjs?v=4.10.2';
+import {pcbBossHeads} from './pcb-boss.mjs?v=4.10.2';
 const box=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
 export function drawPlacementMachine(c,g){const b=g.pcb.boss,t=g.time;const alarm=b.active&&!b.done;c.save();
  // Structural rails, motor carriages and cable chain, rather than a scaled enemy.
