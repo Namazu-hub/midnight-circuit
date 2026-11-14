@@ -1,5 +1,5 @@
-import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.9.3';
-import {REPAIR_NAMES} from './repairs.mjs?v=4.9.3';
+import {setupActionHand,drawActionRepairs} from './action-repairs.mjs?v=4.10.0';
+import {REPAIR_NAMES} from './repairs.mjs?v=4.10.0';
 
 // Incremental integration with the existing eight courses. Room order is kept
 // compatible with old saves; a full five-section redesign is a separate change.

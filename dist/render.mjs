@@ -1,16 +1,16 @@
-import {drawBenchMachines} from './bench-machine-art.mjs?v=4.9.3';
-import {drawBenchWiring} from './bench-wiring.mjs?v=4.9.3';
-import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.9.3';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.9.3';
-import {drawEquipment} from './equipment-art.mjs?v=4.9.3';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.9.3';
-import {poseScale} from './feel.mjs?v=4.9.3';
-import {currentRoom} from './rooms.mjs?v=4.9.3';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.9.3';
-import {drawResearch} from './research.mjs?v=4.9.3';
-import {drawPrinter} from './printer-art.mjs?v=4.9.3';
-import {drawLab} from './laboratory.mjs?v=4.9.3';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.9.3';
+import {drawBenchMachines} from './bench-machine-art.mjs?v=4.10.0';
+import {drawBenchWiring} from './bench-wiring.mjs?v=4.10.0';
+import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.10.0';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.10.0';
+import {drawEquipment} from './equipment-art.mjs?v=4.10.0';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.10.0';
+import {poseScale} from './feel.mjs?v=4.10.0';
+import {currentRoom} from './rooms.mjs?v=4.10.0';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.10.0';
+import {drawResearch} from './research.mjs?v=4.10.0';
+import {drawPrinter} from './printer-art.mjs?v=4.10.0';
+import {drawLab} from './laboratory.mjs?v=4.10.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.10.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -186,7 +186,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const sign of g.level.signs){if(Math.abs(g.player.x-sign.x)>310||g.level.students.some(s=>Math.abs(g.player.x-s.x)<185&&Math.abs(s.x-sign.x)<240&&sign.y>310&&sign.y<410))continue;c.save();c.globalAlpha=.8;c.font='11px "Segoe UI",sans-serif';const w=c.measureText(sign.text).width+20;round(c,sign.x-w/2,sign.y-13,w,26,4,'#0d1c2bbc');c.fillStyle='#b6ced6';c.textAlign='center';c.fillText(sign.text,sign.x,sign.y+4);c.textAlign='left';c.restore();}
   for(const coin of g.level.chips){if(coin.got||coin.x<g.camera-30||coin.x>g.camera+VIEW.w+30)continue;const yy=coin.y+Math.sin(t*3+coin.x)*3;glow(c,coin.x,yy,18,'#f8d98a10');const ww=4+Math.abs(Math.sin(t*2+coin.x*.01))*3;rect(c,coin.x-ww,yy-7,ww*2,14,'#d0a75e');rect(c,coin.x-ww+2,yy-6,ww*2-3,10,'#ffe3a2');rect(c,coin.x-1,yy-4,2,6,'#fff2ca');}
   for(const item of g.level.gears){if(item.got)continue;glow(c,item.x,item.y,34,'#75efce22');gear(c,item.x,item.y+Math.sin(t*2)*4,t);star(c,item.x+19,item.y-17,2,'#c8ffe5');}
-  for(const r of g.level.relays){if(r.portal||g.printer||g.pcb)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
+  for(const r of g.level.relays){if(r.portal||g.printer||g.pcb||g.level.benchMap)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
   for(const cp of g.level.checkpoints)checkpoint(c,cp,cp.active,t);goal(c,g,t);
   for(const e of g.level.enemies){if(!e.alive||e.x<g.camera-60||e.x>g.camera+VIEW.w+60)continue;
     const x=e.x,y=e.y,freeze=g.pulse>0,col=freeze?'#76eacf':e.kind==='capacitor'?'#a4b5fc':e.kind==='beaker'?'#f19ea6':'#d5b486';
@@ -209,7 +209,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
     }
     rect(c,x+4,y+24,8,4,'#6f8493');rect(c,x+22,y+24,8,4,'#6f8493');if(freeze)glow(c,x+16,y+12,35,'#75efce30');
   }
-  for(const d of g.level.drinks){if(d.got)continue;const yy=d.y+Math.sin(t*3)*3;glow(c,d.x,yy,36,'#aaff4328');rect(c,d.x-10,yy-18,20,35,'#0a171e');rect(c,d.x-9,yy-20,18,3,'#b7c5bd');rect(c,d.x-9,yy+16,18,3,'#809e8c');c.font='bold 18px monospace';c.fillStyle='#b0ff63';c.textAlign='center';c.fillText('M',d.x,yy+5);c.font='7px monospace';c.fillText('ENA',d.x,yy+13);c.textAlign='left';}
+  for(const d of g.level.drinks){if(d.got)continue;const yy=d.y+Math.sin(t*3)*3;glow(c,d.x,yy,36,'#aaff4328');rect(c,d.x-10,yy-18,20,35,'#0a171e');rect(c,d.x-9,yy-20,18,3,'#b7c5bd');rect(c,d.x-9,yy+16,18,3,'#809e8c');c.font='bold 18px monospace';c.fillStyle='#b0ff63';c.textAlign='center';c.fillText('M',d.x,yy+5);c.font='7px monospace';c.fillText('ENA',d.x,yy+13);if(g.level.benchMap){c.font='bold 13px monospace';c.fillStyle='#ffdb9b';c.fillText('¥10',d.x,yy-29);}c.textAlign='left';}
   for(const l of g.level.lasers){if(l.nozzle){rect(c,l.x-25,l.y-52,62,38,'#dde5e4');rect(c,l.x-15,l.y-46,40,19,'#263f52');rect(c,l.x-5,l.y-27,22,20,'#bf875b');line(c,l.baseX-85,l.y-55,l.baseX+110,l.y-55,'#819ba5',7);}rect(c,l.x-8,l.y-11,28,12,'#706276');rect(c,l.x-8,l.y+l.h-1,28,10,'#706276');if(laserActive(g,l)){glow(c,l.x+6,l.y+l.h/2,100,'#ff665a12');rect(c,l.x-5,l.y,22,l.h,'#ff646026');rect(c,l.x+2,l.y,8,l.h,'#ff8676');rect(c,l.x+5,l.y,2,l.h,'#ffdbbc');}else{const warning=g.pulse<=0&&laserPhase(g,l)<.65;for(let y=l.y;y<l.y+l.h;y+=16)rect(c,l.x+5,y,warning?4:2,5,warning?'#ffd88caa':'#90edc740');if(warning){c.font='bold 18px monospace';c.fillStyle='#ffd88c';c.fillText('!',l.x-5,l.y-20);}}}
   drawBenchMachines(c,g,reduced);drawBenchSupplies(c,g);drawBenchWiring(c,g);if(!g.pcb&&!g.level.benchMap)drawLab(c,g);drawResearch(c,g);drawPrinter(c,g);drawPCB(c,g,reduced);
   const p=g.player;

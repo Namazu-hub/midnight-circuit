@@ -97,8 +97,8 @@ export function drawBenchSupplies(c,g){
  for(const b of g.level.benchSupplies){
   fill(c,b.x-32,b.y-30,64,28,'#6c5d40');fill(c,b.x-29,b.y-27,58,22,'#b39358');fill(c,b.x-32,b.y-6,64,6,'#443d31');
   fill(c,b.x-34,b.y-(b.opened?59:42),68,10,b.opened?'#ab945f':'#d2b575');
-  if(!b.opened){fill(c,b.x-5,b.y-33,10,13,'#e4d9aa');c.font='13px sans-serif';c.fillStyle='#e6d5a8';c.fillText('補給箱',b.x,b.y-57);}
-  else if(!b.drinkTaken){fill(c,b.x-8,b.y-56,16,29,'#192f31');c.font='20px monospace';c.fillStyle='#b6e57d';c.fillText('M',b.x,b.y-33);}
+  if(!b.opened){fill(c,b.x-5,b.y-33,10,13,'#e4d9aa');c.font='13px sans-serif';c.fillStyle='#e6d5a8';c.fillText('補給 ¥50 / 缶 ¥10',b.x,b.y-57);}
+  else if(!b.drinkTaken){fill(c,b.x-8,b.y-56,16,29,'#192f31');c.font='20px monospace';c.fillStyle='#b6e57d';c.fillText('M',b.x,b.y-33);c.font='13px monospace';c.fillText('¥10',b.x,b.y-72);}
   else{c.font='12px sans-serif';c.fillStyle='#a0ae96';c.fillText('回収済',b.x,b.y-37);}
  }
  c.restore();

@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import {createGame,respawn,platformSolid} from '../dist/engine.mjs';
 import {tickResearch,purchase,nearVendor,balance} from '../dist/research.mjs';
 import {readProgress} from '../dist/progress.mjs';
-test('grants for enemies, pickups and repairs occur once per attempt and survive retry',()=>{
+test('grants for enemies, pickups and repairs occur once per life of each enemy; fixed rewards survive a paid retry',()=>{
  const g=legacyRepairGame();g.level.enemies[0].alive=false;g.level.chips[0].got=true;g.level.relays[0].on=true;
  tickResearch(g);assert.equal(g.research.funds,60);assert.equal(g.research.kills,1);assert.equal(g.research.repairs,1);
- respawn(g);tickResearch(g);assert.equal(g.research.funds,60);
+ respawn(g);tickResearch(g);assert.equal(g.research.funds,10);assert.equal(g.research.earned,60);
 });
 test('repair creates solid optional stairs; pulse cannot unlock them early',()=>{
  const g=legacyRepairGame(),r=g.level.relays.find(r=>r.researchLink.length),a=g.level.platforms[r.researchLink[0]];
@@ -22,10 +22,9 @@ test('shop requires proximity and balance; useless purchases never charge',()=>{
  assert.equal(purchase(g,'drink').ok,true);assert.equal(g.player.boost,0);assert.equal(g.equipment.drinks,1);g.equipment.drinks=3;assert.equal(purchase(g,'drink').ok,false);
  g.player.x+=1000;const funds=g.research.funds;assert.equal(purchase(g,'battery').ok,false);assert.equal(g.research.funds,funds);
 });
-test('battery is capped and hints are optional; zero funds do not alter repairs',()=>{
- const g=legacyRepairGame();g.research.funds=100;assert.equal(purchase(g,'battery').ok,false);g.lives=2;
- assert.equal(purchase(g,'battery').ok,true);assert.equal(g.lives,3);assert.equal(g.research.funds,0);
- assert.equal(purchase(g,'hint').ok,false);assert.ok(g.level.relays.every(r=>!r.on));
+test('life batteries are removed and zero funds do not alter repairs',()=>{
+ const g=legacyRepairGame();g.research.funds=100;assert.equal(purchase(g,'battery').ok,false);assert.equal(g.research.funds,100);
+ g.research.funds=0;assert.equal(purchase(g,'hint').ok,false);assert.ok(g.level.relays.every(r=>!r.on));
 });
 test('assistance pays one repair grant and updates linked platforms',()=>{
  const g=legacyRepairGame(),r=g.level.relays.find(r=>r.mode);g.level.vendors=[{x:r.x,y:r.y+40}];g.player.x=r.x;g.player.y=r.y;g.research.funds=200;

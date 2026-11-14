@@ -1,6 +1,6 @@
-import {RESISTORS,bridgeState,filterStatus} from './circuit-model.mjs?v=4.9.3';
-import {relayYard} from './circuit-challenge.mjs?v=4.9.3';
-import {doorReady} from './rooms.mjs?v=4.9.3';
+import {RESISTORS,bridgeState,filterStatus} from './circuit-model.mjs?v=4.10.0';
+import {relayYard} from './circuit-challenge.mjs?v=4.10.0';
+import {doorReady} from './rooms.mjs?v=4.10.0';
 const rect=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
 const line=(c,points,color,width=3)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();};
 function label(c,text,x,y,color='#d1e7dc',size=15){c.fillStyle=color;c.font=`bold ${size}px monospace`;c.fillText(text,x,y);}

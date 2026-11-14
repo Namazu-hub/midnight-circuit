@@ -23,9 +23,9 @@ test('incident changes collision; cooling needs both fans; assistance cannot byp
  const v=g.level.vendors[0];Object.assign(g.player,{x:v.x-14,y:v.y-40});g.research.funds=200;assert.equal(purchase(g,'assist').ok,false);assert.equal(g.research.funds,200);
 });
 function enter(g){g.rooms.active='D';Object.assign(g.player,{x:5346,y:470});for(let i=0;i<65;i++)updateGame(g,{});updateGame(g,{interact:true});for(let i=0;i<220;i++)updateGame(g,{});}
-test('arena closes, retries reset battle but preserve repairs and consume normal lives',()=>{
+test('arena closes, retries reset battle but preserve repairs and pay the recovery fee',()=>{
  const g=createGame(3);g.level.relays.forEach(r=>r.on=true);enter(g);assert.ok(g.printer.boss.active);g.player.x=5200;tick(g);assert.ok(g.player.x>=5420);
- g.printer.boss.hp=7;g.printer.boss.jobs.push({x:5700,y:470,progress:.2});g.printer.boss.frame=.5;respawn(g,'retry');assert.equal(g.lives,2);assert.equal(g.player.x,5230);assert.equal(g.printer.boss.active,false);assert.equal(g.printer.boss.hp,18);assert.equal(g.printer.boss.jobs.length,0);assert.ok(g.level.relays.every(r=>r.on));
+ g.printer.boss.hp=7;g.printer.boss.jobs.push({x:5700,y:470,progress:.2});g.printer.boss.frame=.5;g.research.funds=50;respawn(g,'retry');assert.equal(g.research.recoveries,1);assert.equal(g.player.x,5230);assert.equal(g.printer.boss.active,false);assert.equal(g.printer.boss.hp,18);assert.equal(g.printer.boss.jobs.length,0);assert.ok(g.level.relays.every(r=>r.on));
  enter(g);g.printer.seenIntro=true;assert.equal(printerControl(g).id,'skip');tick(g,true);assert.ok(g.printer.boss.age>=9);
 });
 test('boss cannot finish by HP or a switch: restraint, cooling and a physical core hit are ordered',()=>{

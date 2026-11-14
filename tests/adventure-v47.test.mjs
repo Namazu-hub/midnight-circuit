@@ -15,7 +15,7 @@ test('explicit printer abyss costs one HP while a lower recovery deck is safe',(
  const g=createGame(3);g.rooms.active='B';Object.assign(g.player,{x:2200,y:640,vy:0});g.spawnGrace=0;
  for(let i=0;i<120;i++)updateGame(g,{});assert.equal(g.player.hp,6);assert.equal(g.player.y+40,680);
  Object.assign(g.player,{x:2200,y:760,vy:100});updateGame(g,{});assert.equal(g.player.hp,5);assert.equal(g.deaths,1);assert.ok(g.player.invul>1.9);
- g.player.hp=1;g.rooms.active='B';Object.assign(g.player,{x:2200,y:760});updateGame(g,{});assert.equal(g.lives,2);assert.equal(g.player.hp,6);
+ g.research.funds=50;g.player.hp=1;g.rooms.active='B';Object.assign(g.player,{x:2200,y:760});updateGame(g,{});assert.equal(g.research.recoveries,1);assert.equal(g.player.hp,6);
 });
 test('keyboard retains C and adds F, with disjoint V and B item edges',()=>{
  assert.deepEqual(actionKeys,['KeyC','KeyF']);assert.equal(equipmentKeys.KeyV,'weapon');assert.equal(equipmentKeys.KeyB,'drink');
@@ -27,8 +27,8 @@ test('stored drinks cap at three, heal once and only explicit drinking can overl
  const uses=g.equipment.consumed;respawn(g,'fall');assert.equal(g.equipment.consumed,uses);assert.equal(g.player.boost,0);
  assert.equal(EQUIPMENT.speed,1.55);
 });
-test('overload at HP1 consumes a normal life and the boost still expires',()=>{
- const g=createGame(0);g.equipment.consumed=2;g.equipment.drinks=1;g.player.hp=1;updateGame(g,{drink:true});assert.equal(g.lives,2);assert.equal(g.player.hp,6);assert.equal(g.equipment.drinks,0);assert.equal(g.player.boost,0);
+test('overload at HP1 pays the recovery fee and the boost still expires',()=>{
+ const g=createGame(0);g.research.funds=50;g.equipment.consumed=2;g.equipment.drinks=1;g.player.hp=1;updateGame(g,{drink:true});assert.equal(g.research.recoveries,1);assert.equal(g.player.hp,6);assert.equal(g.equipment.drinks,0);assert.equal(g.player.boost,0);
  g.equipment.drinks=1;g.equipment.consumed=0;updateGame(g,{drink:true});g.player.boost=.001;updateGame(g,{});assert.equal(g.player.boost,0);
 });
 test('tool purchases charge once, reject replacement and exhaust exact durability',()=>{
@@ -68,7 +68,7 @@ test('cooled defense has two turrets and two flying minis, warnings, a capped bu
  assert.ok(coreReady(b));assert.equal(b.minions.filter(e=>e.kind==='turret').length,2);assert.equal(b.minions.filter(e=>e.kind==='mini').length,2);assert.ok(b.jobs.length+b.minions.length<=4);assert.ok(g.printer.bolts.length);assert.ok(b.minions.filter(e=>e.kind==='mini').every(e=>e.y<470));
  const e=b.minions[0];g.player.x=e.x;g.player.y=e.y;tickDefense(g,{},true,1/120,()=>{});assert.ok(!b.minions.includes(e));
  const wall=b.defense.wall;wall.progress=1;g.printer.bolts.push({x:6152,y:400,w:12,h:12,vx:0,vy:0,life:3});tickDefense(g,{},false,.01,()=>{});assert.equal(g.printer.bolts.at(-1).life,0);
- respawn(g,'retry');assert.equal(g.printer.boss.defense,undefined);assert.equal(g.printer.boss.jobs.length,0);assert.equal(g.printer.bolts.length,0);assert.equal(g.lives,2);
+ g.research.funds=50;respawn(g,'retry');assert.equal(g.printer.boss.defense,undefined);assert.equal(g.printer.boss.jobs.length,0);assert.equal(g.printer.bolts.length,0);assert.equal(g.research.recoveries,1);
 });
 test('dawn door remains locked until the physical boss finish and the next room is playable',()=>{
  const g=createGame(3),d=g.level.doors.find(d=>d.id==='dawn');assert.equal(doorReady(g,d),false);g.printer.boss.done=true;g.printer.boss.active=true;g.rooms.active='E';assert.ok(beginDoor(g,d));for(let i=0;i<150;i++)tickDoor(g,{},1/120,1200);assert.equal(g.rooms.active,'H');assert.equal(g.finished,false);const x=g.player.x;for(let i=0;i<120;i++)updateGame(g,{right:true});assert.ok(g.player.x>x+100);assert.equal(g.printer.ending.active,false);

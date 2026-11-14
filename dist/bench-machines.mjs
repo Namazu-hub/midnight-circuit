@@ -1,5 +1,5 @@
-// Stage 1's optional physical experiments. Never count as another wiring repair.
-import {approach} from './world.mjs?v=4.9.3';
+// Stage 1's lift and optional experiments. Never count as another wiring repair.
+import {approach} from './world.mjs?v=4.10.0';
 export function installBenchMachines(L){
  const add=(id,x,y,w=120)=>{const p={x,y,w,h:20,type:'platform',benchMachine:id,benchSurface:true};L.platforms.push(p);return p;};
  // Leave a readable approach to each new experiment; combat resumes on the exit.
@@ -35,6 +35,10 @@ export function moveBenchMachines(g,dt){
   const edge=down&&!m.contact;m.contact=down;m.flash=Math.max(0,(m.flash||0)-dt);
   if(edge){m.flash=.5;g.events.push({type:'benchButton',x:p.x+14,y:p.y+p.h});}
   if(m.kind==='lift'){
+   // An empty raised car returns for a missed landing; a rider is never recalled.
+   const riding=p.standing===a.id;
+   m.emptyTime=m.on&&!riding?((m.emptyTime||0)+dt):0;
+   if(m.emptyTime>1.5){m.on=false;m.emptyTime=0;}
    if(edge){
     // One fare per attempt; paid access survives a fall so a checkpoint
     // cannot strand PICO after all nearby one-time coins were collected.
@@ -44,6 +48,8 @@ export function moveBenchMachines(g,dt){
      m.on=true;
     }else g.events.push({type:'actionStep',text:`リフト ¥${m.price}：科研費を集めよう`,x:m.x+55,y:a.y-30});
    }
+   const barrier=g.level.platforms.find(p=>p.benchBarrier);
+   if(barrier){barrier.y=m.paid?230:-310;barrier.h=800-barrier.y;}
    const old=a.y;a.y=approach(a.y,m.on?m.top:m.y,105*dt);a.dy=a.y-old;a.dx=0;
   }else if(m.kind==='bridge'){
    if(edge)m.timer=m.duration;
@@ -74,7 +80,7 @@ export function moveBenchMachines(g,dt){
  }
 }
 export function resetBenchMachines(g){
- for(const m of g.level.benchMachines||[]){m.contact=false;m.on=false;m.timer=0;m.extended=false;m.charge=0;m.phase='idle';m.wait=0;m.flash=0;}
+ for(const m of g.level.benchMachines||[]){m.contact=false;m.on=false;m.timer=0;m.extended=false;m.charge=0;m.phase='idle';m.wait=0;m.flash=0;m.emptyTime=0;}
 }
 // Keep a fast basement descent inside the visible play area without changing physics.
 export function frameBenchPlayer(g,height){

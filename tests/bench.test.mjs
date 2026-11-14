@@ -97,7 +97,7 @@ test('partial charge drains when stepping away; retry resets the carrier and cos
 });
 test('cabinet requires the paid lift, and a fall cannot charge its fare twice',()=>{
  const g=createGame(0),wall=g.level.platforms.find(a=>a.benchBarrier),m=g.level.benchMachines.find(a=>a.id==='lift');
- assert.ok(wall.y<290&&wall.y+wall.h===510);assert.ok(!g.level.platforms.some(a=>a.type==='ghost'));
+ assert.ok(wall.y<=g.level.minY-90&&wall.y+wall.h>=800);assert.ok(!g.level.platforms.some(a=>a.type==='ghost'&&!a.requiresRepair));
  Object.assign(g.player,{x:885,y:470,onGround:true,standing:g.level.platforms.find(a=>a.benchMachine==='lift').id});
  step(g);assert.equal(m.on,false);assert.equal(m.paid,false);
  g.research.funds=10;step(g,{jump:true});frames(g,100);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);
@@ -109,9 +109,9 @@ test('Stage 1 drink consumes funds only on pickup and leaves a can if unaffordab
  step(g);assert.equal(g.equipment.drinks,0);assert.equal(g.level.drinks[0].got,undefined);
  g.research.funds=10;step(g);assert.equal(g.equipment.drinks,1);assert.equal(g.research.funds,0);
 });
-test('Stage 1 enemies return offscreen on a timer without repeating the defeat grant',()=>{
+test('Stage 1 enemies return offscreen on a timer with a fresh defeat grant per respawn',()=>{
  const g=createGame(0),e=g.level.enemies[0];g.level.enemies=[e];g.level.chips=[];g.level.drinks=[];Object.assign(g.player,{x:2500,y:470});e.alive=false;
  frames(g,5);assert.equal(e.rewardPaid,true);const earned=g.research.earned;
  frames(g,2200);assert.equal(e.alive,true);assert.equal(g.research.earned,earned);
- e.alive=false;frames(g,5);assert.equal(g.research.earned,earned);
+ e.alive=false;frames(g,5);assert.equal(g.research.earned,earned+15);
 });

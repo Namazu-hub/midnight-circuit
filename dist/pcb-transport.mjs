@@ -1,4 +1,4 @@
-import {clamp,overlap} from './world.mjs?v=4.9.3';
+import {clamp,overlap} from './world.mjs?v=4.10.0';
 // Stage-local reusable feeder objects. Loss returns the object, never money.
 export const PCB_SUPPLY={tray:{x:6740,y:300,w:64,h:24,material:'iron'},puck:{x:7590,y:470,w:46,h:40,material:'magnet',pole:1}};
 export function resetPCBPart(p){const spec=PCB_SUPPLY[p.kind];Object.assign(p,spec,{vx:0,vy:0,held:false,returns:(p.returns||0)+1});}

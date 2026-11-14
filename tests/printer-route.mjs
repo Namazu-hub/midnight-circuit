@@ -18,11 +18,11 @@ export function traversePrinter({record=false}={}){
  const b=s.boss;
  const battle=until=>{go(5550,400);for(let f=0;f<120*120&&b.phase<until;f++){const p=g.player,head=dragonBoxes(b)[0],cycle=b.clock%4.2;step({left:p.x+14>5560,right:p.x+14<5540,jump:p.onGround&&(cycle>.9&&cycle<2.2||p.y+40>410)||p.jumps===1&&p.vy>-60&&cycle<2.2,pulse:g.cooldown<=0&&b.vulnerable&&Math.hypot(p.x+14-head.x-head.w/2,p.y+20-head.y-head.h/2)<185});if(g.printer.boss!==b)throw Error('boss retry needed');}};
  battle(2);go(5480,510);use();go(5590,400);go(5760,290);go(5610,180);use();battle(3);
- if(b.phase!==3)throw Error(`boss not phase3 hp${b.hp} life${g.lives} age${b.age} active${b.active} pos${g.player.x},${g.player.y} deaths${g.deaths} relays${g.level.relays.map(r=>r.on)} gear${s.gear} fans${s.fans} parts${g.level.printerParts.map(p=>p.state)}`);
+ if(b.phase!==3)throw Error(`boss not phase3 hp${b.hp} funds${g.research.funds} age${b.age} active${b.active} pos${g.player.x},${g.player.y} deaths${g.deaths} relays${g.level.relays.map(r=>r.on)} gear${s.gear} fans${s.fans} parts${g.level.printerParts.map(p=>p.state)}`);
  go(5590,400);go(5760,290);go(5610,180);use();
  go(6000,510);for(let i=0;i<1200&&!b.centerLatch;i++)step({pulse:g.cooldown<=0});go(5590,400);go(5760,290);use();
  if(!b.route)throw Error(`frame not started ${b.x}`);
  wait(6.1);go(6270,400);go(6450,290);go(6290,180);use();go(6450,290);use();go(5880,350);for(let i=0;i<1200&&!b.done;i++){const c=dragonBoxes(b)[5];step({left:g.player.x+14>c.x+c.w/2+20,right:g.player.x+14<c.x+c.w/2-20,jump:g.player.onGround,pulse:g.cooldown<=0&&Math.hypot(g.player.x+14-c.x-c.w/2,g.player.y+20-c.y-c.h/2)<95&&g.player.y+20<c.y+c.h/2+18});}if(!b.done)throw Error('core finisher failed');wait(3.3);door('dawn');go(19970,510);
  return {g,maxY:-100,inputs};
 }
-if(process.argv[1]?.endsWith('/printer-route.mjs')){const {g}=traversePrinter();console.log({finish:g.finished,hp:g.player.hp,lives:g.lives,time:g.time,repairs:g.level.relays.map(r=>r.on)});}
+if(process.argv[1]?.endsWith('/printer-route.mjs')){const {g}=traversePrinter();console.log({finish:g.finished,hp:g.player.hp,funds:g.research.funds,time:g.time,repairs:g.level.relays.map(r=>r.on)});}

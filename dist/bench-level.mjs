@@ -1,4 +1,4 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.9.3';
+import {installBenchMachines} from './bench-machines.mjs?v=4.10.0';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
@@ -8,10 +8,19 @@ export function redesignBench(L){
  L.chips=L.chips.filter(p=>!(p.x===325&&p.y===365));
  // The old pulse-only trays neither teach the wiring sequence nor form useful routes.
  L.platforms=L.platforms.filter(p=>p.type!=='ghost');
+ // Old service stairs bypassed the paid lift through the collectible shelf.
+ // Keep that shelf, reached by riding the lift and jumping left.
+ L.platforms=L.platforms.filter(p=>!(p.type==='platform'&&p.x<850&&p.x!==670));
+ L.chips=L.chips.filter(p=>!(p.x<850&&p.y<440));
+ L.chips.push({x:690,y:250},{x:805,y:250},{x:1045,y:190});
  L.wireButtons=[7780,7900,8020].map(x=>({x,y:70,w:64}));
  L.platforms.push({x:7740,y:70,w:450,h:20,type:'platform'});
+ // The restored circuit has a visible, traversable result beside its terminal.
+ L.platforms.push({x:8190,y:70,w:110,h:20,type:'ghost',group:'bench-wire',requiresRepair:true,benchExitBridge:true},
+  {x:8300,y:70,w:100,h:20,type:'platform',benchSurface:true});
+ Object.assign(L.goal,{x:8350,y:70});Object.assign(L.route.at(-1),L.goal);
  L.wireHints=[{x:3980,y:1320}];
- L.benchMap=true;L.killY=1650;L.maxY=1100;
+ L.benchMap=true;L.minY=-220;L.killY=1650;L.maxY=1100;
  const old=L.platforms.filter(p=>p.type==='ground');
  const spans=[];
  for(const p of old){
@@ -23,7 +32,7 @@ export function redesignBench(L){
  L.platforms=L.platforms.filter(p=>p.type!=='ground').concat(spans);
  // A tall insulated cabinet blocks the first floor route. Its top is above
  // normal double-jump reach; the tool lift provides the actual passage.
- L.platforms.push({x:1010,y:230,w:70,h:280,type:'ground',benchSurface:true,benchBarrier:true});
+ L.platforms.push({x:1010,y:-310,w:70,h:1110,type:'ground',benchSurface:true,benchBarrier:true});
  // Move floor-bound objects with their supporting bench; keep upper shelves intact.
  for(const e of L.enemies)if(e.y===482){e.y=surface(e.x)-e.h;e.baseY=e.y;const p=spans.find(p=>e.x>=p.x&&e.x<p.x+p.w);if(p){e.min=Math.max(e.min,p.x+15);e.max=Math.min(e.max,p.x+p.w-e.w-15);}}
  for(const a of [...L.students,...L.checkpoints])if(a.y===510)a.y=surface(a.x);
@@ -81,5 +90,5 @@ export function redesignBench(L){
  }
  L.platforms=other.concat(merged);
  installBenchMachines(L);
- L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'地下電源室'},{x:5930,name:'配管ギャラリー'},{x:7150,name:'制御盤デッキ'}];
+ L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'サーバー記録室'},{x:5930,name:'夜勤の保守室'},{x:7150,name:'制御盤デッキ'}];
 }

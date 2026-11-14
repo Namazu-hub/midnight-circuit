@@ -1,5 +1,7 @@
 # Stage 1: workbench ridge and service basements
 
+現行v4.10の科研費復帰・敵再出現・1面の変更と検証は[RELEASE-v4.10.md](RELEASE-v4.10.md)を参照。以下は過去版の記録です。
+
 2026-11-11 / work/v4.9-pcb-factory / runtime URL version 4.9f
 
 ## Reference and implementation
