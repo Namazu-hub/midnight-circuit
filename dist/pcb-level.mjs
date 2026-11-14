@@ -1,4 +1,4 @@
-import {addCircuitTower} from './circuit-level.mjs?v=4.9.1';
+import {addCircuitTower} from './circuit-level.mjs?v=4.9.2';
 // Stage 06: production creates the terrain; no player fabrication menu.
 export const PCB_ROOMS=[['A','停止したライン'],['B','ペースト印刷'],['C','部品実装'],['D','部品供給・電磁石'],['E','リフロー炉'],['F','外観検査 AOI'],['G','出荷ヤード'],['H','夜明けの研究室']];
 export function redesignPCB(L){

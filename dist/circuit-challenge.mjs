@@ -1,5 +1,5 @@
 // Tower's second coil and relay yard. Uses the existing walk/collision system.
-import {clamp} from './world.mjs?v=4.9.1';
+import {clamp} from './world.mjs?v=4.9.2';
 export const BOOST=Object.freeze({speed:860,up:650,duration:.95});
 export function relayYard(s){const get=id=>s.parts.find(e=>e.id===id)?.state==='locked';return {power:get('r2'),store:get('c2'),switch:get('sw'),ready:get('r2')&&get('c2')&&get('sw')};}
 export function moveRelayYard(g,dt){const s=g.circuit,yard=relayYard(s),p=g.player;

@@ -1,7 +1,7 @@
 // Original Canvas lab materials. All repeat phases use world coordinates.
 const fill=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
 const line=(c,x,y,xx,yy,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
-export function drawBenchBackdrop(c,g,width,height){
+export function drawBenchBackdrop(c,g,width,height,reduced=false){
  const x=Math.round(g.camera)-24,y=Math.round(g.cameraY||0)-24;width+=48;height+=48;
  c.save();const fade=c.createLinearGradient(0,-150,0,820);fade.addColorStop(0,'#101d2c');fade.addColorStop(.65,'#182b39');fade.addColorStop(1,'#101e2a');c.fillStyle=fade;c.fillRect(x,y,width,height);
  // A single wall grid follows both camera axes; no screen-anchored underground windows.
@@ -9,8 +9,11 @@ export function drawBenchBackdrop(c,g,width,height){
  for(let xx=Math.floor(x/144)*144;xx<x+width;xx+=144){line(c,xx,y,xx,y+height,'#213542');for(let yy=Math.floor(y/96)*96;yy<y+height;yy+=96)fill(c,xx+8,yy+8,2,2,'#35505c');}
  for(let xx=Math.floor((x-120)/576)*576;xx<x+width;xx+=576){
   fill(c,xx+48,40,420,262,'#0b1725');fill(c,xx+56,48,404,246,'#142b3c');
-  // Distant lab silhouettes; frames are continuous and remain behind terrain.
-  for(let i=0;i<10;i++){const h=28+(i*29+xx/576*17)%57;fill(c,xx+60+i*40,290-h,37,h,'#0c1b2a');fill(c,xx+68+i*40,298-h,3,4,'#4e666d');}
+  // Slow distant scenery is clipped to each window; the wall remains world-locked.
+  c.save();c.beginPath();c.rect(xx+56,48,404,246);c.clip();
+  const drift=reduced?0:g.camera*.13;
+  for(let wx=Math.floor((xx+56-drift)/80)*80;wx<xx+460-drift;wx+=80){const h=45+((wx/80%5)+5)%5*12;fill(c,wx+drift,290-h,69,h,'#0c1b2a');fill(c,wx+drift+11,298-h,4,6,'#4e666d');}
+  c.restore();
   fill(c,xx+252,48,5,246,'#294554');fill(c,xx+56,174,404,4,'#294554');
   fill(c,xx+48,307,420,5,'#253e4c');
  }
@@ -54,6 +57,10 @@ export function drawBenchRooms(c,g,width=1200){
   if(r.x+r.w<g.camera||r.x>g.camera+width+180)continue;
   const warm=r.role==='supply';
   fill(c,r.x,r.y,r.w,r.h,warm?'#252d2d':'#101f2b');
+  c.save();c.beginPath();c.rect(r.x,r.y,r.w,r.h);c.clip();
+  // Static pools of light add depth, never obscure platforms or flash on camera motion.
+  for(let xx=r.x+300;xx<r.x+r.w;xx+=390){const lamp=c.createRadialGradient(xx,r.y+35,10,xx,r.y+35,360);lamp.addColorStop(0,warm?'#e2be6820':'#81c9df18');lamp.addColorStop(1,'transparent');c.fillStyle=lamp;c.fillRect(xx-360,r.y,720,r.h);}
+  c.restore();
   // Matching panel seams continue through the room and the return shaft.
   for(let yy=Math.ceil(r.y/96)*96;yy<r.floorY;yy+=96)line(c,r.x,yy,r.x+r.w,yy,warm?'#35403d':'#263a47');
   for(let xx=Math.ceil(r.x/144)*144;xx<r.x+r.w;xx+=144)line(c,xx,r.y,xx,r.floorY,warm?'#343f3d':'#233744');

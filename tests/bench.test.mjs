@@ -46,3 +46,52 @@ test('continuous workbench undersides, merged shelves, and furniture clear of ri
  for(const coin of L.chips)for(const gear of L.gears)assert.ok(Math.abs(coin.y-gear.y)>25||Math.abs(coin.x-gear.x)>35,'pickups do not cover each other');
  for(const coin of L.chips)for(const s of L.students)assert.ok(Math.abs(coin.y-s.y+45)>25||Math.abs(coin.x-s.x)>45,'coins clear of laptops');
 });
+
+import {platformSolid,VIEW} from '../dist/engine.mjs';
+function fixture(x,y){const g=createGame(0);g.level.enemies=[];Object.assign(g.player,{x:x-14,y:y-40,vx:0,vy:0});return g;}
+const frames=(g,n,input={})=>{for(let i=0;i<n;i++)step(g,input);};
+test('rider-triggered tool lift reaches the collectible and toggles only on a new landing',()=>{
+ const g=fixture(820,510),m=g.level.benchMachines[0];
+ frames(g,36,{right:true});frames(g,300);assert.equal(m.on,true);assert.equal(g.player.y+40,290);
+ assert.ok(g.player.onGround);assert.equal(g.level.relays[0].on,false);
+ // Jump off and back on: a deliberate landing calls the lift down.
+ step(g,{jump:true});frames(g,110);frames(g,280);assert.equal(m.on,false);assert.equal(g.player.y+40,510);
+ go(g,800,510);frames(g,46,{right:true});frames(g,300);assert.equal(g.player.y+40,290);go(g,745,295);assert.equal(g.gears,1);assert.equal(g.deaths,0);
+});
+test('timed trays open by foot contact and can be traversed by normal jumps to a reward',()=>{
+ const g=fixture(1870,510),m=g.level.benchMachines.find(m=>m.id==='bridge');
+ const parts=g.level.platforms.filter(a=>a.benchMachine==='bridge');assert.ok(parts.every(a=>!platformSolid(g,a)));
+ go(g,1930,510);assert.ok(m.timer>9);for(const a of parts)go(g,a.x+65,a.y);step(g,{jump:true,right:true});go(g,2510,240);
+ assert.ok(g.chips>=2);assert.equal(g.deaths,0);frames(g,1300);assert.ok(parts.every(a=>!platformSolid(g,a)));
+});
+test('expired trays retain a standing rider, then retract, and can be retriggered after failure',()=>{
+ const g=fixture(1930,510),m=g.level.benchMachines.find(m=>m.id==='bridge');frames(g,5);go(g,2050,390);
+ frames(g,1400);assert.equal(m.timer,0);assert.equal(m.extended,true);assert.ok(g.player.onGround);
+ go(g,1930,510);frames(g,5);assert.ok(m.timer>8);
+ respawn(g,'fall');assert.equal(m.extended,false);assert.equal(g.player.hp,5);assert.equal(m.timer,0);
+ // Returning to the same apparatus after a checkpoint reset has no consumed resource.
+ Object.assign(g.player,{x:1916,y:470,vx:0,vy:0});frames(g,5);assert.ok(m.timer>9);
+});
+test('charging carrier transports a standing rider, permits a destination jump, and returns empty',()=>{
+ const g=fixture(5180,430),m=g.level.benchMachines.find(m=>m.id==='shuttle'),a=g.level.platforms.find(a=>a.benchMachine==='shuttle');
+ go(g,5255,430);frames(g,80);assert.ok(m.charge>0&&m.charge<1);
+ frames(g,650);assert.equal(m.phase,'wait');assert.equal(a.x,m.endX);assert.equal(g.player.y+40,m.top);assert.ok(g.player.x>5650);
+ go(g,5810,220);assert.ok(g.chips>0);frames(g,1100);assert.equal(m.phase,'idle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.deaths,0);
+});
+test('descent camera keeps PICO visible at 900px/s and static scenery cannot alter gameplay',()=>{
+ const g=fixture(3370,550);g.player.vy=900;
+ for(let f=0;f<180;f++){step(g);assert.ok(g.player.y+40-g.cameraY<=VIEW.h-80);assert.ok(g.cameraY>=g.level.minY&&g.cameraY<=g.level.maxY);}
+ assert.equal(g.deaths,0);assert.equal(g.level.relays.length,1);assert.equal(g.level.gears.length,3);
+});
+test('new controls work with the ordinary enemy population, with clear initial contact zones',()=>{
+ for(const [id,x,y,n] of [['lift',885,470,330],['bridge',1916,470,60],['shuttle',5245,390,850]]){
+  const g=createGame(0);Object.assign(g.player,{x,y});frames(g,n);const m=g.level.benchMachines.find(m=>m.id===id);
+  assert.equal(g.deaths,0);assert.equal(g.player.hp,6);assert.ok(id==='lift'?m.on:id==='bridge'?m.extended:m.phase==='wait');
+ }
+});
+test('partial charge drains when stepping away; retry resets the carrier and costs no funds',()=>{
+ const g=fixture(5255,430),m=g.level.benchMachines.find(m=>m.id==='shuttle');frames(g,65);assert.ok(m.charge>0&&m.charge<1);
+ frames(g,35,{left:true});frames(g,180);assert.equal(m.phase,'idle');assert.equal(m.charge,0);
+ respawn(g,'fall');const a=g.level.platforms.find(a=>a.benchMachine==='shuttle');assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(g.research.funds,0);
+ Object.assign(g.player,{x:5245,y:390});frames(g,850);assert.equal(m.phase,'wait');assert.equal(g.research.funds,0);
+});

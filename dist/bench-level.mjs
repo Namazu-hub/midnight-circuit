@@ -1,3 +1,4 @@
+import {installBenchMachines} from './bench-machines.mjs?v=4.9.2';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
@@ -72,5 +73,6 @@ export function redesignBench(L){
   else merged.push({...p});
  }
  L.platforms=other.concat(merged);
+ installBenchMachines(L);
  L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'地下電源室'},{x:5930,name:'配管ギャラリー'},{x:7150,name:'制御盤デッキ'}];
 }

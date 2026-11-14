@@ -1,5 +1,5 @@
-import {grant} from './research.mjs?v=4.9.1';
-import {collectDrink} from './equipment.mjs?v=4.9.1';
+import {grant} from './research.mjs?v=4.9.2';
+import {collectDrink} from './equipment.mjs?v=4.9.2';
 // Optional supply stash: ordinary proximity pickup, no extra controls or repair.
 export function tickBenchRoom(g){
  if(!g.level.benchMap)return;

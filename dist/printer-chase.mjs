@@ -1,6 +1,6 @@
-import {clamp,approach,overlap} from './world.mjs?v=4.9.1';
-import {grant} from './research.mjs?v=4.9.1';
-import {killPrinterFoe} from './printer-enemies.mjs?v=4.9.1';
+import {clamp,approach,overlap} from './world.mjs?v=4.9.2';
+import {grant} from './research.mjs?v=4.9.2';
+import {killPrinterFoe} from './printer-enemies.mjs?v=4.9.2';
 export const CHASE=Object.freeze({left:20400,right:24100,release:20860,start:20580,holder:23730,radius:115,startSpeed:220,maxSpeed:335});
 export function extendChase(L){
  const C=CHASE;L.width=C.right;L.rooms.push({id:'A2',left:C.left,right:C.right,minY:-80,maxY:160,name:'巨大材料搬送路'});

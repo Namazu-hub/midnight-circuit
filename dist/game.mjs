@@ -1,22 +1,22 @@
-import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9.1';
-import {roomControl} from './rooms.mjs?v=4.9.1';
-import {printerGuidance} from './printer-progress.mjs?v=4.9.1';
-import {TOOLS} from './equipment.mjs?v=4.9.1';
-import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9.1';
-import {FEEL,holdFrame} from './feel.mjs?v=4.9.1';
-import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9.1';
-import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9.1';
-import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9.1';
-import {createRepairUI} from './repair-ui.mjs?v=4.9.1';
-import {tickResearch} from './research.mjs?v=4.9.1';
-import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9.1';
-import {bindTouchControls} from './touch-input.mjs?v=4.9.1';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9.1';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9.1';
-import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9.1';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.9.1';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9.1';
-import {drawAwakening} from './awakening.mjs?v=4.9.1';
+import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.9.2';
+import {roomControl} from './rooms.mjs?v=4.9.2';
+import {printerGuidance} from './printer-progress.mjs?v=4.9.2';
+import {TOOLS} from './equipment.mjs?v=4.9.2';
+import {actionKeys,equipmentKeys} from './input-map.mjs?v=4.9.2';
+import {FEEL,holdFrame} from './feel.mjs?v=4.9.2';
+import {printerControl,printerObjective,requestPrinterHint} from './printer.mjs?v=4.9.2';
+import {nearbyAction,actionObjective} from './action-repairs.mjs?v=4.9.2';
+import {beginRepair,nearbyRepair,commitRepair} from './repairs.mjs?v=4.9.2';
+import {createRepairUI} from './repair-ui.mjs?v=4.9.2';
+import {tickResearch} from './research.mjs?v=4.9.2';
+import {GOODS,nearVendor,purchase} from './research.mjs?v=4.9.2';
+import {bindTouchControls} from './touch-input.mjs?v=4.9.2';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.9.2';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.9.2';
+import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.9.2';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.9.2';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.9.2';
+import {drawAwakening} from './awakening.mjs?v=4.9.2';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
 const blank=()=>blankProgress(LEVELS.length,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -42,6 +42,7 @@ class Synth{
     if(name==='feverMilestone'){[784,1047,1319].forEach((n,i)=>tone(n,.23,'triangle',.25,i*.05));}
     if(name==='portal'){tone(220,.5,'sine',.3,0,1300);}
     if(name==='railLand')tone(75,.08,'triangle',.12);
+    if(name==='benchButton'){tone(260,.08,'triangle',.2,0,520);}
     if(name==='jump')tone(330,.14,'square',.13,0,680);
     if(name==='doublejump'){tone(590,.12,'triangle',.32,0,980);tone(980,.12,'triangle',.2,.05);}
     if(name==='chip'){tone(880,.09,'sine',.3);tone(1320,.12,'sine',.22,.045);}
@@ -205,6 +206,7 @@ function processEvents(){
     if(e.type==='printDenied')toast('科研費が足りない',2);
     if(e.type==='tool'){burst(e.x,e.y,'#ffcd9b',e.last?20:8);audio.sound('pulse');}
     if(e.type==='boost'){burst(e.x,e.y,'#b6ff6b',30);toast('モンエナ！ 9秒間の虹色スピードアップ ×1.55',3);}
+    if(e.type==='benchButton')burst(e.x,e.y,'#b5e8d1',6);
     if(e.type==='chip')burst(e.x,e.y,'#ffe0a0',6);
     if(e.type==='gear'){burst(e.x,e.y,'#9bffdc',26);toast(`ひみつのパーツを発見！ ${game.gears} / 3`,2.6);}
     if(e.type==='resistance'){particles.push({x:e.x,y:e.y-30,vx:0,vy:-25,text:['1 kΩ','10 kΩ','100 kΩ'][e.band],color:'#ffe3a4',life:1,max:1});audio.tone(330*2**(e.band/3),.15,'triangle',.15);}

@@ -131,3 +131,54 @@ pulse ACTIVE and pause/resume were observed separately from these fixtures. No c
 of human first-play clarity, device touch QA, audio QA or performance gain is
 made. The public entry remains the ordinary index.html; the review page is not
 required for gameplay.
+
+## v4.9.2 — physical buttons and optional machine routes (2026-11-13)
+
+These are part of the ordinary Stage 1, not exclusive to the review tool. The
+one required wiring sequence is unchanged. No extra repair count, save key,
+RULES value, stage order or touch control is introduced.
+
+| Apparatus | Player action and result | Retry / purpose |
+|---|---|---|
+| Tool lift, x850 | land on its centre pressure button to toggle between y510 and y290; ride and jump left to the existing tool shelf | a fresh landing reverses it; holding does not repeat; reaches the existing collectible gear |
+| Extension trays, x1900 | step on the floor button; three amber trays extend for 10 seconds, forming a rising route to x2440 | retrigger freely; occupied trays wait before retracting; coins and a drink reward the upper route |
+| Charging carrier, x5200 | stand on the centre button for 1.2 seconds; the carrier rises, traverses right to x5680, waits and returns | leaving early drains the charge; missed rides return; jumping onto the upper exit shelf earns coins |
+
+Inactive trays have dashed outlines and no collision. Active tops have the
+same bright landing edge as their collision surface. Pads, conduit, direction
+symbols and local charge/timer displays show the physical cause and result.
+Button chirps and charge completion effects use the existing sound/effect
+systems. A few nearby enemies are relocated away from the controls; existing
+counts and ordinary combat remain. No apparatus costs currency. Respawn resets
+apparatus motion, while ordinary collected-item flags remain authoritative.
+
+`bench-machines.mjs` owns apparatus state, solidity, rider movement and the
+Stage 1 camera framing guard. `bench-machine-art.mjs` owns the matching drawing.
+`bench-level` installs their geometry; engine/render call the two modules.
+The old main route remains available; these are optional action/exploration
+routes rather than three additional mandatory switch gates.
+
+Windows retain world-aligned frames and show a slow distant silhouette
+parallax. Reduced-effects mode disables that drift and button flashes.
+Basement light pools are clipped to room bounds, with cool archive and warm
+workshop lighting. During rapid descent, Stage 1 camera framing keeps PICO
+inside the playable vertical view without changing movement physics.
+
+Validation: `npm run check` passes (63 runtime modules); `npm test` passes
+203/203 (196 baseline plus 7 tests). Existing routes/expectations were retained.
+All eight `tests/routes.mjs` routes finish with zero deaths; the dedicated
+printer and PCB route commands also finish. New tests cover riding/jumping,
+tray expiry/occupancy/retrigger, partial charge, automatic return, respawn,
+no-cost retries and downward camera framing. Three apparatus activations are
+also checked with normal enemies retained. Isolated movement fixtures clear
+enemies and explicitly set their initial player positions; they are not a
+human first-play study.
+
+Chromium: the normal local index was launched and movement/pulse observed.
+The labelled `tools/bench-review.html` fixtures were used to operate the lift,
+extend trays and charge the carrier, and to inspect a 700x600 logical view.
+This narrow renderer fixture is not a physical phone or touch-input test.
+No manual start-to-goal completion, actual iPhone/Android test, audio quality
+check, player enjoyment study or performance benchmark is claimed. The normal
+public entry is still index.html; no test URL is needed to use these machines.
+Runtime entry/import URL versions and package version advance to 4.9.2.

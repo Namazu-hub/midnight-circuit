@@ -1,24 +1,25 @@
-import {tickBenchRoom} from './bench-room.mjs?v=4.9.1';
-import {tickBenchWiring} from './bench-wiring.mjs?v=4.9.1';
-import {resetCircuitTower} from './circuit-tower.mjs?v=4.9.1';
-import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9.1';
-import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9.1';
-import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9.1';
-import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9.1';
-import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9.1';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.9.1';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9.1';
-import {movePrinterFoes} from './printer-enemies.mjs?v=4.9.1';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9.1';
-import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9.1';
-import {setupRepairStations} from './repair-stations.mjs?v=4.9.1';
-import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9.1';
-import {setupResearch,tickResearch} from './research.mjs?v=4.9.1';
-import {tickLab} from './laboratory.mjs?v=4.9.1';
-import {LEVELS} from './levels.mjs?v=4.9.1';
-import {clamp,overlap,approach} from './world.mjs?v=4.9.1';
-import {tickEnemies} from './enemies.mjs?v=4.9.1';
-import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9.1';
+import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.9.2';
+import {tickBenchRoom} from './bench-room.mjs?v=4.9.2';
+import {tickBenchWiring} from './bench-wiring.mjs?v=4.9.2';
+import {resetCircuitTower} from './circuit-tower.mjs?v=4.9.2';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.9.2';
+import {pcbCameraTarget} from './pcb-boss.mjs?v=4.9.2';
+import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.9.2';
+import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.9.2';
+import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.9.2';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.9.2';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.9.2';
+import {movePrinterFoes} from './printer-enemies.mjs?v=4.9.2';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.9.2';
+import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.9.2';
+import {setupRepairStations} from './repair-stations.mjs?v=4.9.2';
+import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.9.2';
+import {setupResearch,tickResearch} from './research.mjs?v=4.9.2';
+import {tickLab} from './laboratory.mjs?v=4.9.2';
+import {LEVELS} from './levels.mjs?v=4.9.2';
+import {clamp,overlap,approach} from './world.mjs?v=4.9.2';
+import {tickEnemies} from './enemies.mjs?v=4.9.2';
+import {tickRail,resetRail,railAt} from './rail.mjs?v=4.9.2';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
 export const RULES={maxHP:6,boostDuration:9,boostSpeed:1.55,speed:290,gravity:1640,jump:625,airJump:555,pulse:2.8,cooldown:5.2};
@@ -33,7 +34,7 @@ export function createGame(index=0,customLevel=null){
 }
 export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
- resetCircuitTower(g);
+ resetBenchMachines(g);resetCircuitTower(g);
  resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){g.lives--;emit(g,'lifeLost',{lives:g.lives});if(g.lives<=0){g.gameOver=true;emit(g,'gameOver');return;}p.hp=6;p.displayHP=6;p.hurtTimer=0;}
@@ -57,6 +58,7 @@ export function laserPhase(g,l){return (g.time+(l.phase||0))%3.8;}
 export function laserActive(g,l){const phase=laserPhase(g,l);return !g.level.relays.some(r=>r.mode==='timing'&&r.on)&&g.pulse<=0&&phase>=.65&&phase<2.2;}
 export function printedPhase(a){return (a.clock+(a.phase||0))%(a.period||4.8);}
 export function platformSolid(g,a){
+ const bench=benchMachineSolid(g,a);if(bench!==null)return bench;
  if(g.pcb){const solid=pcbSolid(g,a);if(solid!==null)return solid;}
  if(g.printer){const solid=printerSolid(g,a);if(solid!==null)return solid;}
  if(a.actionDevice)return actionPlatformSolid(g,a);
@@ -76,7 +78,7 @@ export function pressState(g,h){
 function updateMachinery(g,dt){
  const p=g.player,frozen=g.pulse>0;
  for(const a of g.level.platforms){
-  if(a.pcbManaged||a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
+  if(a.benchMachine||a.pcbManaged||a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
   if((a.type==='moving'||a.type==='wave')&&!frozen&&powered){const v=Math.sin(a.clock/a.period*Math.PI*2+(a.phase||0))*a.range;a.x=a.baseX+(a.axis==='x'?v:0);a.y=a.baseY+(a.axis==='y'?v:0);}
   if(a.type==='orbit'&&!frozen&&powered){a.x=a.baseX+Math.cos(a.clock/a.period*Math.PI*2)*a.range;a.y=a.baseY+Math.sin(a.clock/a.period*Math.PI*2)*a.range;}
   if(a.type==='leaf'&&!frozen){if(a.missing>0){a.missing=Math.max(0,a.missing-dt);if(a.missing===0)a.crumble=0;}else if(a.crumble>0){a.crumble+=dt;if(a.crumble>.8){a.missing=3.2;a.crumble=0;}}}
@@ -128,7 +130,7 @@ function simulateGame(g,input={},dt=1/120){
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
- if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);p.oldBottom=p.y+p.h;
+ if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);
@@ -150,7 +152,7 @@ function simulateGame(g,input={},dt=1/120){
  const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.circuit?.dash>0?180:g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??g.level.maxY??0):0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  const pcbFocus=pcbCameraTarget(g,VIEW.w);if(pcbFocus!==null){g.camera+=(pcbFocus-g.camera)*Math.min(1,dt*6);g.cameraY+=(0-g.cameraY)*Math.min(1,dt*4);return;}
- g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);
+ g.camera+=(tx-g.camera)*Math.min(1,dt*6);g.cameraY+=(ty-g.cameraY)*Math.min(1,dt*4);frameBenchPlayer(g,VIEW.h);
 }
 
 export function updateGame(g,input={},dt=1/120){

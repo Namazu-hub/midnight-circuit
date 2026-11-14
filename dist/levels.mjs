@@ -1,7 +1,7 @@
-import {redesignBench} from './bench-level.mjs?v=4.9.1';
-import {redesignPCB} from './pcb-level.mjs?v=4.9.1';
-import {redesignPrinter} from './printer-level.mjs?v=4.9.1';
-import {expandRooms} from './laboratory.mjs?v=4.9.1';
+import {redesignBench} from './bench-level.mjs?v=4.9.2';
+import {redesignPCB} from './pcb-level.mjs?v=4.9.2';
+import {redesignPrinter} from './printer-level.mjs?v=4.9.2';
+import {expandRooms} from './laboratory.mjs?v=4.9.2';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],
