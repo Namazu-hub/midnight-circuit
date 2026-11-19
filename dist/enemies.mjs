@@ -1,3 +1,4 @@
+import {stepBioEnemy} from './bio-enemies.mjs?v=4.15.0';
 import {clamp,overlap} from './world.mjs?v=4.11.0';
 export const ENEMY_GUIDE=[
  ['spring','横伸びバネ','縮んで予告した後、左右に伸びる。上から踏むかパルス。'],
@@ -18,7 +19,9 @@ export function tickEnemies(g,dt,hit){
  const p=g.player,frozen=g.pulse>0;
  for(const e of g.level.enemies){
    if(!e.alive)continue;e.active=Math.abs(e.x-p.x)<720&&Math.abs(e.y-p.y)<470;
-   if(!e.active||frozen)continue;
+   if(!e.active||e.room&&g.rooms?.active!==e.room)continue;
+   if(e.kind.startsWith('bio-')){stepBioEnemy(g,e,dt,hit);continue;}
+   if(frozen)continue;
    e.clock+=dt;e.stateTime+=dt;const dx=p.x-e.x,dy=p.y-e.y;
    if(e.kind==='spring'){
      const phase=e.clock%3.4;e.state=phase<1?'charge':phase<1.6?'extend':'recover';e.extension=e.state==='extend'?95:0;
@@ -62,7 +65,8 @@ export function tickEnemies(g,dt,hit){
    }
  }
  if(frozen)return;
- for(const q of g.projectiles){q.life-=dt;const oldY=q.y;q.x+=q.vx*dt;q.y+=q.vy*dt;
+ for(const q of g.projectiles){if(q.room&&q.room!==g.rooms?.active){q.life=0;continue;}
+   q.life-=dt;if(q.gravity)q.vy+=q.gravity*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
    if(q.kind==='bolt'&&g.level.platforms.some(a=>a.h>=60&&overlap(q,a)))q.life=0;
    if(q.kind==='acid'&&g.level.relays.some(r=>r.mode==='titration'&&r.on))q.life=0;
    if(q.life>0&&overlap(p,q))hit(g,q.x);

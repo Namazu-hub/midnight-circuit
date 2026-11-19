@@ -1,4 +1,4 @@
-import {pulseRing} from './bio-wire.mjs?v=4.14.0';
+import {pulseRing} from './bio-wire.mjs?v=4.15.0';
 const CX=10600;
 const pins=[
  {x:10342,y:357,name:'左肩'},
@@ -14,7 +14,7 @@ export function exposedPin(s){return pins[s.phase];}
 const reach=115;
 export function skeletonHint(g){
  const s=g.level.skeleton;
- if(s.done)return 'ワイヤーをすべて解除　出口 →';
+ if(s.done)return s.settled?'骨格試験機 撃破　出口 →':'最後の吊り線が切れた！';
  const pin=exposedPin(s),dx=pin.x-g.player.x-14,dy=pin.y-g.player.y-20;
  const near=Math.hypot(dx,dy)<reach;
  const direction=Math.abs(dx)>85?(dx>0?'→':'←'):(dy<0?'↑':'↓');
@@ -52,8 +52,57 @@ function legPose(s,side){
  }
  return {hip,knee:[(hip[0]+foot[0])/2+side*20,(hip[1]+foot[1])/2-12],foot};
 }
+// Capture the actual joint pose at the cut. Every fragment has its own landing time.
+function fragments(s){
+ const pieces=[];
+ const bone=(a,b,kind='bone')=>{
+  const i=pieces.length,x=(a[0]+b[0])/2,y=(a[1]+b[1])/2;
+  pieces.push({kind,x,y,length:Math.hypot(b[0]-a[0],b[1]-a[1]),angle:Math.atan2(b[1]-a[1],b[0]-a[0]),
+   drift:(x-CX)*.65+(i%2?1:-1)*(18+i*3),rest:kind==='skull'?482:499-i%4*3,delay:(i%4)*.055});
+ };
+ for(const side of [-1,1]){
+  const {shoulder,elbow,hand}=armPose(s,side),{hip,knee,foot}=legPose(s,side);
+  bone(shoulder,elbow);bone(elbow,hand);bone(hip,knee);bone(knee,foot);
+  for(let i=0;i<4;i++)bone([CX,275+i*15],[CX+side*(42-i*4),281+i*15]);
+ }
+ bone([CX,253],[CX,366]);bone([CX-20,224],[CX+20,224],'skull');
+ return pieces;
+}
+function drawWreck(c,s,reduced){
+ const t=reduced?2:s.time;
+ for(const side of [-1,1]){
+  const x=CX+side*209;
+  line(c,[[x,72],[x+side*12,116],[x+side*(18+24*Math.sin(t*19)*Math.exp(-4*t)),165]],'#94aaac',3);
+ }
+ const wave=(t-.82)/.65;
+ if(wave>0&&wave<1){
+  c.save();c.globalAlpha=(1-wave)*.8;c.strokeStyle='#ffe1a8';c.lineWidth=4;
+  c.beginPath();c.ellipse(CX,503,28+230*wave,5+14*wave,0,0,Math.PI*2);c.stroke();c.restore();
+ }
+ for(const part of s.pieces){
+  const age=Math.max(0,t-part.delay),drop=Math.sqrt(2*(part.rest-part.y)/810);
+  const bounce=Math.max(0,age-drop),u=Math.min(1,age/(drop+.45));
+  const x=part.x+part.drift*u,y=age<drop?part.y+405*age*age:part.rest-20*Math.abs(Math.sin(bounce*11))*Math.max(0,1-bounce/.5);
+  c.save();c.translate(x,y);c.rotate(part.angle*(1-u)+(part.kind==='skull' ? .55 : Math.sign(part.drift)*Math.PI)*u);
+  if(part.kind==='skull'){
+   circle(c,[0,0],26,'#e7e0c9');c.fillStyle='#e7e0c9';c.fillRect(-16,11,32,15);
+   for(const side of [-1,1])circle(c,[side*10,0],7,'#293141');
+  }else{
+   const half=part.length/2;line(c,[[-half,0],[half,0]],'#ded7bf',8);
+   circle(c,[-half,0],6,'#a3aaa5');circle(c,[half,0],5,'#e5dfcd');
+  }
+  c.restore();
+ }
+}
 export function tickSkeleton(g,activated,dt,hit){
- const s=g.level.skeleton;if(!s||s.done||g.rooms.active!=='skeleton')return;
+ const s=g.level.skeleton;if(!s||g.rooms.active!=='skeleton')return;
+ if(s.done){
+  if(s.settled)return;
+  const before=s.time;s.time+=dt;
+  if(before<.82&&s.time>=.82){g.shake=.28;g.events.push({type:'skeletonImpact',x:CX,y:494});}
+  if(s.time>=1.65){s.settled=true;g.events.push({type:'skeletonVictory',x:CX,y:450});}
+  return;
+ }
  const p=g.player;
  if(!s.active){
   if(p.x<10115||!g.level.handRigs[1].delivered||!g.level.handRigs[0].locked)return;
@@ -71,20 +120,26 @@ export function tickSkeleton(g,activated,dt,hit){
  }
  const pin=exposedPin(s);
  if(activated&&slack(s)&&Math.hypot(p.x+14-pin.x,p.y+20-pin.y)<reach){
+  if(s.phase===pins.length-1)s.pieces=fragments(s);
   s.phase++;s.done=s.phase===pins.length;s.active=!s.done;s.time=0;
-  g.events.push({type:'actionStep',x:pin.x,y:pin.y,text:s.done?'張力解除 · 骨格試験機は停止した':pin.name+'のワイヤーを解放'});
+  g.events.push({type:s.done?'skeletonCut':'actionStep',x:pin.x,y:pin.y,text:pin.name+'のワイヤーを解放'});
  }
 }
 function line(c,pts,color,w){
  c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(...pts[0]);for(const p of pts.slice(1))c.lineTo(...p);c.stroke();
 }
 function circle(c,p,r,col){c.fillStyle=col;c.beginPath();c.arc(...p,r,0,Math.PI*2);c.fill();}
-export function drawSkeleton(c,g){
+export function drawSkeleton(c,g,reduced){
  const s=g.level.skeleton;if(!s||g.rooms.active!=='skeleton')return;
  c.save();c.lineCap='round';c.font='bold 16px sans-serif';c.textAlign='center';
  const ivory='#dfdac6',joint='#788d95',wire='#e7ba79';
  line(c,[[CX-390,65],[CX+390,65]],'#506983',12);
- c.save();if(s.done){c.translate(CX,506);c.scale(1,.45);c.translate(-CX,-506);}
+ if(s.done){
+  drawWreck(c,s,reduced);
+  c.fillStyle='#a5f4cb';c.font='bold 22px sans-serif';c.fillText(s.settled?'骨格試験機　撃破　✓':'吊架解除',CX,108);
+  c.restore();return;
+ }
+ c.save();
  line(c,[[CX,243],[CX,365]],ivory,12);
  for(let i=0;i<5;i++)for(const dir of [-1,1])line(c,[[CX,271+i*13],[CX+dir*(42-i*3),264+i*13],[CX+dir*(31-i*3),280+i*13]],ivory,6);
  line(c,[[CX-28,356],[CX,375],[CX+28,356],[CX-28,356]],ivory,9);

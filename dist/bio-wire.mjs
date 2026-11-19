@@ -2,7 +2,10 @@
 export function installWireRuns(L){
  L.wireRuns=[
   {room:'spool',points:[[2480,482],[2790,195],[3160,-185]],sag:115,cleared:false},
-  {room:'shaft',points:[[6200,-620],[6510,-390],[6900,285]],high:[6650,-665],sag:135,cleared:false}
+  {room:'shaft',points:[[6200,-620],[6510,-390],[6900,285]],high:[6650,-665],sag:135,cleared:false},
+  {room:'entry',points:[[955,482],[1230,310],[1565,455]],sag:68,cleared:false},
+  {room:'palm',points:[[14395,775],[14710,530],[15120,744]],high:[14800,385],sag:95,cleared:false},
+  {room:'pinch',points:[[16660,-955],[16990,-1120],[17365,-970]],sag:78,cleared:false}
  ];
 }
 export const currentRun=g=>g.level.wireRuns?.find(r=>r.room===g.rooms?.active);

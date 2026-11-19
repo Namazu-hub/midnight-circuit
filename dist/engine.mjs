@@ -1,6 +1,6 @@
-import {tickWireRun} from './bio-wire.mjs?v=4.14.0';
-import {tickSkeleton} from './wire-skeleton.mjs?v=4.14.0';
-import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.14.0';
+import {tickWireRun} from './bio-wire.mjs?v=4.15.0';
+import {tickSkeleton} from './wire-skeleton.mjs?v=4.15.0';
+import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.15.0';
 import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.11.0';
 import {payRecovery} from './recovery.mjs?v=4.11.0';
 import {setupEnemyRespawns,recycleEnemies} from './enemy-respawn.mjs?v=4.11.0';
@@ -21,9 +21,9 @@ import {setupRepairStations} from './repair-stations.mjs?v=4.13.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.13.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.13.0';
 import {tickLab} from './laboratory.mjs?v=4.13.0';
-import {LEVELS} from './levels.mjs?v=4.14.0';
+import {LEVELS} from './levels.mjs?v=4.15.0';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
-import {tickEnemies} from './enemies.mjs?v=4.11.0';
+import {tickEnemies} from './enemies.mjs?v=4.15.0';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
@@ -41,7 +41,7 @@ export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
  if(g.gameOver||g.fever)return;
  const p=g.player;
- if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
+ if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=g.level.biomimetic?0:Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp=p.hurtTo;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){if(!payRecovery(g))return;p.hp=6;p.displayHP=6;p.hurtTimer=0;}
  resetBenchMachines(g);resetCircuitTower(g);resetHandRide(g);
  resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;

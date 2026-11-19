@@ -1,8 +1,8 @@
 import {roomControl} from './rooms.mjs?v=4.14.0';
 import {gateStatus} from './gate-status.mjs?v=4.12.1';
-import {currentRun,wireHint} from './bio-wire.mjs?v=4.14.0';
-import {skeletonHint} from './wire-skeleton.mjs?v=4.14.0';
-import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.14.0';
+import {currentRun,wireHint} from './bio-wire.mjs?v=4.15.0';
+import {skeletonHint} from './wire-skeleton.mjs?v=4.15.0';
+import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.15.0';
 // Both rigs belong to a single attempt. A recovery keeps the paid rig available.
 export function installHandRigs(level){
  level.handRigs=[
@@ -72,15 +72,16 @@ export function pendingHandTask(g){
  const rigs=g.level.handRigs;
  if(rigs&&!rigs[0].locked)return '関節リンク回廊で腱の張力を固定しよう';
  if(rigs&&!rigs[1].delivered)return '把持試験台の試験片に乗って対岸へ運ぼう';
+ if(g.level.skeleton?.done&&!g.level.skeleton.settled)return '吊架解除';
  if(g.level.skeleton&&!g.level.skeleton.done)return '骨格試験室でワイヤー端子を解放しよう';
 }
 export function bioHint(g){
  const d=roomControl(g);
  if(g.rooms.active==='skeleton'&&(g.level.skeleton.active||g.level.skeleton.done))return skeletonHint(g);
  if(d){const lock=gateStatus(g,d).next;return lock?lock.label:'C／ACTION　扉 '+d.arrow;}
- const r=currentRun(g);if(r)return wireHint(g,r);
- if(g.rooms.active==='skeleton')return skeletonHint(g);
  if(nearbyWorkshop(g))return '巻胴で C／ACTION または X／PULSE　点線に合わせる';
+ const r=currentRun(g);if(r&&(g.rooms.swing||r.points.some(p=>Math.hypot(p[0]-g.player.x-14,p[1]-g.player.y-20)<240)))return wireHint(g,r);
+ if(g.rooms.active==='skeleton')return skeletonHint(g);
  return '';
 }
 export function drawHandRigs(c,g){

@@ -1,5 +1,5 @@
 import {feeLabel} from './facility-fees.mjs?v=4.12.1';
-import {handControl,handLabel,pendingHandTask,bioHint} from './hand-machines.mjs?v=4.14.0';
+import {handControl,handLabel,pendingHandTask,bioHint} from './hand-machines.mjs?v=4.15.0';
 import {RECOVERY_COST} from './recovery.mjs?v=4.11.0';
 import {pcbControl,pcbGoal} from './pcb-factory.mjs?v=4.14.0';
 import {roomControl} from './rooms.mjs?v=4.14.0';
@@ -14,11 +14,11 @@ import {createRepairUI} from './repair-ui.mjs?v=4.13.0';
 import {tickResearch} from './research.mjs?v=4.13.0';
 import {GOODS,nearVendor,purchase} from './research.mjs?v=4.13.0';
 import {bindTouchControls} from './touch-input.mjs?v=4.11.0';
-import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.14.0';
-import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.14.0';
+import {VIEW,RULES,LEVELS,clamp,createGame,updateGame,respawn} from './engine.mjs?v=4.15.0';
+import {drawHome,drawWorld,drawThumbnail} from './render.mjs?v=4.15.0';
 import {blankProgress,readProgress,recordClear} from './progress.mjs?v=4.11.0';
-import {ENEMY_GUIDE} from './enemies.mjs?v=4.11.0';
-import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.14.0';
+import {ENEMY_GUIDE} from './enemies.mjs?v=4.15.0';
+import {FEVER_CONFIG,createFever,updateFever,feverSnapshot,drawFeverIntro,drawFeverFX} from './fever.mjs?v=4.15.0';
 import {drawAwakening} from './awakening.mjs?v=4.11.0';
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const STORAGE='midnight-circuit-save-v1';
@@ -193,6 +193,10 @@ function processEvents(){
 
   let repairNotice=null;for(const e of game.events){audio.sound(e.type);
     if(e.type==='repairOpen'){openRepair();}
+    if(e.type==='wireCut'){audio.sound('resistance');burst(e.x,e.y,'#9bf5da',7);}
+    if(e.type==='skeletonCut'){audio.sound('coilLaunch');burst(e.x,e.y,'#a6ffdd',28);}
+    if(e.type==='skeletonImpact'){audio.tone(120,.42,'triangle',.38,0,42);burst(e.x,e.y,'#e1cba8',40);}
+    if(e.type==='skeletonVictory'){audio.sound('bonus');toast('骨格試験機　撃破！　出口が開いた',4);}
     if(e.type==='actionStep'){burst(e.x,e.y,'#8affe0',18);audio.sound('relay');toast(e.text,4);}
     if(e.type==='repairComplete'){repairNotice=e.text;burst(e.x,e.y,'#ffd87a',35);audio.sound('relay');toast(e.text,6);}
     if(e.type==='researchRepair'&&!game.printer){repairNotice??=e.text;burst(e.x,e.y,'#80ffd0',30);toast(e.text,5);}

@@ -18,11 +18,15 @@ export function traverseBio({limit=180,trace=false}={}){
    if(ride){
     const u=(1-Math.cos(ride.time*Math.PI/1.65))/2;
     input.pulse=u>.95&&g.cooldown===0;input.left=room==='shaft'&&ride.b===run.points[1];
+   }else if(room==='pinch'&&run.cleared&&thumb.angle===thumb.target){
+    if(cx>run.points[1][0]){steer(run.points[2][0]);input.pulse=Math.abs(cx-run.points[2][0])<24&&g.cooldown===0;}
+    else door('grasp');
    }else if(!run.cleared||p.x<run.points[1][0]){
     steer(run.points[0][0]);input.pulse=Math.abs(cx-run.points[0][0])<28&&g.cooldown===0;
-   }else door(room==='shaft'?'grasp':'link');
-  }else if(room==='entry')door('spool');
-  else if(room==='link'){
+   }else if(room==='pinch')drum(thumb);
+   else if(room==='palm'){const east=L.doors.find(d=>d.room==='palm'&&d.checks.length);steer(east.x);input.interact=Math.abs(cx-east.x)<18&&g.rooms.cooldown===0;}
+   else door(({shaft:'grasp',spool:'link',entry:'spool'})[room]);
+  }else if(room==='link'){
    if(ext.angle!==ext.target)door('extensor');
    else if(flex.angle!==flex.target)drum(flex);
    else if(!bridge.locked){
@@ -31,15 +35,13 @@ export function traverseBio({limit=180,trace=false}={}){
    else if(!visited.has('palm'))door('palm');
    else door('shaft');
   }else if(room==='extensor'){if(ext.angle!==ext.target)drum(ext);else door('link');}
-  else if(room==='palm'){const east=L.doors.find(d=>d.room==='palm'&&d.checks.length);steer(east.x);input.interact=Math.abs(cx-east.x)<18&&g.rooms.cooldown===0;}
   else if(room==='grasp'){
    if(thumb.angle!==thumb.target)door('pinch');
    else if(opp.angle!==opp.target)drum(opp);
    else if(!grip.paid){steer(grip.x);input.interact=Math.abs(cx-grip.x)<15;}
    else if(!grip.delivered){const a=L.platforms.find(a=>a.gripSpecimen);steer(a.x+a.w/2);}
    else door('skeleton');
-  }else if(room==='pinch'){if(thumb.angle!==thumb.target)drum(thumb);else door('grasp');}
-  else if(room==='skeleton'){
+  }else if(room==='skeleton'){
    const s=L.skeleton;if(s.done)steer(L.goal.x);else{
     const pin=exposedPin(s);steer(pin.x);
     input.jump=pin.y<p.y-25&&Math.abs(cx-pin.x)<200&&(p.onGround||p.jumps===1&&p.vy>-60);

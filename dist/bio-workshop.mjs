@@ -4,7 +4,7 @@ export function installWorkshop(L){
  const drum=(relay,x,y,target,label)=>L.wireControls.push({kind:'drum',relay,x,y,target,angle:0,label});
  drum('bio-joints',12520,-1320,2,'伸筋を巻く');
  drum('bio-joints',4170,-600,1,'屈筋を巻く');
- drum('bio-grasp',17080,-930,1,'母指を巻く');
+ drum('bio-grasp',17520,-930,1,'母指を巻く');
  drum('bio-grasp',7940,510,3,'対向指を巻く');
 }
 export function nearbyWorkshop(g){

@@ -1,5 +1,6 @@
-import {pendingHandTask} from './hand-machines.mjs?v=4.14.0';
-import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.14.0';
+import {drawBone} from './bio-enemies.mjs?v=4.15.0';
+import {pendingHandTask} from './hand-machines.mjs?v=4.15.0';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.15.0';
 import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
@@ -12,7 +13,7 @@ import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWor
 import {drawResearch} from './research.mjs?v=4.13.0';
 import {drawPrinter} from './printer-art.mjs?v=4.14.0';
 import {drawLab} from './laboratory.mjs?v=4.13.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.14.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.15.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -169,7 +170,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else if(!g.level.benchMap)background(c,g.level.theme,g.camera,t);
   c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,Math.min(-1000,(room.minY??0)-100),room.right-room.left,4000);c.clip();}
   if(g.level.benchMap)drawBenchBackdrop(c,g,VIEW.w,VIEW.h,reduced);drawDawnRoom(c,g);drawBenchRooms(c,g,VIEW.w);
-  drawBioLab(c,g);
+  drawBioLab(c,g,reduced);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}
   for(const a of g.level.platforms){if(a.x+a.w<g.camera-30||a.x>g.camera+VIEW.w+30)continue;platform(c,a,P,g.pulse,t,g);}
   for(const z of g.level.gravityZones){c.save();c.fillStyle='#75ebce0b';c.fillRect(z.x,z.y,z.w,z.h);c.strokeStyle='#7bedd357';c.setLineDash([7,10]);c.strokeRect(z.x,z.y,z.w,z.h);c.setLineDash([]);c.fillStyle='#9bded0';c.font='13px monospace';c.fillText('LOW GRAVITY / 0.38 G',z.x+30,z.y+40);for(let i=0;i<25;i++){const x=z.x+(i*149)%z.w,y=z.y+((i*87-t*18)%z.h+z.h)%z.h;star(c,x,y,2,'#b7ffe555');}c.restore();}
@@ -181,7 +182,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   if(g.cart){c.save();c.translate(g.cart.x,g.cart.y);c.rotate(g.cart.angle);platform(c,{x:-g.cart.w/2,y:0,w:g.cart.w,h:18,type:'cart'},P,0,t);c.restore();}
   for(const h of g.level.presses){const state=pressState(g,h),color=g.pulse>0?'#89efce':state.warning?'#ffd68f':'#f2a08d';line(c,h.x+h.w/2,h.y-140,h.x+h.w/2,h.y,'#76838c',18);rect(c,h.x-13,h.y-16,h.w+26,20,'#87949a');rect(c,h.x,state.y,h.w,state.h,'#34464f');for(let y=h.y+10;y<h.y+state.h-20;y+=17)line(c,h.x+10,y,h.x+h.w-10,y,'#677f88',3);rect(c,h.x-8,h.y+state.h-16,h.w+16,16,color);if(state.warning){c.save();c.strokeStyle='#ffd68f88';c.setLineDash([5,6]);c.strokeRect(h.x,h.y,h.w,h.floorY-h.y);c.restore();c.font='bold 15px monospace';c.fillStyle='#ffd68f';c.textAlign='center';c.fillText('!',h.x+h.w/2,h.y-30);c.textAlign='left';}}
   for(const portal of g.level.portals){const col=portal.on?'#8affd5':'#d5adff';glow(c,portal.x,portal.y,90,col+'24');c.save();c.translate(portal.x,portal.y);c.strokeStyle=col;c.lineWidth=5;c.beginPath();c.ellipse(0,0,30,60,0,0,Math.PI*2);c.stroke();c.lineWidth=1;c.beginPath();c.ellipse(0,0,40,69,0,0,Math.PI*2);c.stroke();for(let i=0;i<5;i++)star(c,Math.cos(t+i*1.25)*28,Math.sin(t+i*1.25)*56,3,col);c.font='11px monospace';c.fillStyle=col;c.textAlign='center';c.fillText('X / TRANSFER',0,-82);c.restore();}
-  for(const q of g.projectiles){if(q.kind==='screw'){rect(c,q.x,q.y,12,5,'#d0e0ed');rect(c,q.x+4,q.y+5,4,17,'#a2b9cd');for(let k=0;k<4;k++)line(c,q.x+2,q.y+7+k*4,q.x+10,q.y+5+k*4,'#e1ebef',2);}else if(q.kind==='acid'){round(c,q.x,q.y,q.w,q.h,4,'#acdf72');glow(c,q.x+q.w/2,q.y,28,'#b4ff5226');for(let i=0;i<3;i++)rect(c,q.x+9+i*17,q.y-4-Math.sin(t*6+i)*3,3,3,'#cbf590');}else{glow(c,q.x+4,q.y+4,17,'#ffab773d');rect(c,q.x,q.y,q.w,q.h,'#ffb78b');rect(c,q.x+2,q.y+2,4,4,'#fff0c9');}}
+  for(const q of g.projectiles){if(q.room&&q.room!==g.rooms?.active)continue;if(q.kind==='bone'){drawBone(c,q.x+8,q.y+7,q.life*11);}else if(q.kind==='screw'){rect(c,q.x,q.y,12,5,'#d0e0ed');rect(c,q.x+4,q.y+5,4,17,'#a2b9cd');for(let k=0;k<4;k++)line(c,q.x+2,q.y+7+k*4,q.x+10,q.y+5+k*4,'#e1ebef',2);}else if(q.kind==='acid'){round(c,q.x,q.y,q.w,q.h,4,'#acdf72');glow(c,q.x+q.w/2,q.y,28,'#b4ff5226');for(let i=0;i<3;i++)rect(c,q.x+9+i*17,q.y-4-Math.sin(t*6+i)*3,3,3,'#cbf590');}else{glow(c,q.x+4,q.y+4,17,'#ffab773d');rect(c,q.x,q.y,q.w,q.h,'#ffb78b');rect(c,q.x+2,q.y+2,4,4,'#fff0c9');}}
   // Small details make each room feel inhabited.
   for(const p of g.level.platforms){if(g.level.benchMap||p.h<60||p.w<350)continue;const x=p.x+p.w-65;if(x<g.camera-100||x>g.camera+VIEW.w+100)continue;
     if(g.level.theme==='garden')plant(c,x,p.y,1.1,'#9ac77a');else{rect(c,x-13,p.y-34,35,34,'#354b5c');rect(c,x-10,p.y-31,29,4,P.edge);rect(c,x-8,p.y-21,8,11,P.glow+'88');rect(c,x+5,p.y-21,10,2,'#748f9b');rect(c,x+5,p.y-16,8,2,'#748f9b');}}
@@ -193,7 +194,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const item of g.level.gears){if(item.got)continue;glow(c,item.x,item.y,34,'#75efce22');gear(c,item.x,item.y+Math.sin(t*2)*4,t);star(c,item.x+19,item.y-17,2,'#c8ffe5');}
   for(const r of g.level.relays){if(r.mode==='tendon'||r.portal||g.printer||g.pcb||g.level.benchMap)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
   for(const cp of g.level.checkpoints)checkpoint(c,cp,cp.active,t);goal(c,g,t);
-  for(const e of g.level.enemies){if(!e.alive||e.x<g.camera-60||e.x>g.camera+VIEW.w+60)continue;
+  for(const e of g.level.enemies){const margin=e.bioShape==='spinner'?245:60;if(!e.alive||e.room&&e.room!==g.rooms?.active||e.x<g.camera-margin||e.x>g.camera+VIEW.w+margin)continue;
     if(drawBioEnemy(c,e))continue;
     const x=e.x,y=e.y,freeze=g.pulse>0,col=freeze?'#76eacf':e.kind==='capacitor'?'#a4b5fc':e.kind==='beaker'?'#f19ea6':'#d5b486';
     if(e.kind==='spring'){
