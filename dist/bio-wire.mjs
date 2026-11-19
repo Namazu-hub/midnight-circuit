@@ -12,11 +12,11 @@ function position(a,b,u,sag){
 }
 export function tickWireRun(g,input,activated,dt){
  const r=currentRun(g);if(!r)return false;
- const p=g.player,near=(a)=>Math.hypot(p.x+14-a[0],p.y+20-a[1])<92;
+ const p=g.player,near=(a,radius=92)=>Math.hypot(p.x+14-a[0],p.y+20-a[1])<radius;
  let ride=g.rooms.swing;
  if(!ride){
   if(!activated)return false;
-  const reverse=r.cleared&&near(r.points[2]);
+  const reverse=r.cleared&&near(r.points[2],120);
   if(!reverse&&!near(r.points[0]))return false;
   ride=g.rooms.swing={reverse,a:r.points[reverse?2:0],b:r.points[1],time:0};
   g.cooldown=.28;g.pulse=Math.min(g.pulse,.18);
@@ -29,7 +29,9 @@ export function tickWireRun(g,input,activated,dt){
    if(u>=.83){
     const end=r.points[ride.reverse?0:2];
     if(ride.b===end){
-     g.rooms.swing=null;r.cleared=true;p.vx=ride.reverse?-260:260;p.vy=-650;p.jumps=1;
+     const [x,y]=position(ride.a,ride.b,u,r.sag);
+     g.rooms.swing=null;r.cleared=true;
+     Object.assign(p,{x:x-14,y:y-20,vx:ride.reverse?-260:260,vy:-650,jumps:1});
      g.events.push({type:'spring',x:p.x+14,y:p.y});return true;
     }
     const high=!ride.reverse&&ride.b===r.points[1]&&r.high&&input.left;
