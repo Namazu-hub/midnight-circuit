@@ -2,7 +2,7 @@
 // with no source artwork included in the game.
 export function redesignBiomimetic(L){
  const dialogue=L.students.flatMap(s=>s.lines);
- Object.assign(L,{name:'東郷研究室・人体模倣',en:'BIOMIMETIC HAND LAB',theme:'biomimetic',biomimetic:true,width:10000,minY:-1450,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'腱の巻取り塔から関節回廊へ。校正した指を橋にして把持試験室へ。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
+ Object.assign(L,{name:'東郷研究室・人体模倣',en:'BIOMIMETIC HAND LAB',location:'02 / BIOMIMETIC HAND LAB',tagline:'腱と関節をつなぎ、もう一度つかむ。',theme:'biomimetic',biomimetic:true,width:10000,minY:-1450,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'腱の巻取り塔から関節回廊へ。校正した指を橋にして把持試験室へ。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
  const pad=(x,y,w=200,extra={})=>L.platforms.push({x,y,w,h:20,type:'platform',...extra});
  const floor=(x,y,w)=>L.platforms.push({x,y,w,h:y<0?20:100,type:y<0?'platform':'ground'});
  const route=(x,y)=>L.route.push({x,y,service:y!==510&&y!==-600});
