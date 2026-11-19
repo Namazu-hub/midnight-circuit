@@ -26,7 +26,7 @@ export function traverse(index,{limit=180,trace=false}={}){
    if(!p.onGround&&p.jumps===1&&p.vy>-50&&(dy<-20||Math.abs(dx)>90||index===6))jump=true;
    if(g.cooldown<=0&&(foe||L.lasers.some(l=>Math.abs(l.x-p.x)<200)||L.presses.some(h=>Math.abs(h.x-p.x)<180)||L.platforms.some(a=>['printed','ghost'].includes(a.type)&&Math.abs(a.x-p.x)<170)))pulse=true;
    // Wind column: steer into it at ground level, then hold its center while rising.
-   if(index===1&&wp===5){left=p.x+14>2968;right=p.x+14<2952;jump=p.onGround;}
+   if(index===1&&!L.biomimetic&&wp===5){left=p.x+14>2968;right=p.x+14<2952;jump=p.onGround;}
   }
   if(L.boss&&!L.boss.repaired&&p.x>7120){const b=L.boss,tx=b.hp>0?L.bossConsole.x:b.x+20;left=p.x+14>tx+15;right=p.x+14<tx-15;pulse=g.cooldown<=0;jump=b.hp>0&&b.state==='rush'&&Math.abs(b.x-p.x)<180&&p.onGround;}
   if(index===0&&!L.relays[0].on&&p.x>L.wireButtons[0].x-80&&p.y<32){

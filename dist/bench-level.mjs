@@ -1,4 +1,4 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.10.2';
+import {installBenchMachines} from './bench-machines.mjs?v=4.11.0';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];

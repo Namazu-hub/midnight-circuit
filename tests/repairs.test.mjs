@@ -60,7 +60,7 @@ test('gear repair restores a full brake without breaking cart rider or lane mech
  const g=createGame(2),r=g.level.relays.find(r=>r.puzzleType==='gears');approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);for(let i=0;i<240;i++)updateGame(g,{left:true});assert.equal(g.cart.speed,0);const x=g.cart.x;for(let i=0;i<60;i++)updateGame(g,{left:true});assert.equal(g.cart.x,x);
 });
 test('every repair family is placed in a course; repairs work with zero funds',()=>{
- const types=new Set();for(const g of [legacyRepairGame(),...Array.from({length:8},(_,i)=>createGame(i))]){for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
+ const types=new Set();for(const g of [legacyRepairGame(),legacyRepairGame('titration'),...Array.from({length:8},(_,i)=>createGame(i))]){for(const r of g.level.relays.filter(r=>r.puzzleType)){types.add(r.puzzleType);if(r.actionRepair)completeHand(g,r);approach(g,r);beginRepair(g,r);assert.ok(solveSession(g).ok);assert.equal(g.research.funds,0);}}
  assert.deepEqual([...types].sort(),Object.keys(REPAIR_NAMES).sort());
 });
 test('emergency repair upgrades once; full-repair cache stays locked until upgraded',()=>{

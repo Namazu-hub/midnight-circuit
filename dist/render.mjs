@@ -1,16 +1,17 @@
-import {drawBenchMachines} from './bench-machine-art.mjs?v=4.10.2';
-import {drawBenchWiring} from './bench-wiring.mjs?v=4.10.2';
-import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.10.2';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.10.2';
-import {drawEquipment} from './equipment-art.mjs?v=4.10.2';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.10.2';
-import {poseScale} from './feel.mjs?v=4.10.2';
-import {currentRoom} from './rooms.mjs?v=4.10.2';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.10.2';
-import {drawResearch} from './research.mjs?v=4.10.2';
-import {drawPrinter} from './printer-art.mjs?v=4.10.2';
-import {drawLab} from './laboratory.mjs?v=4.10.2';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.10.2';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.11.0';
+import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
+import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
+import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.11.0';
+import {drawEquipment} from './equipment-art.mjs?v=4.11.0';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.11.0';
+import {poseScale} from './feel.mjs?v=4.11.0';
+import {currentRoom} from './rooms.mjs?v=4.11.0';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.11.0';
+import {drawResearch} from './research.mjs?v=4.11.0';
+import {drawPrinter} from './printer-art.mjs?v=4.11.0';
+import {drawLab} from './laboratory.mjs?v=4.11.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.11.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -23,6 +24,7 @@ const PALETTES={
   optics:{sky:'#201d36',low:'#3a345c',line:'#5a4e7e',deep:'#282440',top:'#dcb9ff',edge:'#9372b5',soil:'#44375d',glow:'#e2a9ff'},
   tower:{sky:'#211e3d',low:'#4b3859',line:'#59456a',deep:'#2d2546',top:'#c7b3e3',edge:'#8b78b4',soil:'#443952',glow:'#c4a6ff'}
 };
+PALETTES.biomimetic={...PALETTES.bench,sky:'#131e32',top:'#a3d9cf',glow:'#c4b5ec'};
 const rect=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.ceil(w),Math.ceil(h));};
 function line(c,x1,y1,x2,y2,color,width=1){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();}
 function round(c,x,y,w,h,r,color){c.fillStyle=color;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
@@ -165,6 +167,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else if(!g.level.benchMap)background(c,g.level.theme,g.camera,t);
   c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,-1000,room.right-room.left,3000);c.clip();}
   if(g.level.benchMap)drawBenchBackdrop(c,g,VIEW.w,VIEW.h,reduced);drawDawnRoom(c,g);drawBenchRooms(c,g,VIEW.w);
+  drawBioLab(c,g);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}
   for(const a of g.level.platforms){if(a.x+a.w<g.camera-30||a.x>g.camera+VIEW.w+30)continue;platform(c,a,P,g.pulse,t,g);}
   for(const z of g.level.gravityZones){c.save();c.fillStyle='#75ebce0b';c.fillRect(z.x,z.y,z.w,z.h);c.strokeStyle='#7bedd357';c.setLineDash([7,10]);c.strokeRect(z.x,z.y,z.w,z.h);c.setLineDash([]);c.fillStyle='#9bded0';c.font='13px monospace';c.fillText('LOW GRAVITY / 0.38 G',z.x+30,z.y+40);for(let i=0;i<25;i++){const x=z.x+(i*149)%z.w,y=z.y+((i*87-t*18)%z.h+z.h)%z.h;star(c,x,y,2,'#b7ffe555');}c.restore();}
@@ -189,6 +192,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const r of g.level.relays){if(r.portal||g.printer||g.pcb||g.level.benchMap)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
   for(const cp of g.level.checkpoints)checkpoint(c,cp,cp.active,t);goal(c,g,t);
   for(const e of g.level.enemies){if(!e.alive||e.x<g.camera-60||e.x>g.camera+VIEW.w+60)continue;
+    if(drawBioEnemy(c,e))continue;
     const x=e.x,y=e.y,freeze=g.pulse>0,col=freeze?'#76eacf':e.kind==='capacitor'?'#a4b5fc':e.kind==='beaker'?'#f19ea6':'#d5b486';
     if(e.kind==='spring'){
       const ex=freeze?0:e.extension||0;c.strokeStyle=freeze?'#76eacf':'#ffbd80';c.lineWidth=4;c.beginPath();for(let i=0;i<=14;i++){const xx=x-ex+(32+ex*2)*i/14,yy=y+14+(i%2?9:-9);i?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.stroke();

@@ -1,7 +1,8 @@
-import {redesignBench} from './bench-level.mjs?v=4.10.2';
-import {redesignPCB} from './pcb-level.mjs?v=4.10.2';
-import {redesignPrinter} from './printer-level.mjs?v=4.10.2';
-import {expandRooms} from './laboratory.mjs?v=4.10.2';
+import {redesignBiomimetic} from './biomimetic.mjs?v=4.11.0';
+import {redesignBench} from './bench-level.mjs?v=4.11.0';
+import {redesignPCB} from './pcb-level.mjs?v=4.11.0';
+import {redesignPrinter} from './printer-level.mjs?v=4.11.0';
+import {expandRooms} from './laboratory.mjs?v=4.11.0';
 // Level coordinates use world-space pixels, with negative Y extending upwards.
 const meta=[
  ['机上の大冒険','THE WORKBENCH','bench','#75efce','回路スイッチ & 光の橋','小さな一歩が、道をつなぐ。','光る制御装置の近くで X。回路を直すと光の橋が残る。'],
@@ -130,6 +131,7 @@ const studentQuotes=[['アノードカソード逆につけちゃった！','ネ
 rooms.forEach((L,i)=>studentQuotes[i].forEach((line,j)=>L.students[j%L.students.length].lines.unshift(line)));
 expandRooms(rooms);
 redesignBench(rooms[0]);
+redesignBiomimetic(rooms[1]);
 redesignPrinter(rooms[3]);
 redesignPCB(rooms[5]);
 export const LEVELS=rooms;
