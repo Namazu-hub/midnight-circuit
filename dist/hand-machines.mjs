@@ -1,3 +1,4 @@
+import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.13.0';
 // Both rigs belong to a single attempt. A recovery keeps the paid rig available.
 export function installHandRigs(level){
  level.handRigs=[
@@ -9,17 +10,18 @@ const calibrated=(g,r)=>g.level.relays.find(v=>v.id===r.relay)?.on;
 export const tensionAt=t=>(1-Math.cos(t*Math.PI))/2;
 export const balanced=t=>{const tension=tensionAt(t);return tension>=.4&&tension<=.7;};
 export function handControl(g){
- return g?.level.handRigs?.find(r=>!(r.kind==='tendon'?r.locked:r.paid)&&
+ return nearbyWorkshop(g)||g?.level.handRigs?.find(r=>!(r.kind==='tendon'?r.locked:r.paid)&&
   Math.abs(g.player.x+14-r.x)<68&&Math.abs(g.player.y+40-r.y)<65);
 }
 export function handLabel(g,r){
- if(!calibrated(g,r))return '先に左の関節を校正';
+ if(r.kind==='drum'||r.kind==='hatch')return r.label;
+ if(!calibrated(g,r))return '上下の巻胴を合わせる';
  if(r.paid)return '張力を固定';
  return (r.kind==='tendon'?'腱を巻く':'三指を起動')+' ¥'+r.cost;
 }
 function announce(g,r,text){g.events.push({type:'handNotice',x:r.x,y:r.y-65,text});}
 function operate(g,r){
- if(!calibrated(g,r)){announce(g,r,'左の校正台で関節角を合わせよう');return;}
+ if(!calibrated(g,r)){announce(g,r,'上の部屋とこの階の巻胴で、腕を金色の合印に合わせよう');return;}
  if(!r.paid){
   if(g.research.funds<r.cost){announce(g,r,'科研費があと¥'+(r.cost-g.research.funds)+'必要。チップや敵の撃破で集めよう');return;}
   g.research.funds-=r.cost;r.paid=true;
@@ -30,9 +32,11 @@ function operate(g,r){
   announce(g,r,r.locked?'拮抗張力が釣り合った。指骨を伸展します':'張力が帯の外です。もう一度固定できます');
  }
 }
-export function tickHandRigs(g,input,dt){
+export function tickHandRigs(g,input,dt,activated=false){
  const rigs=g.level.handRigs;if(!rigs)return;
- const control=input.interact&&handControl(g);if(control)operate(g,control);
+ const control=(input.interact||activated)&&handControl(g);
+ if(control?.kind==='drum'||(input.interact&&control?.kind==='hatch'))operateWorkshop(g,control);
+ else if(input.interact&&control)operate(g,control);
  const [tendon,grip]=rigs;
  if(tendon.paid&&!tendon.locked)tendon.time+=dt;
  if(tendon.locked)tendon.extension=Math.min(1,tendon.extension+dt/1.5);
@@ -54,12 +58,14 @@ export function tickHandRigs(g,input,dt){
  block.dx=block.x-oldX;block.dy=block.y-oldY;
 }
 export function resetHandRide(g){
+ const boss=g.level.skeleton;if(boss&&!boss.done)Object.assign(boss,{active:false,phase:0,time:0});
  const grip=g.level.handRigs?.[1];if(grip){grip.phase='dock';grip.time=0;}
 }
 export function pendingHandTask(g){
  const rigs=g.level.handRigs;
  if(rigs&&!rigs[0].locked)return '関節リンク回廊で腱の張力を固定しよう';
  if(rigs&&!rigs[1].delivered)return '把持試験台の試験片に乗って対岸へ運ぼう';
+ if(g.level.skeleton&&!g.level.skeleton.done)return '骨格試験室でワイヤー端子を解放しよう';
 }
 export function drawHandRigs(c,g){
  const [tendon,grip]=g.level.handRigs;
@@ -82,7 +88,9 @@ export function drawHandRigs(c,g){
   c.strokeStyle='#81c3bd';c.lineWidth=3;c.beginPath();c.moveTo(x,y-133);c.lineTo(x,a.baseY-335);c.stroke();
   c.fillStyle='#879ab1';c.fillRect(x-43,y-145,86,24);
   for(const dir of [-1,0,1]){
-   const bx=x+dir*34,ex=x+dir*(111-25*close),ey=y+(dir===0?-20:6);
+   const drum=g.level.wireControls.filter(o=>o.relay===grip.relay)[dir===0?0:1];
+   const offset=grip.paid?0:(drum.target-drum.angle)*12;
+   const bx=x+dir*34,ex=x+dir*(111-25*close)+offset,ey=y+(dir===0?-20:6);
    c.strokeStyle=dir===0?'#648b94':'#d3c9c0';c.lineWidth=10;c.beginPath();c.moveTo(bx,y-123);c.lineTo(x+dir*103,y-60);c.lineTo(ex,ey);c.stroke();
    c.fillStyle='#73cbbb';c.beginPath();c.arc(x+dir*103,y-60,6,0,Math.PI*2);c.fill();
   }

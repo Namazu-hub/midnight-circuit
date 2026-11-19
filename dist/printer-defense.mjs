@@ -1,5 +1,5 @@
 import {overlap,clamp} from './world.mjs?v=4.11.0';
-import {grant} from './research.mjs?v=4.11.0';
+import {grant} from './research.mjs?v=4.13.0';
 import {toolHit} from './equipment.mjs?v=4.11.0';
 import {startFabrication} from './fabrication.mjs?v=4.11.0';
 export const DEFENSE=Object.freeze({turrets:2,minis:2,coreOpen:8,build:2,shotPeriod:3.2,rainPeriod:3.8});

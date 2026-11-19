@@ -7,7 +7,7 @@ export function traverse(index,{limit=180,trace=false}={}){
  if(index===5)return traversePCB();
  const g=createGame(index);let wp=0,maxY=0,oldDeaths=0,stuck=0,lastWP=0;
  for(let f=0;f<120*limit&&!g.finished;f++){
-  if(g.repairSession)solveSession(g);
+  if(g.repairSession){if(g.level.biomimetic)throw Error('stage two opened repair UI');solveSession(g);}
   const p=g.player,L=g.level;const target=L.route[wp]||L.goal;let dx=target.x-(p.x+14),dy=target.y-(p.y+40);
   if(g.deaths!==oldDeaths){oldDeaths=g.deaths;let closest=0,d=Infinity;for(let i=0;i<L.route.length;i++){const r=L.route[i],dd=Math.hypot(r.x-p.x,r.y-p.y-40);if(dd<d){d=dd;closest=i;}}wp=closest;}
   if((!target.portal&&Math.abs(dx)<65&&(target.service||index===4||index===7&&wp>=2&&wp<=9||index===6&&wp>=2&&wp<=9||index===3&&wp>=4&&wp<=9?p.onGround&&Math.abs(dy)<45:dy>-100))||(target.portal&&L.portals.find(r=>r.id===target.portal).on)){wp=Math.min(wp+1,L.route.length);}
@@ -58,10 +58,28 @@ export function traverse(index,{limit=180,trace=false}={}){
     const tension=(1-Math.cos(tendon.time*Math.PI))/2;
     interact=Math.abs(p.x+14-tendon.x)<16&&(!tendon.paid||(tension>.45&&tension<.65));
    }else if(tendon.locked&&tendon.extension<1&&p.x>4200&&p.x<4400)steer(tendon.x);
-   if(!L.relays[1].on&&p.x>7770&&p.x<8200){steer(L.relays[1].x);pulse=Math.abs(p.x+14-L.relays[1].x)<30&&Math.abs(p.y+20-L.relays[1].y)<70&&g.cooldown<=0;}
+   for(const r of L.relays){
+    if(r.on)continue;
+    const [upper,lower]=L.wireControls.filter(o=>o.relay===r.id);
+    const hatch=L.wireControls.find(o=>o.kind==='hatch'&&o.toY===upper.y);
+    const upstairs=Math.abs(p.y+40-upper.y)<150;
+    if(!upstairs&&(p.x<hatch.x-110||p.x>lower.x+280||Math.abs(p.y+40-lower.y)>300))continue;
+    const target=upstairs?(upper.angle!==upper.target?upper:{x:hatch.toX,y:hatch.toY}):
+      upper.angle!==upper.target?hatch:lower;
+    steer(target.x);
+    interact=Math.abs(p.x+14-target.x)<12&&Math.abs(p.y+40-target.y)<30&&f%18===0;
+    // Keep each press as a separate action, including a return through the same hatch.
+   }
    if(L.relays[1].on&&p.x>7850&&p.x<9000&&!grip.delivered){
     if(!grip.paid){steer(grip.x);interact=Math.abs(p.x+14-grip.x)<16;}
     else{const block=L.platforms.find(a=>a.gripSpecimen);steer(block.x+block.w/2);}
+   }
+   const boss=L.skeleton;
+   if(grip.delivered&&p.x>10155&&!boss.done){
+    const [x,y]=[[10342,400],[10820,290],[10600,404]][boss.phase];
+    const dx=x-p.x-14,dy=y-p.y-40;
+    steer(x);jump=(dy<-30&&Math.abs(dx)<200&&p.onGround)||(dy<-15&&p.jumps===1&&p.vy>-60);
+    pulse=Math.abs(dx)<35&&Math.abs(dy)<30&&boss.time%3.6>=2.1&&g.cooldown<=0;
    }
   }
   updateGame(g,{left,right,jump,pulse,interact},1/120);g.events=[];maxY=Math.min(maxY,p.y);

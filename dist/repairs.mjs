@@ -66,7 +66,7 @@ export function puzzleHint(s){
 }
 export function nearbyRepair(g,includeRepaired=false){if(!g||g.fever)return null;return g.level.relays.filter(r=>r.puzzleType&&(!r.actionRepair||r.on)&&(!r.on||includeRepaired&&(r.repairRank||0)<2)&&Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)<115).sort((a,b)=>Math.hypot(g.player.x-a.x,g.player.y-a.y)-Math.hypot(g.player.x-b.x,g.player.y-b.y))[0]||null;}
 export function beginRepair(g,r=nearbyRepair(g,true)){
- if(!r||(r.actionRepair&&!r.on)||g.finished||g.gameOver||!g.level.relays.includes(r)||Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)>=115)return null;
+ if(!r||r.worldRepair||(r.actionRepair&&!r.on)||g.finished||g.gameOver||!g.level.relays.includes(r)||Math.hypot(g.player.x+14-r.x,g.player.y+20-r.y)>=115)return null;
  r.puzzle??=createPuzzle(r.puzzleType,r.difficulty);g.repairSession={id:r.id,puzzle:r.puzzle};return g.repairSession;
 }
 export function commitRepair(g){

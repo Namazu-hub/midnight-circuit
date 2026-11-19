@@ -1,5 +1,5 @@
 import {drawCore} from './core-art.mjs?v=4.11.0';
-import {drawAdventure} from './printer-adventure-art.mjs?v=4.11.0';
+import {drawAdventure} from './printer-adventure-art.mjs?v=4.13.0';
 import {drawDragon,dragonPose,dragonCore} from './dragon.mjs?v=4.11.0';
 const line=(c,x,y,xx,yy,color,w=3)=>{c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();};
 function screen(c,x,y,text,small=''){c.fillStyle='#102033';c.fillRect(x,y,240,75);c.strokeStyle='#77a4b2';c.lineWidth=3;c.strokeRect(x,y,240,75);c.fillStyle='#b7e9dc';c.font='bold 15px monospace';c.textAlign='left';c.fillText(text,x+12,y+26);c.fillStyle='#edbd90';c.font='12px sans-serif';c.fillText(small,x+12,y+53);}

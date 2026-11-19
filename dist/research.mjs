@@ -1,5 +1,5 @@
 import {TOOLS,equipTool,EQUIPMENT} from './equipment.mjs?v=4.11.0';
-import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.11.0';
+import {applyRepairEffects,drawRepairMachines} from './repair-stations.mjs?v=4.13.0';
 // First overhaul milestone: shared rewards, spending and repair-linked exploration.
 export const ECONOMY={pickup:5,enemy:15,repair:40,cache:75,max:99999};
 export const GOODS=[{id:'heal',name:'応急補修 · HP +3',cost:25},{id:'drink',name:'モンエナ · 1本（Bで飲む）',cost:35},{id:'hint',name:'装置の位置ヒント',cost:10},{id:'assist',name:'近くの装置を自動補助',cost:80},...TOOLS];
@@ -26,7 +26,7 @@ export function tickResearch(g){
  if(g.fever||!g.research)return;
  for(const c of g.level.chips)if(c.got&&!c.rewardPaid){c.rewardPaid=true;grant(g,ECONOMY.pickup,'科研費',c.x,c.y);}
  for(const e of g.level.enemies)if(!e.alive&&!e.rewardPaid){e.rewardPaid=true;g.research.kills++;grant(g,ECONOMY.enemy,'撃破助成',e.x,e.y);}
- for(const r of g.level.relays)if(r.on&&!r.rewardPaid){r.rewardPaid=true;if(!r.puzzleType)r.repairResult='restored';g.research.repairs++;grant(g,ECONOMY.repair,'修理助成',r.x,r.y);g.events.push({type:'researchRepair',x:r.x,y:r.y,text:r.effectText|| (r.researchLink.length?'装置復旧！ 緑の足場で上の科研費ボックスへ':'装置復旧！ 研究を再開できる')});}
+ for(const r of g.level.relays)if(r.on&&!r.rewardPaid){r.rewardPaid=true;if(!r.puzzleType&&!r.repairRank)r.repairResult='restored';g.research.repairs++;grant(g,ECONOMY.repair,'修理助成',r.x,r.y);g.events.push({type:'researchRepair',x:r.x,y:r.y,text:r.effectText|| (r.researchLink.length?'装置復旧！ 緑の足場で上の科研費ボックスへ':'装置復旧！ 研究を再開できる')});}
  applyRepairEffects(g);
  for(const r of g.level.relays)if(r.on&&r.repairRank>=2&&!r.bonusPaid){r.bonusPaid=true;g.research.fullRepairs++;grant(g,30,'完全修理ボーナス',r.x,r.y);}
  for(const c of g.level.researchCaches)if(!c.got&&g.level.relays.find(r=>r.id===c.device)?.on&&(!c.requiresRank||(g.level.relays.find(r=>r.id===c.device)?.repairRank||0)>=c.requiresRank)&&Math.hypot(g.player.x+14-c.x,g.player.y+20-c.y)<38){c.got=true;g.research.caches++;grant(g,ECONOMY.cache,'高所探索ボーナス',c.x,c.y);}

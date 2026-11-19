@@ -1,8 +1,8 @@
 import {feeLabel} from './facility-fees.mjs?v=4.12.1';
 import {drawCircuitTower} from './circuit-art.mjs?v=4.12.1';
-import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.12.0';
+import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.13.0';
 import {drawPCBTransport} from './pcb-transport.mjs?v=4.11.0';
-import {drawPCBFoes} from './pcb-enemies.mjs?v=4.11.0';
+import {drawPCBFoes} from './pcb-enemies.mjs?v=4.13.0';
 import {doorReady} from './rooms.mjs?v=4.12.1';
 const box=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
 function board(c,x,y,w){box(c,x,y,w,24,'#174e46');box(c,x,y,w,4,'#c0f3cf');for(let i=0;i<w-40;i+=60){c.strokeStyle='#d9bc74';c.lineWidth=2;c.beginPath();c.moveTo(x+i+14,y+18);c.lineTo(x+i+14,y+9);c.lineTo(x+i+49,y+9);c.stroke();box(c,x+i+45,y+7,6,5,'#d8e9cd');}}

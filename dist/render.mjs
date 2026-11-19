@@ -1,17 +1,18 @@
-import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.11.1';
+import {pendingHandTask} from './hand-machines.mjs?v=4.13.0';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.13.0';
 import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.12.1';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.13.0';
 import {drawEquipment} from './equipment-art.mjs?v=4.11.0';
-import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.11.0';
+import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.13.0';
 import {poseScale} from './feel.mjs?v=4.11.0';
 import {currentRoom} from './rooms.mjs?v=4.12.1';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.12.1';
-import {drawResearch} from './research.mjs?v=4.11.0';
-import {drawPrinter} from './printer-art.mjs?v=4.12.1';
-import {drawLab} from './laboratory.mjs?v=4.11.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.12.1';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.13.0';
+import {drawResearch} from './research.mjs?v=4.13.0';
+import {drawPrinter} from './printer-art.mjs?v=4.13.0';
+import {drawLab} from './laboratory.mjs?v=4.13.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.13.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -157,12 +158,12 @@ function checkpoint(c,cp,active,t){
   const col=active?'#7ef2ce':'#728b9e';rect(c,cp.x+2,cp.y-81,30,22,col);rect(c,cp.x+29,cp.y-77+Math.sin(t*3)*2,8,17,col);rect(c,cp.x+9,cp.y-75,4,10,'#23484e');rect(c,cp.x+6,cp.y-72,10,4,'#23484e');if(active)glow(c,cp.x+13,cp.y-70,70,'#75efce17');
 }
 function goal(c,g,t){
-  const {x,y}=g.level.goal,ready=g.level.relays.every(r=>r.optional||r.on)&&(!g.level.boss||g.level.boss.repaired)&&(!g.printer||g.printer.boss.done),col=ready?g.level.color:'#8c7d9e';glow(c,x,y-50,110,col+'20');
+  const {x,y}=g.level.goal,ready=!pendingHandTask(g)&&g.level.relays.every(r=>r.optional||r.on)&&(!g.level.boss||g.level.boss.repaired)&&(!g.printer||g.printer.boss.done),col=ready?g.level.color:'#8c7d9e';glow(c,x,y-50,110,col+'20');
   rect(c,x-31,y-102,62,102,'#101e31');rect(c,x-36,y-105,72,9,'#6a8895');rect(c,x-32,y-96,5,96,'#82aaa9');rect(c,x+27,y-96,5,96,'#82aaa9');rect(c,x-23,y-91,46,85,'#233d4f');
   rect(c,x-18,y-86,36,50,col+'44');rect(c,x-15,y-82,30,40,'#163140');
   const wave=Math.sin(t*4)*4;line(c,x-11,y-60,x-5,y-60,col,2);line(c,x-5,y-60,x,y-69-wave,col,2);line(c,x,y-69-wave,x+5,y-52+wave,col,2);line(c,x+5,y-52+wave,x+12,y-60,col,2);
   rect(c,x-20,y-29,40,4,col);rect(c,x-17,y-18,6,6,col);rect(c,x+11,y-18,6,6,col);rect(c,x-39,y-5,78,5,'#9ab7bc');
-  c.font='9px monospace';c.textAlign='center';c.fillStyle=col;c.fillText(ready?'RESTORE':`${g.level.relays.filter(r=>!r.optional&&!r.on).length} TO REPAIR`,x,y-120);c.textAlign='left';
+  c.font='9px monospace';c.textAlign='center';c.fillStyle=col;c.fillText(ready?'RESTORE':g.level.skeleton?'LOCKED':`${g.level.relays.filter(r=>!r.optional&&!r.on).length} TO REPAIR`,x,y-120);c.textAlign='left';
 }
 export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else if(!g.level.benchMap)background(c,g.level.theme,g.camera,t);
@@ -190,7 +191,7 @@ export function drawWorld(c,g,t,effects=[],reduced=false){
   for(const sign of g.level.signs){if(Math.abs(g.player.x-sign.x)>310||g.level.students.some(s=>Math.abs(g.player.x-s.x)<185&&Math.abs(s.x-sign.x)<240&&sign.y>310&&sign.y<410))continue;c.save();c.globalAlpha=.8;c.font='11px "Segoe UI",sans-serif';const w=c.measureText(sign.text).width+20;round(c,sign.x-w/2,sign.y-13,w,26,4,'#0d1c2bbc');c.fillStyle='#b6ced6';c.textAlign='center';c.fillText(sign.text,sign.x,sign.y+4);c.textAlign='left';c.restore();}
   for(const coin of g.level.chips){if(coin.got||coin.x<g.camera-30||coin.x>g.camera+VIEW.w+30)continue;const yy=coin.y+Math.sin(t*3+coin.x)*3;glow(c,coin.x,yy,18,'#f8d98a10');const ww=4+Math.abs(Math.sin(t*2+coin.x*.01))*3;rect(c,coin.x-ww,yy-7,ww*2,14,'#d0a75e');rect(c,coin.x-ww+2,yy-6,ww*2-3,10,'#ffe3a2');rect(c,coin.x-1,yy-4,2,6,'#fff2ca');}
   for(const item of g.level.gears){if(item.got)continue;glow(c,item.x,item.y,34,'#75efce22');gear(c,item.x,item.y+Math.sin(t*2)*4,t);star(c,item.x+19,item.y-17,2,'#c8ffe5');}
-  for(const r of g.level.relays){if(r.portal||g.printer||g.pcb||g.level.benchMap)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
+  for(const r of g.level.relays){if(r.mode==='tendon'||r.portal||g.printer||g.pcb||g.level.benchMap)continue;glow(c,r.x,r.y-10,55,r.on?'#75efce33':'#c4a6ff16');rect(c,r.x-18,r.y-30,36,58,'#233448');rect(c,r.x-14,r.y-26,28,28,r.on?'#65d2b3':'#73658e');rect(c,r.x-9,r.y-21,18,18,'#18343a');c.fillStyle=r.on?'#a5f9da':'#cfb7ff';c.font='18px monospace';c.textAlign='center';c.fillText(r.on?'✓':'ϟ',r.x,r.y-6);c.textAlign='left';rect(c,r.x-12,r.y+11,24,3,r.on?'#75efce':'#8b73a1');}
   for(const cp of g.level.checkpoints)checkpoint(c,cp,cp.active,t);goal(c,g,t);
   for(const e of g.level.enemies){if(!e.alive||e.x<g.camera-60||e.x>g.camera+VIEW.w+60)continue;
     if(drawBioEnemy(c,e))continue;
