@@ -1,4 +1,8 @@
-import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.13.0';
+import {roomControl} from './rooms.mjs?v=4.14.0';
+import {gateStatus} from './gate-status.mjs?v=4.12.1';
+import {currentRun,wireHint} from './bio-wire.mjs?v=4.14.0';
+import {skeletonHint} from './wire-skeleton.mjs?v=4.14.0';
+import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.14.0';
 // Both rigs belong to a single attempt. A recovery keeps the paid rig available.
 export function installHandRigs(level){
  level.handRigs=[
@@ -10,11 +14,13 @@ const calibrated=(g,r)=>g.level.relays.find(v=>v.id===r.relay)?.on;
 export const tensionAt=t=>(1-Math.cos(t*Math.PI))/2;
 export const balanced=t=>{const tension=tensionAt(t);return tension>=.4&&tension<=.7;};
 export function handControl(g){
- return nearbyWorkshop(g)||g?.level.handRigs?.find(r=>!(r.kind==='tendon'?r.locked:r.paid)&&
+ if(!g?.level.handRigs)return null;
+ return roomControl(g)||nearbyWorkshop(g)||g?.level.handRigs?.find(r=>!(r.kind==='tendon'?r.locked:r.paid)&&
   Math.abs(g.player.x+14-r.x)<68&&Math.abs(g.player.y+40-r.y)<65);
 }
 export function handLabel(g,r){
- if(r.kind==='drum'||r.kind==='hatch')return r.label;
+ if(r.kind==='passage')return '扉 '+r.arrow;
+ if(r.kind==='drum')return r.label;
  if(!calibrated(g,r))return '上下の巻胴を合わせる';
  if(r.paid)return '張力を固定';
  return (r.kind==='tendon'?'腱を巻く':'三指を起動')+' ¥'+r.cost;
@@ -35,8 +41,8 @@ function operate(g,r){
 export function tickHandRigs(g,input,dt,activated=false){
  const rigs=g.level.handRigs;if(!rigs)return;
  const control=(input.interact||activated)&&handControl(g);
- if(control?.kind==='drum'||(input.interact&&control?.kind==='hatch'))operateWorkshop(g,control);
- else if(input.interact&&control)operate(g,control);
+ if(control?.kind==='drum'){operateWorkshop(g,control);if(activated)g.cooldown=.4;}
+ else if(input.interact&&rigs.includes(control))operate(g,control);
  const [tendon,grip]=rigs;
  if(tendon.paid&&!tendon.locked)tendon.time+=dt;
  if(tendon.locked)tendon.extension=Math.min(1,tendon.extension+dt/1.5);
@@ -58,6 +64,7 @@ export function tickHandRigs(g,input,dt,activated=false){
  block.dx=block.x-oldX;block.dy=block.y-oldY;
 }
 export function resetHandRide(g){
+ if(g.level.biomimetic)g.rooms.swing=null;
  const boss=g.level.skeleton;if(boss&&!boss.done)Object.assign(boss,{active:false,phase:0,time:0});
  const grip=g.level.handRigs?.[1];if(grip){grip.phase='dock';grip.time=0;}
 }
@@ -66,6 +73,15 @@ export function pendingHandTask(g){
  if(rigs&&!rigs[0].locked)return '関節リンク回廊で腱の張力を固定しよう';
  if(rigs&&!rigs[1].delivered)return '把持試験台の試験片に乗って対岸へ運ぼう';
  if(g.level.skeleton&&!g.level.skeleton.done)return '骨格試験室でワイヤー端子を解放しよう';
+}
+export function bioHint(g){
+ const d=roomControl(g);
+ if(g.rooms.active==='skeleton'&&(g.level.skeleton.active||g.level.skeleton.done))return skeletonHint(g);
+ if(d){const lock=gateStatus(g,d).next;return lock?lock.label:'C／ACTION　扉 '+d.arrow;}
+ const r=currentRun(g);if(r)return wireHint(g,r);
+ if(g.rooms.active==='skeleton')return skeletonHint(g);
+ if(nearbyWorkshop(g))return '巻胴で C／ACTION または X／PULSE　点線に合わせる';
+ return '';
 }
 export function drawHandRigs(c,g){
  const [tendon,grip]=g.level.handRigs;

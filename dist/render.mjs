@@ -1,18 +1,18 @@
-import {pendingHandTask} from './hand-machines.mjs?v=4.13.0';
-import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.13.0';
+import {pendingHandTask} from './hand-machines.mjs?v=4.14.0';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.14.0';
 import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
-import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.13.0';
+import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.14.0';
 import {drawEquipment} from './equipment-art.mjs?v=4.11.0';
 import {drawDawnRoom} from './printer-adventure-art.mjs?v=4.13.0';
 import {poseScale} from './feel.mjs?v=4.11.0';
-import {currentRoom} from './rooms.mjs?v=4.12.1';
-import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.13.0';
+import {currentRoom} from './rooms.mjs?v=4.14.0';
+import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWork} from './printer-visual.mjs?v=4.14.0';
 import {drawResearch} from './research.mjs?v=4.13.0';
-import {drawPrinter} from './printer-art.mjs?v=4.13.0';
+import {drawPrinter} from './printer-art.mjs?v=4.14.0';
 import {drawLab} from './laboratory.mjs?v=4.13.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.13.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.14.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -167,7 +167,7 @@ function goal(c,g,t){
 }
 export function drawWorld(c,g,t,effects=[],reduced=false){
   const P=g.pcb?{...PALETTES.solder,top:'#b5e3cb',edge:'#5b9292',soil:'#244750',deep:'#172e39'}:PALETTES[g.level.theme];if(g.pcb)drawPCBBackdrop(c,g,VIEW.w,VIEW.h);else if(!g.level.benchMap)background(c,g.level.theme,g.camera,t);
-  c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,-1000,room.right-room.left,3000);c.clip();}
+  c.save();if(g.shake>0&&!reduced){c.translate(Math.sin(t*87)*g.shake*12,Math.cos(t*99)*g.shake*7);}c.translate(-Math.round(g.camera),-Math.round(g.cameraY||0));const room=currentRoom(g);if(room&&!g.rooms.transition?.door.boss){c.beginPath();c.rect(room.left,Math.min(-1000,(room.minY??0)-100),room.right-room.left,4000);c.clip();}
   if(g.level.benchMap)drawBenchBackdrop(c,g,VIEW.w,VIEW.h,reduced);drawDawnRoom(c,g);drawBenchRooms(c,g,VIEW.w);
   drawBioLab(c,g);
   for(const w of g.level.winds){c.fillStyle='#b9ee9e0b';c.fillRect(w.x,w.y,w.w,w.h);for(let i=0;i<18;i++){const x=w.x+15+(i*71)%(w.w-30),y=w.y+((i*59-t*100)%w.h+w.h)%w.h;line(c,x,y,x,y+12,'#c8f2aa50',2);line(c,x,y,x-3,y+4,'#c8f2aa50');line(c,x,y,x+3,y+4,'#c8f2aa50');}rect(c,w.x+10,w.y+w.h-28,w.w-20,25,'#244a45');for(let x=w.x+25;x<w.x+w.w-15;x+=22)rect(c,x,w.y+w.h-25,9,18,'#5d8870');}

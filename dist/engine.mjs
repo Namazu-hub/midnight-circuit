@@ -1,26 +1,27 @@
-import {tickSkeleton} from './wire-skeleton.mjs?v=4.13.0';
-import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.13.0';
+import {tickWireRun} from './bio-wire.mjs?v=4.14.0';
+import {tickSkeleton} from './wire-skeleton.mjs?v=4.14.0';
+import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.14.0';
 import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.11.0';
 import {payRecovery} from './recovery.mjs?v=4.11.0';
 import {setupEnemyRespawns,recycleEnemies} from './enemy-respawn.mjs?v=4.11.0';
 import {tickBenchRoom} from './bench-room.mjs?v=4.13.0';
 import {tickBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {resetCircuitTower} from './circuit-tower.mjs?v=4.13.0';
-import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.13.0';
+import {setupPCB,movePCB,tickPCB,pcbSolid} from './pcb-factory.mjs?v=4.14.0';
 import {pcbCameraTarget} from './pcb-boss.mjs?v=4.13.0';
 import {setupTethers,constrainTethers,resetTethers} from './tether.mjs?v=4.11.0';
 import {setupEquipment,collectDrink,drink,useTool,tickEquipment,toolHit} from './equipment.mjs?v=4.11.0';
 import {feelState,holdFrame,finishFrame,FEEL} from './feel.mjs?v=4.11.0';
-import {tickPrinterChat} from './printer-visual.mjs?v=4.13.0';
-import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.12.1';
+import {tickPrinterChat} from './printer-visual.mjs?v=4.14.0';
+import {setupRooms,tickDoor,tickCable,constrainRoom,currentRoom,resetRooms} from './rooms.mjs?v=4.14.0';
 import {movePrinterFoes} from './printer-enemies.mjs?v=4.13.0';
-import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.13.0';
+import {setupPrinter,tickPrinter,resetPrinter,printerSolid} from './printer.mjs?v=4.14.0';
 import {tickActionRepairs,actionPlatformSolid,returnCarriedPart} from './action-repairs.mjs?v=4.11.0';
 import {setupRepairStations} from './repair-stations.mjs?v=4.13.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.13.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.13.0';
 import {tickLab} from './laboratory.mjs?v=4.13.0';
-import {LEVELS} from './levels.mjs?v=4.13.0';
+import {LEVELS} from './levels.mjs?v=4.14.0';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
 import {tickEnemies} from './enemies.mjs?v=4.11.0';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
@@ -141,7 +142,7 @@ function simulateGame(g,input={},dt=1/120){
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
  if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt);tickHandRigs(g,input,dt,activated);p.oldBottom=p.y+p.h;
- if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
+ if(g.cart)tickRail(g,input,dt);else if(!tickWireRun(g,input,activated,dt)&&!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);tickSkeleton(g,activated,dt,damage);
  if(!g.printer)tickLab(g,input,activated,dt,damage);

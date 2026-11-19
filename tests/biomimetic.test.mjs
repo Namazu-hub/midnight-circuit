@@ -1,10 +1,13 @@
+import {tickWireRun} from '../dist/bio-wire.mjs';
+import {tickDoor,roomControl,constrainRoom} from '../dist/rooms.mjs';
+import {traverseBio} from './bio-route.mjs';
 import {tickResearch} from '../dist/research.mjs';
 import {nearbyRepair,beginRepair} from '../dist/repairs.mjs';
 import {tickSkeleton,exposedPin} from '../dist/wire-skeleton.mjs';
 import {pendingHandTask,tickHandRigs} from '../dist/hand-machines.mjs';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createGame,platformSolid,respawn} from '../dist/engine.mjs';
-test('biomimetic stage has nine connected vertical districts, three branch parts and distinct enemies',()=>{const g=createGame(1),L=g.level;assert.equal(L.bioRooms.length,9);assert.equal(L.gears.length,3);assert.ok(L.gears.some(p=>p.y>700));assert.ok(L.gears.some(p=>p.y<-1200));assert.ok(L.enemies.some(e=>e.bioShape==='hand'));assert.ok(L.enemies.some(e=>e.bioShape==='bone'));assert.ok(L.platforms.some(a=>a.axis==='y'));assert.equal(g.research.funds,0);assert.ok(!createGame(0).level.biomimetic);});
+test('biomimetic stage has nine connected vertical districts, three branch parts and distinct enemies',()=>{const g=createGame(1),L=g.level;assert.equal(L.rooms.length,9);assert.equal(L.gears.length,3);assert.ok(L.gears.some(p=>p.y>700));assert.ok(L.gears.some(p=>p.y<-1200));assert.ok(L.enemies.some(e=>e.bioShape==='hand'));assert.ok(L.enemies.some(e=>e.bioShape==='bone'));assert.equal(L.wireRuns.length,2);assert.equal(g.research.funds,0);assert.ok(!createGame(0).level.biomimetic);});
 test('tendon drive requires calibration, funding and a balanced lock, with free retries',()=>{
  const g=createGame(1),[rig]=g.level.handRigs,bridge=g.level.platforms.find(a=>a.bioFinger);
  Object.assign(g.player,{x:rig.x-14,y:rig.y-40});g.pulse=2;g.research.funds=60;
@@ -50,16 +53,12 @@ test('each calibration requires both room drums and pays its reward once',()=>{
   tickResearch(g);tickResearch(g);
   assert.equal(r.repairRank,2);assert.equal(g.research.funds,funds+70);
  }
- for(const hatch of controls.filter(o=>o.kind==='hatch')){
-  Object.assign(g.player,{x:hatch.x-14,y:hatch.y-40});
-  tickHandRigs(g,{},0,true);assert.equal(g.player.y,hatch.y-40);
-  tickHandRigs(g,{interact:true},0);assert.equal(g.player.x,hatch.toX-14);assert.equal(g.player.y,hatch.toY-40);
- }
+
 });
 test('the skeleton exposes one cable after each strike and keeps a finished arena open on retry',()=>{
  const g=createGame(1),boss=g.level.skeleton,[bridge,grip]=g.level.handRigs;
  const pulse=()=>tickSkeleton(g,true,0,()=>{});
- g.player.x=10328;tickSkeleton(g,false,0,()=>{});assert.equal(boss.active,false);
+ g.rooms.active='skeleton';g.player.x=10328;tickSkeleton(g,false,0,()=>{});assert.equal(boss.active,false);
  bridge.locked=grip.delivered=true;
  for(let phase=0;phase<3;phase++){
   const pin=exposedPin(boss);Object.assign(g.player,{x:pin.x-14,y:pin.y-20});
@@ -73,4 +72,36 @@ test('the skeleton exposes one cable after each strike and keeps a finished aren
  Object.assign(retry.level.skeleton,{active:true,phase:1,time:2.5});retry.research.funds=50;
  respawn(retry);assert.equal(retry.level.skeleton.phase,0);assert.equal(retry.level.skeleton.active,false);
  assert.equal(retry.level.handRigs[1].delivered,true);assert.match(pendingHandTask(retry),/骨格/);
+});
+
+test('all doors enforce room bounds, requirements and a transition before arrival',()=>{
+ const g=createGame(1),L=g.level;
+ for(const d of L.doors){
+  g.rooms.active=d.room;g.rooms.cooldown=0;
+  const room=L.rooms.find(r=>r.id===d.room);
+  g.player.x=room.right+90;constrainRoom(g);assert.ok(g.player.x+g.player.w<room.right);
+  Object.assign(g.player,{x:d.x-14,y:d.y-40});assert.equal(roomControl(g),d);
+  tickDoor(g,{interact:true},.01,1200);
+  if(d.checks.length){assert.equal(g.rooms.transition,null);continue;}
+  assert.equal(g.rooms.active,d.room);assert.ok(g.rooms.transition);
+  tickDoor(g,{},.65,1200);assert.equal(g.rooms.active,d.to);
+  assert.equal(g.player.x,d.toX-14);tickDoor(g,{},.6,1200);assert.equal(g.rooms.transition,null);
+ }
+});
+test('ordinary inputs visit all nine rooms, transfer on both wires, power the rigs and defeat the skeleton',()=>{
+ const {g,visited}=traverseBio();
+ assert.equal(g.finished,true);assert.equal(visited.size,9);assert.ok(g.level.wireRuns.every(r=>r.cleared));
+ assert.ok(g.level.handRigs.every(r=>r.paid));assert.equal(g.level.skeleton.phase,3);assert.equal(g.deaths,0);
+});
+
+test('a missed transfer swings back, a cleared wire works both ways, and jumping releases it',()=>{
+ const g=createGame(1),run=g.level.wireRuns[0];g.rooms.active=run.room;
+ const ride=(pulse,dt=0,jump=false)=>tickWireRun(g,{jump},pulse,dt);
+ Object.assign(g.player,{x:run.points[0][0]-14,y:run.points[0][1]-20});
+ assert.equal(ride(false),false);ride(true);ride(true,.1);
+ assert.equal(g.rooms.swing.b,run.points[1]);assert.equal(run.cleared,false);
+ ride(false,3.2);assert.ok(Math.abs(g.player.x+14-run.points[0][0])<1);
+ ride(true,1.65);ride(true,1.65);assert.ok(run.cleared);assert.equal(g.rooms.swing,null);
+ ride(true);assert.equal(g.rooms.swing.reverse,true);ride(true,1.65);
+ assert.equal(g.rooms.swing.b,run.points[0]);ride(false,.2,true);assert.equal(g.rooms.swing,null);assert.ok(g.player.vy<0);
 });

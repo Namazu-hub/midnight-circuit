@@ -1,57 +1,88 @@
-import {installSkeleton,drawSkeleton} from './wire-skeleton.mjs?v=4.13.0';
-import {installWorkshop,drawWorkshop} from './bio-workshop.mjs?v=4.13.0';
-import {installHandRigs,drawHandRigs} from './hand-machines.mjs?v=4.13.0';
+import {installWireRuns,drawWireRun} from './bio-wire.mjs?v=4.14.0';
+import {doorReady} from './rooms.mjs?v=4.14.0';
+import {installSkeleton,drawSkeleton} from './wire-skeleton.mjs?v=4.14.0';
+import {installWorkshop,drawWorkshop} from './bio-workshop.mjs?v=4.14.0';
+import {installHandRigs,drawHandRigs} from './hand-machines.mjs?v=4.14.0';
 // Original Stage 2 geometry: topology inspired by the supplied branching map,
 // with no source artwork included in the game.
 export function redesignBiomimetic(L){
  const dialogue=L.students.flatMap(s=>s.lines);
- Object.assign(L,{name:'人体模倣研究室',en:'BIOMIMETIC HAND LAB',location:'02 / BIOMIMETIC HAND LAB',tagline:'腱と関節をつなぎ、もう一度つかむ。',theme:'biomimetic',biomimetic:true,width:11300,minY:-1580,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'梯子扉で上下の部屋を行き来。巻胴のそばでACTIONかパルスを使い、腕を金色の合印に重ねよう。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
+ Object.assign(L,{name:'人体模倣研究室',en:'BIOMIMETIC HAND LAB',location:'02 / BIOMIMETIC HAND LAB',tagline:'腱と関節をつなぎ、もう一度つかむ。',theme:'biomimetic',biomimetic:true,width:18000,minY:-1580,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'光った扉は C／ACTION。緑の二重丸には X／PULSE。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
  const pad=(x,y,w=200,extra={})=>L.platforms.push({x,y,w,h:20,type:'platform',...extra});
  const floor=(x,y,w)=>L.platforms.push({x,y,w,h:y<0?20:100,type:y<0?'platform':'ground'});
  const route=(x,y)=>L.route.push({x,y,service:y!==510&&y!==-600});
- const room=(x,y,w,h,name)=>{L.sections.push({x,name});return {x,y,w,h,name};};
- L.bioRooms=[room(0,20,2200,590,'人体模倣 / 展示・前室'),room(2250,-760,1100,1380,'腱ワイヤー巻取り塔'),room(3350,-760,2500,400,'関節リンク回廊'),room(3500,-1560,1800,600,'伸筋・拮抗ワイヤー室'),room(3600,-280,2400,1180,'掌の機構・整備室'),room(6000,-760,1100,1380,'屈曲・伸展の縦坑'),room(7200,20,2800,590,'把持試験・実験台'),room(7600,-1080,1800,700,'精密ピンチ・標本室'),room(10000,-80,1300,690,'骨格試験室 / 吊架架台')];
- floor(0,510,2200);route(600,510);route(1500,510);route(2100,510);
- // Two-way switchback stairs beside a visibly cable-driven elevator.
- for(let i=0;i<9;i++){const x=2300+(i%2)*270,y=400-i*120;pad(x,y,240);route(x+110,y);}
- pad(2850,-600,500);route(3100,-600);
- floor(3350,-600,1050);route(3650,-600);route(4160,-600);
+ // Side rooms have separate physics bounds. Door pairs describe their vertical connections.
+ L.rooms=[
+  ['entry',0,2170,0,0,'#1e3543'],['spool',2200,3460,-750,0,'#392f49'],
+  ['link',3500,5900,-945,0,'#253a4c'],['shaft',6000,7120,-940,0,'#373047'],
+  ['grasp',7200,9900,-160,0,'#34424a'],['skeleton',10000,11300,-65,0,'#2c2b41'],
+  ['extensor',11900,13400,-1580,0,'#31434e'],['palm',14000,15500,0,830,'#343246'],
+  ['pinch',16300,17950,-1220,0,'#344653']
+ ].map(([id,left,right,minY,maxY,ink])=>({id,left,right,minY,maxY,ink}));
+ L.doors=[];
+ const passage=(from,x,y,to,xx,yy,arrow,checks=[],backChecks=[])=>{
+  const add=(room,x,y,to,toX,toY,arrow,checks)=>L.doors.push({id:room+'-'+to+'-'+x,room,x,y,to,toX,toY,arrow,checks,kind:'passage'});
+  add(from,x,y,to,xx,yy,arrow,checks);add(to,xx,yy,from,x,y,({'→':'←','↑':'↓','↓':'↑'})[arrow],backChecks);
+ };
+ const lock=(path,label)=>[{path,label}];
+ passage('entry',2030,510,'spool',2310,510,'→');
+ passage('spool',3240,-255,'link',3590,-600,'→',lock('level.wireRuns.0.cleared','最後の輪でパルスを放ち、跳び出す'));
+ passage('link',3820,-600,'extensor',12030,-1320,'↑');
+ passage('link',4010,-600,'palm',14120,800,'↓');
+ passage('palm',15360,800,'link',5420,-600,'↑',lock('level.handRigs.0.locked','指骨橋の張力を固定'));
+ passage('link',5770,-600,'shaft',6075,-600,'→',lock('level.handRigs.0.locked','指骨橋の張力を固定'));
+ passage('shaft',7010,360,'grasp',7300,510,'→',lock('level.wireRuns.1.cleared','最後の輪でパルスを放ち、跳び出す'));
+ passage('grasp',7660,510,'pinch',16420,-930,'↑');
+ passage('grasp',9740,510,'skeleton',10075,510,'→',lock('level.handRigs.1.delivered','三指ハンドで試験片を対岸へ'));
+ floor(0,510,2170);floor(2200,510,420);pad(3040,-255,380);
+ floor(3500,-600,900);
  L.relays.push({id:'bio-joints',x:4200,y:-630,mode:'tendon',worldRepair:true,effectText:'関節校正完了。右の巻取り台で腱を張ろう',label:'指関節の校正',on:false});
  pad(4400,-600,620,{type:'ghost',requiresRepair:true,group:'bio-joints',bioFinger:true});
- floor(5020,-600,980);route(4630,-600);route(5200,-600);route(5850,-600);
- for(let i=0;i<4;i++){const x=6100+i*300,y=-360+i*240;pad(x,y,180);route(x+90,y);}
- floor(6800,510,1400);route(7050,510);route(7900,510);
+ floor(5020,-600,880);floor(6000,-600,290);pad(6790,360,330);
+ floor(7200,510,1000);
  L.relays.push({id:'bio-grasp',x:7960,y:480,mode:'tendon',worldRepair:true,label:'三指把持の校正',on:false,effectText:'把持の校正完了。右の三指ハンドで試験片を運ぼう'});
- pad(8190,509,164,{gripSpecimen:true});floor(8820,510,1180);route(8500,510);route(9200,510);route(9810,510);floor(10000,510,1300);pad(10255,400,175);pad(10510,404,175);pad(10680,396,140);pad(10775,290,160);route(11180,510);L.goal={x:11180,y:510};
- // Upper loop: climb from the joint corridor and rejoin it beyond the bridge.
- for(let i=0;i<5;i++)pad(3500+i*170,-720-i*120,200);
- floor(4180,-1320,850);for(let i=0;i<6;i++)pad(5150+(i%2)*190,-1200+i*120,200);
- // Lower loop: a deep service room with two independent return shafts.
- floor(3600,800,2400);for(const start of [3630,5680])for(let i=0;i<11;i++)pad(start+(i%2)*130,680-i*120,190);
- for(let i=0;i<5;i++)pad(3970+i*330,400,220);
- // Final optional tower and a high horizontal return to the grasp experiment.
- for(let i=0;i<11;i++)pad(7370+(i%2)*210,390-i*120,190);
- floor(7800,-930,1400);for(let i=0;i<11;i++)pad(9270+(i%2)*180,-810+i*120,190);
- L.gears=[{x:4750,y:-1365},{x:4800,y:755},{x:8770,y:-975}];
- L.drinks=[{x:1200,y:475},{x:5500,y:-635},{x:7000,y:475}];
- L.checkpoints=[{x:2000,y:510},{x:3600,y:-600},{x:7050,y:510},{x:10085,y:510}];L.checkpoint=L.checkpoints[0];
- L.vendorSites=[{x:250,y:510},{x:3650,y:-600},{x:7100,y:510}];
+ pad(8190,509,164,{gripSpecimen:true});floor(8820,510,1080);floor(10000,510,1300);
+ pad(10255,400,175);pad(10510,404,175);pad(10680,396,140);pad(10775,290,160);L.goal={x:11180,y:510};
+ floor(11900,-1320,1500);floor(14000,800,1500);floor(16300,-930,1650);
+ for(const [x,y,w] of [[12220,-1420,180],[14620,690,190],[14900,580,180],[17330,-1035,185]])pad(x,y,w);
+ L.gears=[{x:12300,y:-1462},{x:15060,y:758},{x:17410,y:-1076}];
+ L.drinks=[{x:1200,y:475},{x:5500,y:-635},{x:7400,y:475}];
+ L.checkpoints=[{x:2360,y:510},{x:3650,y:-600},{x:6130,y:-600},{x:7360,y:510},{x:10135,y:510}];L.checkpoint=L.checkpoints[0];
+ L.fallZones=[{room:'spool',x:2200,y:660,w:1260,h:460},{room:'shaft',x:6000,y:560,w:1120,h:560},{room:'link',x:3500,y:-220,w:2400,h:1250}];
+ for(const [x,y] of [[2030,510],[3240,-255],[3820,-600],[12520,-1320],[4340,-600],[5770,-600],[7010,360],[7660,510],[17080,-930],[8130,510],[9740,510],[11180,510]])route(x,y);
+ L.vendorSites=[{x:250,y:510},{x:3650,y:-600},{x:7450,y:510}];
  for(const a of L.platforms.filter(a=>a.w>=600))for(let x=a.x+100;x<a.x+a.w-60;x+=180)L.chips.push({x,y:a.y-45});
  const foe=(x,y,bone=false)=>L.enemies.push({x,y:y-28,baseY:y-28,w:32,h:28,min:x-65,max:x+65,speed:45,dir:1,alive:true,kind:bone?'mouse-hop':'resistor',bioShape:bone?'bone':'hand',clock:0,state:'patrol',stateTime:0});
- for(const [x,y] of [[850,510],[1650,510],[3900,-600],[5300,-600],[5700,-600],[7300,510],[9000,510],[9500,510],[4500,-1320],[4880,-1320],[4200,800],[5100,800],[8200,-930],[8700,-930]])foe(x,y,x%3===0);
- L.students=[{x:400,y:510,name:'人体模倣の研究生',color:'#c6b8f1',lines:['腱を引くと、指が曲がる。戻すには反対側のワイヤーも必要。',...dialogue.slice(0,3)]},{x:5510,y:800,name:'機構設計の研究生',color:'#8edbcc',lines:['関節を増やすだけでは、狙った姿勢にはならないんだ。',...dialogue.slice(3)]},{x:9060,y:510,name:'把持実験の研究生',color:'#e5b1bf',lines:['強く握るより、三つの接触点を安定させる。']}];
- L.signs=[{x:350,y:250,text:'人体模倣研究室'},{x:2400,y:90,text:'腱ワイヤー / 上層へ'},{x:4050,y:-800,text:'指関節を校正して橋を固定'},{x:7850,y:280,text:'三指把持 / 試験片に乗る'}];
- installHandRigs(L);installWorkshop(L);installSkeleton(L);
- L.bioLift={x:3050,y:300,w:160,h:20,type:'moving',axis:'y',range:420,period:9,phase:0};L.platforms.push(L.bioLift);
+ for(const [x,y] of [[850,510],[1650,510],[3900,-600],[5300,-600],[5700,-600],[7300,510],[9000,510],[9500,510],[12420,-1320],[12880,-1320],[14400,800],[15000,800],[16800,-930],[17400,-930]])foe(x,y,x%3===0);
+ L.students=[{x:400,y:510,name:'人体模倣の研究生',color:'#c6b8f1',lines:['腱を引くと、指が曲がる。戻すには反対側のワイヤーも必要。',...dialogue.slice(0,3)]},{x:15200,y:800,name:'機構設計の研究生',color:'#8edbcc',lines:['関節を増やすだけでは、狙った姿勢にはならないんだ。',...dialogue.slice(3)]},{x:9060,y:510,name:'把持実験の研究生',color:'#e5b1bf',lines:['強く握るより、三つの接触点を安定させる。']}];
+ for(const st of L.students)st.room=L.rooms.find(r=>st.x>=r.left&&st.x<r.right).id;
+ installHandRigs(L);installWorkshop(L);installSkeleton(L);installWireRuns(L);
+ for(let i=0;i<4;i++)L.chips.push({x:6650+i*12,y:-665+i*55});
+
 }
 export function drawBioLab(c,g){
  if(!g.level.biomimetic)return;
  c.save();
- for(const r of g.level.bioRooms){if(r.x+r.w<g.camera||r.x>g.camera+1500)continue;
- c.fillStyle='#17283f';c.fillRect(r.x,r.y,r.w,r.h);c.strokeStyle='#52647f';c.lineWidth=5;c.strokeRect(r.x+12,r.y+12,r.w-24,r.h-24);
- c.fillStyle='#b7dedc';c.font='bold 20px sans-serif';c.fillText(r.name,r.x+40,r.y+55);
- for(let x=r.x+60;x<r.x+r.w;x+=220){c.strokeStyle='#39546e';c.lineWidth=3;c.beginPath();c.moveTo(x,r.y+90);c.lineTo(x,r.y+r.h-40);c.stroke();for(let y=r.y+140;y<r.y+r.h-40;y+=180){c.strokeStyle='#6a85a0';c.beginPath();c.arc(x,y,24,0,Math.PI*2);c.stroke();}}
+ const room=g.level.rooms.find(r=>r.id===g.rooms.active);
+ const top=room.minY-30,bottom=Math.max(610,room.maxY+150),w=room.right-room.left;
+ c.fillStyle=room.ink;c.fillRect(room.left,top,w,bottom-top);
+ c.strokeStyle='#698193';c.lineWidth=4;c.strokeRect(room.left+10,top+12,w-20,bottom-top-24);
+ for(let x=room.left+105;x<room.right;x+=245){
+  c.strokeStyle='#69819355';c.lineWidth=3;c.beginPath();
+  if(['link','palm','grasp','pinch'].includes(room.id)){
+   const y=({link:-720,palm:640,grasp:340,pinch:-1080})[room.id];
+   for(let j=0;j<3;j++){c.moveTo(x-42,y+74);c.lineTo(x+j*20,y-j*12);c.lineTo(x+54+j*15,y-18-j*9);}
+  }else{c.moveTo(x,top+24);c.lineTo(x,bottom-40);c.moveTo(x+32,top+84);c.arc(x,top+84,32,0,Math.PI*2);}
+  c.stroke();
  }
+ for(const d of g.level.doors.filter(d=>d.room===room.id)){
+  const open=g.rooms.transition?.door===d?Math.min(1,g.rooms.transition.time*3)*21:0,ready=doorReady(g,d);
+  c.fillStyle='#111f2a';c.fillRect(d.x-37,d.y-96,74,96);
+  c.strokeStyle=ready?'#94dcca':'#dca071';c.lineWidth=4;c.strokeRect(d.x-38,d.y-96,76,96);
+  for(const dir of [-1,1]){c.fillStyle='#45596c';c.fillRect(d.x+(dir<0?-31:2)+dir*open,d.y-88,29,85);}
+  c.fillStyle=ready?'#b5ffe1':'#ffbf80';c.font='bold 29px sans-serif';c.textAlign='center';c.fillText(ready?d.arrow:'×',d.x,d.y-48);
+ }
+ drawWireRun(c,g);
  for(const a of g.level.platforms.filter(a=>a.bioFinger)){
  const extension=g.level.handRigs[0].extension,on=extension===1;
  for(let j=0;j<3;j++){
@@ -70,8 +101,6 @@ export function drawBioLab(c,g){
  c.fillStyle='#49647a';c.fillRect(a.x-85,a.y+15,75,100);c.fillStyle='#bad6d2';c.fillRect(a.x-65,a.y+35,35,40);
  }
  drawHandRigs(c,g);drawWorkshop(c,g);drawSkeleton(c,g);
- const lift=g.level.platforms.find(a=>a.axis==='y'&&a.type==='moving');
- if(lift){c.strokeStyle='#9fdac9';c.lineWidth=3;c.beginPath();c.moveTo(lift.x+80,-730);c.lineTo(lift.x+80,lift.y);c.stroke();}
  c.restore();
 }
 export function drawBioEnemy(c,e){

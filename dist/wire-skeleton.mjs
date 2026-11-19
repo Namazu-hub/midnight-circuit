@@ -1,3 +1,4 @@
+import {pulseRing} from './bio-wire.mjs?v=4.14.0';
 const CX=10600;
 const pins=[
  {x:10342,y:357,name:'左肩'},
@@ -7,9 +8,19 @@ const pins=[
 export function installSkeleton(L){
  L.skeleton={phase:0,time:0,active:false,done:false,aim:CX-200};
 }
-const cycle=t=>t%3.6;
+const cycle=t=>t%4.7;
 export function slack(s){return cycle(s.time)>=1.95;}
 export function exposedPin(s){return pins[s.phase];}
+const reach=115;
+export function skeletonHint(g){
+ const s=g.level.skeleton;
+ if(s.done)return 'ワイヤーをすべて解除　出口 →';
+ const pin=exposedPin(s),dx=pin.x-g.player.x-14,dy=pin.y-g.player.y-20;
+ const near=Math.hypot(dx,dy)<reach;
+ const direction=Math.abs(dx)>85?(dx>0?'→':'←'):(dy<0?'↑':'↓');
+ if(!near)return (s.phase+1)+'/3　'+pin.name+'の輪 '+direction+'　足場から近づく';
+ return slack(s)?'◎ '+pin.name+'の輪が開いた！　X／PULSE':'× 張力あり　攻撃をかわし、輪が開くのを待つ';
+}
 function lerp(a,b,u){return a+(b-a)*u;}
 function armPose(s,side){
  const clock=cycle(s.time),activeSide=s.phase===0?-1:1;
@@ -42,13 +53,13 @@ function legPose(s,side){
  return {hip,knee:[(hip[0]+foot[0])/2+side*20,(hip[1]+foot[1])/2-12],foot};
 }
 export function tickSkeleton(g,activated,dt,hit){
- const s=g.level.skeleton;if(!s||s.done)return;
+ const s=g.level.skeleton;if(!s||s.done||g.rooms.active!=='skeleton')return;
  const p=g.player;
  if(!s.active){
-  if(p.x<10160||!g.level.handRigs[1].delivered||!g.level.handRigs[0].locked)return;
+  if(p.x<10115||!g.level.handRigs[1].delivered||!g.level.handRigs[0].locked)return;
   s.active=true;s.time=0;g.events.push({type:'handNotice',text:'骨格試験機 起動 · 緩んだワイヤー端子にパルス'});
  }
- s.time+=dt;const clock=cycle(s.time);
+ g.cooldown=Math.min(g.cooldown,.6);g.pulse=Math.min(g.pulse,.3);s.time+=dt;const clock=cycle(s.time);
  if(clock<1.2){
   const minX=s.phase===0?CX-345:s.phase===1?CX:CX-165;
   const maxX=s.phase===0?CX:s.phase===1?CX+345:CX+165;
@@ -59,7 +70,7 @@ export function tickSkeleton(g,activated,dt,hit){
   if(p.x+p.w>x-38&&p.x<x+38&&p.y+p.h>y-28&&p.y<y+22){hit(g,x);if(!s.active||g.gameOver)return;}
  }
  const pin=exposedPin(s);
- if(activated&&slack(s)&&Math.hypot(p.x+14-pin.x,p.y+20-pin.y)<104){
+ if(activated&&slack(s)&&Math.hypot(p.x+14-pin.x,p.y+20-pin.y)<reach){
   s.phase++;s.done=s.phase===pins.length;s.active=!s.done;s.time=0;
   g.events.push({type:'actionStep',x:pin.x,y:pin.y,text:s.done?'張力解除 · 骨格試験機は停止した':pin.name+'のワイヤーを解放'});
  }
@@ -69,7 +80,7 @@ function line(c,pts,color,w){
 }
 function circle(c,p,r,col){c.fillStyle=col;c.beginPath();c.arc(...p,r,0,Math.PI*2);c.fill();}
 export function drawSkeleton(c,g){
- const s=g.level.skeleton;if(!s||g.camera+1800<10000)return;
+ const s=g.level.skeleton;if(!s||g.rooms.active!=='skeleton')return;
  c.save();c.lineCap='round';c.font='bold 16px sans-serif';c.textAlign='center';
  const ivory='#dfdac6',joint='#788d95',wire='#e7ba79';
  line(c,[[CX-390,65],[CX+390,65]],'#506983',12);
@@ -95,8 +106,10 @@ export function drawSkeleton(c,g){
   const pin=exposedPin(s),loose=slack(s);
   const endpoint=s.phase===2?[CX,277]:s.phase===0?armPose(s,-1).shoulder:armPose(s,1).elbow;
   line(c,[[pin.x,pin.y],[pin.x,loose?pin.y+20:97],[endpoint[0],loose?endpoint[1]+14:97],endpoint],loose?'#82e6c4':wire,2);
-  circle(c,[pin.x,pin.y],19,'#28404b');circle(c,[pin.x,pin.y],13,loose?'#83edce':'#efb579');
-  c.fillStyle='#e8efe0';c.fillText(pin.name+(loose?' · PULSE':' · 張力'),pin.x,pin.y-31);
+  c.fillStyle=loose?'#8fffd51b':'#ffbf8010';c.beginPath();c.arc(pin.x,pin.y,reach,0,Math.PI*2);c.fill();
+  c.fillStyle='#263642';c.beginPath();c.arc(pin.x,pin.y,19,0,Math.PI*2);c.fill();
+  pulseRing(c,pin.x,pin.y,loose,g.time);
+  c.fillStyle='#f4f2de';c.fillText(pin.name+(loose?'　X／PULSE':'　×'),pin.x,pin.y-44);
   if(cycle(s.time)<1.7){line(c,[[s.aim-33,502],[s.aim+33,502]],'#ff957d',5);}
  }
  c.fillStyle='#c5dcd9';c.fillText(s.done?'骨格試験機 · 停止':'骨格試験機　'+s.phase+' / 3',CX,98);

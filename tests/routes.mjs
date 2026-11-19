@@ -1,8 +1,10 @@
+import {traverseBio} from './bio-route.mjs';
 import {traversePCB} from './pcb-route.mjs';
 import {traversePrinter} from './printer-route.mjs';
 import {solveSession} from './repair-inputs.mjs';
 import {createGame,updateGame,platformSolid} from '../dist/engine.mjs';
 export function traverse(index,{limit=180,trace=false}={}){
+ if(index===1)return traverseBio({limit,trace});
  if(index===3)return traversePrinter();
  if(index===5)return traversePCB();
  const g=createGame(index);let wp=0,maxY=0,oldDeaths=0,stuck=0,lastWP=0;
@@ -49,40 +51,7 @@ export function traverse(index,{limit=180,trace=false}={}){
    }else{const next=carriers.find(m=>p.x<m.x+140);tx=next?next.x+60:10535;jump=p.onGround;}
    left=p.x+14>tx+5;right=p.x+14<tx-5;pulse=g.cooldown<=0;
   }
-  let interact=false;
-  if(L.handRigs){
-   const [tendon,grip]=L.handRigs;
-   const steer=x=>{left=p.x+14>x+4;right=p.x+14<x-4;jump=false;pulse=false;};
-   if(L.relays[0].on&&p.x>4100&&p.x<4410&&!tendon.locked&&Math.abs(p.y+40-tendon.y)<85){
-    steer(tendon.x);
-    const tension=(1-Math.cos(tendon.time*Math.PI))/2;
-    interact=Math.abs(p.x+14-tendon.x)<16&&(!tendon.paid||(tension>.45&&tension<.65));
-   }else if(tendon.locked&&tendon.extension<1&&p.x>4200&&p.x<4400)steer(tendon.x);
-   for(const r of L.relays){
-    if(r.on)continue;
-    const [upper,lower]=L.wireControls.filter(o=>o.relay===r.id);
-    const hatch=L.wireControls.find(o=>o.kind==='hatch'&&o.toY===upper.y);
-    const upstairs=Math.abs(p.y+40-upper.y)<150;
-    if(!upstairs&&(p.x<hatch.x-110||p.x>lower.x+280||Math.abs(p.y+40-lower.y)>300))continue;
-    const target=upstairs?(upper.angle!==upper.target?upper:{x:hatch.toX,y:hatch.toY}):
-      upper.angle!==upper.target?hatch:lower;
-    steer(target.x);
-    interact=Math.abs(p.x+14-target.x)<12&&Math.abs(p.y+40-target.y)<30&&f%18===0;
-    // Keep each press as a separate action, including a return through the same hatch.
-   }
-   if(L.relays[1].on&&p.x>7850&&p.x<9000&&!grip.delivered){
-    if(!grip.paid){steer(grip.x);interact=Math.abs(p.x+14-grip.x)<16;}
-    else{const block=L.platforms.find(a=>a.gripSpecimen);steer(block.x+block.w/2);}
-   }
-   const boss=L.skeleton;
-   if(grip.delivered&&p.x>10155&&!boss.done){
-    const [x,y]=[[10342,400],[10820,290],[10600,404]][boss.phase];
-    const dx=x-p.x-14,dy=y-p.y-40;
-    steer(x);jump=(dy<-30&&Math.abs(dx)<200&&p.onGround)||(dy<-15&&p.jumps===1&&p.vy>-60);
-    pulse=Math.abs(dx)<35&&Math.abs(dy)<30&&boss.time%3.6>=2.1&&g.cooldown<=0;
-   }
-  }
-  updateGame(g,{left,right,jump,pulse,interact},1/120);g.events=[];maxY=Math.min(maxY,p.y);
+  updateGame(g,{left,right,jump,pulse},1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(wp===lastWP)stuck++;else{lastWP=wp;stuck=0;}
   if(trace&&f%1200===0)console.log(index+1,(f/120).toFixed(0),wp,Math.round(p.x),Math.round(p.y),p.hp,g.deaths,'target',target.x,target.y);
  }
