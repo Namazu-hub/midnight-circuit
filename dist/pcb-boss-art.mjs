@@ -1,5 +1,5 @@
 import {drawCore} from './core-art.mjs?v=4.11.0';
-import {pcbBossHeads} from './pcb-boss.mjs?v=4.11.0';
+import {pcbBossHeads} from './pcb-boss.mjs?v=4.12.0';
 const box=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
 export function drawPlacementMachine(c,g){const b=g.pcb.boss,t=g.time;const alarm=b.active&&!b.done;c.save();
  // Structural rails, motor carriages and cable chain, rather than a scaled enemy.
@@ -9,11 +9,22 @@ export function drawPlacementMachine(c,g){const b=g.pcb.boss,t=g.time;const alar
  const lit=b.done?'#80e7c4':alarm?'#df8ac5':'#c6b88a';
  for(let i=0;i<7;i++){const on=!alarm||b.age>.2*i;box(c,12360+i*195,50,38,9,on?lit:'#233b48');}
  if(!b.active){drawHead(c,{x:13000,y:135,warning:false},t,lit);c.restore();return;}
+ for(const a of g.level.platforms.filter(a=>a.pcbRole==='lure-pad')){
+  const placed=b.placedPads?.includes(a.x);
+  if(placed){
+   box(c,a.x,a.y,a.w,18,'#344b62');box(c,a.x+5,a.y+2,a.w-10,4,'#91e1cd');
+   for(let pin=5;pin<a.w;pin+=13)box(c,a.x+pin,a.y+13,5,8,'#ccd3bb');
+  }else if(b.phase===2){
+   c.save();c.strokeStyle='#f2bf79';c.lineWidth=2;c.setLineDash([7,5]);c.strokeRect(a.x,a.y,a.w,18);c.restore();
+   for(let pin=5;pin<a.w;pin+=13)box(c,a.x+pin,504,6,6,'#efbd82');
+   c.fillStyle='#f5d7a0';c.font='bold 15px sans-serif';c.fillText('空きランド',a.x+21,494);
+  }
+ }
  for(const h of pcbBossHeads(b)){const top=110;
   box(c,h.x-48,top-15,96,25,'#a2b7bd');box(c,h.x-37,top-10,74,14,'#263e51');
   for(let y=top;y<h.y;y+=19){box(c,h.x-23,y,46,12,'#77959e');box(c,h.x-17,y+2,34,4,'#cad7d0');}
   c.strokeStyle='#cc9a60';c.lineWidth=5;c.beginPath();c.moveTo(h.x+43,top);c.bezierCurveTo(h.x+77,top+70,h.x+75,h.y-20,h.x+45,h.y+20);c.stroke();
-  drawHead(c,h,t,lit);
+  drawHead(c,h,t,b.phase===2&&b.jamCycle===Math.floor(b.clock/4)?'#fff0a6':lit);
   if(h.warning&&!b.done){c.save();c.strokeStyle='#f6b5a1';c.lineWidth=3;c.setLineDash([9,7]);c.strokeRect(h.target-65,405,130,103);c.beginPath();c.moveTo(h.x,h.y+70);c.lineTo(h.target,510);c.stroke();c.setLineDash([]);c.font='bold 14px monospace';c.fillStyle='#ffd7a1';c.fillText('▼',h.target-7,398);c.restore();}
  }
  // Fixing station joins the moving head to the actual magnet and solder locks.

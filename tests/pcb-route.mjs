@@ -9,6 +9,10 @@ export function traversePCB({record=false,stopAtD=false}={}){const g=createGame(
  go(6510,510);use();go(6980,510);use();go(7190,510);use();wait(2);const tower=traverseCircuit({game:g,record});if(record)inputs.push(...tower.inputs);wait(.8);door('D');
  go(8500,410);use();wait(4);go(9000,510);go(9400,510);door('E');
  go(11210,510);wait(5);door('F');
- go(12800,510);for(let i=0;i<7000&&g.pcb.boss.phase<3;i++){const b=g.pcb.boss;step({pulse:b.age>3&&b.clock%4>=2.3&&b.clock%4<2.9&&g.cooldown<=0});}if(g.pcb.boss.phase<3)throw Error('boss damage');
+ go(12800,510);for(let i=0;i<7000&&g.pcb.boss.phase<3;i++){const b=g.pcb.boss;
+  // In phase two, draw the reticle onto the near footprint, then step aside.
+  const lure=b.phase===2&&!b.placedPads?.length;
+  const aim=lure?(b.clock%4<1?12500:12580):null;
+  step({left:lure&&g.player.x+14>aim+6,right:lure&&g.player.x+14<aim-6,pulse:!lure&&b.age>3&&b.clock%4>=2.3&&b.clock%4<2.9&&g.cooldown<=0});}if(g.pcb.boss.phase<3)throw Error('boss damage');
  go(12400,510);use();wait(.5);use();go(12560,510);use();go(12400,510);while(g.cooldown>0)step();step({pulse:true});go(12460,400);go(12700,290);use();wait(3);if(!g.pcb.boss.fixed)throw Error('head not fixed');go(12860,420);go(12980,355);go(13100,290);go(13350,290);use();wait(3);if(g.pcb.boss.phase!==4)throw Error('cool');go(13540,180);use();wait(2);go(13220,225);step({jump:true});wait(.2);step({pulse:true});wait(1);if(!g.pcb.boss.done)throw Error('core final hit');door('G');go(15850,510);if(!g.finished)throw Error('no PCB finish');return {g,inputs};}
 if(process.argv[1]?.endsWith('/pcb-route.mjs')){const {g}=traversePCB();console.log({finish:g.finished,hp:g.player.hp,funds:g.research.funds,time:g.time,deaths:g.deaths});}

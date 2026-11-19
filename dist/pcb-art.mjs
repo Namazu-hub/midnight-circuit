@@ -1,5 +1,5 @@
-import {drawCircuitTower} from './circuit-art.mjs?v=4.11.0';
-import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.11.0';
+import {drawCircuitTower} from './circuit-art.mjs?v=4.12.0';
+import {drawPlacementMachine} from './pcb-boss-art.mjs?v=4.12.0';
 import {drawPCBTransport} from './pcb-transport.mjs?v=4.11.0';
 import {drawPCBFoes} from './pcb-enemies.mjs?v=4.11.0';
 import {doorReady} from './rooms.mjs?v=4.11.0';

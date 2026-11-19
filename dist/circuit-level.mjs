@@ -12,8 +12,8 @@ export function addCircuitTower(L){
  pad(0,650,440,80);pad(610,650,690,80);pad(0,510,580);pad(50,580,130); // return, not a stranded rescue floor
  pad(1100,620,180,22,'lift');pad(1330,150,250);pad(1580,150,200,22,'arm');
  pad(1320,360,420);pad(1440,-10,180);pad(1950,-190,420);pad(2260,-190,100,18,'coil2');
- pad(3090,-190,500);pad(3600,-330,320);pad(3950,-470,350);pad(4350,-470,230);
- pad(3520,-190,150,18,'carrier');pad(3890,-330,120,18,'charge-bridge');pad(4280,-800,40,330,'shutter'); // > ordinary double-jump height; coil + air jump is the route
+ pad(3090,-190,500);pad(3600,-330,540);pad(3945,-470,48);pad(4130,-470,170);pad(4350,-470,230);
+ pad(3520,-190,150,18,'carrier');pad(3993,-470,137,18,'charge-bridge');pad(4280,-800,40,330,'shutter'); // > ordinary double-jump height; coil + air jump is the route
  L.checkpoints.push({x:X+90,y:510},{x:X+1450,y:150},{x:X+3170,y:-190});
  L.doors.push({id:'pcb-circuit-in',room:'D',x:6480,y:400,to:'S',toX:X+90,toY:510,label:'回路試験塔'},
  {id:'pcb-circuit-back',room:'S',x:X+90,y:510,to:'D',toX:6480,toY:400,label:'搬送ラインへ戻る'},
@@ -28,6 +28,7 @@ export function addCircuitTower(L){
  {id:'sw',kind:'switch',x:X+4000,y:-506,w:46,h:36,min:X+3970,max:X+4210,padX:X+4170,padY:-470}
  ],controls:[
 
+ {id:'ct-diverter',x:X+3860,y:-360,label:'給電先を切り替える'},
  {id:'ct-yard-reset',x:X+3210,y:-220,label:'未固定部品を再供給'},
  {id:'ct-reset',x:X+720,y:620,label:'未固定部品を再供給'},
  {id:'ct-transistor',x:X+1030,y:620,label:'トランジスタを拾う'},

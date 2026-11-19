@@ -20,7 +20,39 @@ test('coils cause real horizontal displacement, leave the air jump, and do not a
 test('boost and loose inventory are released by death, while repaired circuit states survive',()=>{const g=fixture();power(g);g.circuit.dash=.5;g.circuit.held=true;respawn(g,'fall');assert.equal(g.circuit.dash,0);assert.equal(g.circuit.held,false);assert.equal(g.circuit.parts[0].state,'locked');assert.equal(g.player.hp,5);});
 test('each main-room void has no invisible rescue floor and sends the player back with one HP loss',()=>{const g0=createGame(5);assert.equal(g0.level.pitSpans.length,5);for(const [a,b] of g0.level.pitSpans){const g=createGame(5);g.rooms.active=g.level.rooms.find(r=>a>=r.left&&a<r.right).id;g.respawn={x:g.level.rooms.find(r=>r.id===g.rooms.active).left+100,y:470};Object.assign(g.player,{x:(a+b)/2,y:660});const hp=g.player.hp;for(let i=0;i<100&&!g.deaths;i++)frames(g,1);assert.equal(g.deaths,1,'void '+a);assert.equal(g.player.hp,hp-1);assert.equal(g.player.x,g.respawn.x);}});
 test('relay yard R powers a physical moving carrier; C is transported with it',()=>{const g=fixture(),c=g.circuit.parts.find(e=>e.id==='c2');moveCircuitTower(g,.1);assert.equal(g.circuit.carrierY,-190);lock(g,'r2');for(let i=0;i<60;i++)moveCircuitTower(g,1/120);assert.ok(g.circuit.carrierY<-200);assert.ok(Math.abs(c.y+c.h-g.circuit.carrierY)<1);});
-test('switch enemy stays disconnected until C powers its rail; all three clamps govern actual shutter',()=>{const g=fixture(),sw=g.circuit.parts.find(e=>e.id==='sw'),gate=g.level.platforms.find(a=>a.pcbRole==='circuit-shutter');Object.assign(g.player,{x:20200,y:-510});for(let i=0;i<200;i++)moveCircuitTower(g,1/120);assert.equal(sw.x,sw.homeX);assert.ok(platformSolid(g,gate));lock(g,'r2');lock(g,'c2');for(let i=0;i<400;i++)moveCircuitTower(g,1/120);assert.ok(sw.x>sw.homeX);lock(g,'sw');assert.ok(relayYard(g.circuit).ready);assert.equal(platformSolid(g,gate),false);});
+test('a charged C2 powers the rail while the diverter brakes the lift and magnetically moves SW',()=>{
+ const g=fixture(),s=g.circuit,sw=s.parts.find(e=>e.id==='sw');
+ const gate=g.level.platforms.find(a=>a.pcbRole==='circuit-shutter'),bridge=g.level.platforms.find(a=>a.pcbRole==='circuit-charge-bridge');
+ lock(g,'r2');lock(g,'c2');
+ for(let i=0;i<600;i++)moveCircuitTower(g,1/120);
+ assert.equal(sw.x,sw.homeX);assert.ok(s.chargeLevel>.98);assert.ok(platformSolid(g,gate));
+ towerAction(g,'ct-diverter');const y=s.carrierY;
+ for(let i=0;i<220;i++)moveCircuitTower(g,1/120);
+ assert.equal(s.carrierY,y);assert.ok(sw.x>sw.homeX);assert.ok(platformSolid(g,bridge));
+ for(let i=0;i<1200;i++)moveCircuitTower(g,1/120);
+ assert.equal(sw.state,'seated');assert.ok(!platformSolid(g,bridge));
+ towerAction(g,'ct-pad-sw');assert.equal(sw.state,'seated');assert.ok(platformSolid(g,gate));
+ towerAction(g,'ct-diverter');for(let i=0;i<300;i++)moveCircuitTower(g,1/120);
+ towerAction(g,'ct-diverter');towerAction(g,'ct-pad-sw');assert.equal(platformSolid(g,gate),false);
+ for(let i=0;i<2400;i++)moveCircuitTower(g,1/120);
+ assert.equal(relayYard(s).ready,true);assert.ok(platformSolid(g,bridge));
+});
+test('R2 stomp changes its own discharge time without detuning the upstream filter',()=>{
+ const g=fixture(),s=g.circuit,r=lock(g,'r2');lock(g,'c2');const upstream=s.band;
+ Object.assign(g.player,{x:r.x+8,y:r.y-39,oldBottom:r.y-2,vy:90});
+ tickCircuitTower(g,{},false,.01,()=>{});assert.equal(r.band,2);assert.equal(s.band,upstream);
+ s.chargeLevel=1;towerAction(g,'ct-diverter');for(let i=0;i<1080;i++)moveCircuitTower(g,1/120);
+ assert.ok(relayYard(s).rail);
+});
+test('boss prints only on a targeted footprint, exposes a bonus hit for one cycle, and resets on retry',()=>{
+ const g=fixture(),b=g.pcb.boss;
+ const [pad,other]=g.level.platforms.filter(a=>a.pcbRole==='lure-pad');
+ g.rooms.active='G';Object.assign(b,{active:true,age:8,phase:2,hp:4,clock:1.7,target:pad.x+65,headX:pad.x+65});
+ Object.assign(g.player,{x:pad.x+90,y:470});tickPCBBoss(g,{},false,.01,()=>{});
+ assert.ok(platformSolid(g,pad));assert.ok(!platformSolid(g,other));assert.equal(b.placedPads.length,1);
+ b.clock=2.35;tickPCBBoss(g,{},true,.01,()=>{});assert.equal(b.hp,2);
+ g.research.funds=50;respawn(g);assert.ok(!platformSolid(g,pad));
+});
 test('yard reset supplies only loose parts and never erases a solved clamp or pays funds',()=>{const g=fixture();lock(g,'r2');const sw=g.circuit.parts.find(e=>e.id==='sw');sw.state='dead';sw.dead=2;const money=g.research.funds;towerAction(g,'ct-yard-reset');assert.equal(sw.state,'roam');assert.equal(g.circuit.parts.find(e=>e.id==='r2').state,'locked');assert.equal(g.research.funds,money);assert.equal(g.circuit.parts.length,5);});
 test('D production gate and checklist both require the complete action-puzzle course',()=>{const g=createGame(5);g.level.relays.find(r=>r.id==='magnet').on=true;const d=g.level.doors.find(d=>d.id==='pcb-D');assert.equal(gateStatus(g,d).ready,false);assert.equal(gateStatus(g,d).next.id,'circuit');g.circuit.complete=true;assert.ok(gateStatus(g,d).ready);});
 test('combat guards pay once per appearance and never substitute for circuit components',()=>{const g=fixture(),e=g.circuit.guards[0];Object.assign(g.player,{x:e.x-20,y:e.y});const funds=g.research.funds;tickCircuitTower(g,{},true,.01,()=>{});assert.equal(e.alive,false);assert.equal(g.research.funds,funds+15);tickCircuitTower(g,{},true,.01,()=>{});assert.equal(g.research.funds,funds+15);assert.ok(g.circuit.parts.every(e=>e.state!=='dead'));});

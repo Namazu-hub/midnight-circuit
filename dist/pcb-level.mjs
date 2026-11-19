@@ -1,4 +1,4 @@
-import {addCircuitTower} from './circuit-level.mjs?v=4.11.0';
+import {addCircuitTower} from './circuit-level.mjs?v=4.12.0';
 // Stage 06: production creates the terrain; no player fabrication menu.
 export const PCB_ROOMS=[['A','停止したライン'],['B','ペースト印刷'],['C','部品実装'],['D','部品供給・電磁石'],['E','リフロー炉'],['F','外観検査 AOI'],['G','出荷ヤード'],['H','夜明けの研究室']];
 export function redesignPCB(L){
@@ -23,6 +23,8 @@ export function redesignPCB(L){
  pad(8800,510,540,20,{pcbManaged:true,pcbRole:'solder'});pad(8410,410,220);
  pad(11120,510,190,20,{pcbManaged:true,pcbRole:'aoi-lift'});pad(11300,220,350);pad(11670,350,160);
  for(const [x,y,w] of [[12380,400,180],[12600,290,180],[13280,290,180],[13440,180,250]])pad(x,y,w);
+ // Sacrificial footprints on either side of the head become real component platforms.
+ for(const x of [12500,13440])pad(x-65,424,130,18,{pcbManaged:true,pcbRole:'lure-pad'});
  for(let i=0;i<4;i++)pad(12800+i*120,420-i*65,150,20,{pcbManaged:true,pcbRole:'boss-component',slot:i});
  L.presses.push({x:1680,y:100,w:80,h:100,floorY:510,clock:0,phase:0});L.rain.push({x:1650,y:510,w:200,clock:0,phase:0});
  L.vendorSites=[{x:300,y:510},{x:12210,y:510}];

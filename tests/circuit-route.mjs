@@ -36,7 +36,16 @@ export function traverseCircuit({record=false,experiments=false,alternative=fals
  go(18300,-190);settle(18300);step({jump:true,right:true});if(!g.circuit.secondLaunched)throw Error('second coil');
  until(()=>g.player.onGround&&g.player.x>19090,()=>({right:g.player.x+14<19250,left:g.player.x+14>19280,jump:g.player.jumps===1&&g.player.vy>-70,pulse:g.cooldown<=0&&g.circuit.guards.some(e=>e.alive&&Math.hypot(g.player.x-e.x,g.player.y-e.y)<130)}));mark('yard');
  go(19500,-190);until(()=>g.circuit.parts[2].state==='seated',()=>({pulse:g.cooldown<=0&&g.circuit.parts[2].attack}));go(19450,-190);use();if(g.circuit.parts[2].state!=='locked')throw Error('yard R');
+ if(experiments){
+  const r2=g.circuit.parts[2];until(()=>r2.band===2,()=>({right:g.player.x+14<19448,left:g.player.x+14>19452,jump:g.player.onGround}));
+ }
  go(19600,-330);go(19840,-330);until(()=>g.circuit.parts[3].state==='seated',()=>({pulse:g.cooldown<=0&&g.circuit.parts[3].attack}));go(19750,-330);use();if(g.circuit.parts[3].state!=='locked')throw Error('yard C');
+ go(19860,-330);until(()=>g.circuit.chargeLevel>.93);use();if(g.circuit.yardLoad!=='magnet')throw Error('yard diverter');mark('discharge');
+ if(experiments){
+  go(20050,-470);settle(20050);
+  until(()=>g.circuit.chargeLevel<.24&&g.player.onGround&&Math.abs(g.player.y+40+330)<8);
+  go(19860,-330);use();until(()=>g.circuit.chargeLevel>.9);use();
+ }
  go(20050,-470);go(20225,-470);until(()=>g.circuit.parts[4].state==='seated',()=>({pulse:g.cooldown<=0&&g.circuit.parts[4].attack}));go(20170,-470);use();if(g.circuit.parts[4].state!=='locked')throw Error('yard SW');
  go(20400,-470);mark('exit');
  if(!g.circuit.complete)throw Error('not complete');go(20480,-470);use();wait(1.3);if(g.rooms.active!=='D')throw Error('exit gate');

@@ -1,4 +1,4 @@
-import {moveRelayYard,tickRelayYard,relayYard} from './circuit-challenge.mjs?v=4.11.0';
+import {moveRelayYard,tickRelayYard,relayYard} from './circuit-challenge.mjs?v=4.12.0';
 import {createCircuit,stepCircuit,circuitPower,RESISTORS,bridgeState,filterStatus,drivePower} from './circuit-model.mjs?v=4.11.0';
 import {clamp,overlap} from './world.mjs?v=4.11.0';
 import {toolHit} from './equipment.mjs?v=4.11.0';
@@ -6,7 +6,7 @@ import {grant} from './research.mjs?v=4.11.0';
 export const TOWER=Object.freeze({coilVelocity:980,coilSpeed:800,coilDuration:.68,liftSpeed:100,stun:2.2,respawnDelay:2});
 const active=g=>g.rooms?.active===g.level.circuit?.room;
 const close=(p,x,y,r=70)=>Math.hypot(p.x+14-x,p.y+20-y)<r;
-export function setupCircuitTower(g){if(!g.level.circuit)return;g.circuit={signal:createCircuit(),band:0,diodes:[false,true,true,false],forward:false,source:'ac',dash:0,trail:[],guards:[{x:16780,y:618},{x:17440,y:328},{x:17550,y:-42},{x:18180,y:-222},{x:19320,y:-222},{x:19880,y:-362}].map((e,i)=>({...e,baseX:e.x,w:30,h:32,clock:i*.7,alive:true,paid:false})),parts:g.level.circuit.parts.map(e=>({...e,homeX:e.x,homeY:e.y,state:'roam',clock:0,stun:0,dead:0,dir:1})),held:false,transistor:false,arm:0,liftY:620,liftDir:-1,complete:false,launched:false,launches:0,idle:0,hint:-1,hintTime:0,notice:'',noticeTime:0};}
+export function setupCircuitTower(g){if(!g.level.circuit)return;g.circuit={signal:createCircuit(),band:0,diodes:[false,true,true,false],forward:false,source:'ac',yardLoad:'lift',chargeLevel:0,contactLatched:false,dash:0,trail:[],guards:[{x:16780,y:618},{x:17440,y:328},{x:17550,y:-42},{x:18180,y:-222},{x:19320,y:-222},{x:19880,y:-362}].map((e,i)=>({...e,baseX:e.x,w:30,h:32,clock:i*.7,alive:true,paid:false})),parts:g.level.circuit.parts.map(e=>({...e,homeX:e.x,homeY:e.y,state:'roam',clock:0,stun:0,dead:0,dir:1})),held:false,transistor:false,arm:0,liftY:620,liftDir:-1,complete:false,launched:false,launches:0,idle:0,hint:-1,hintTime:0,notice:'',noticeTime:0};}
 export function towerControl(g){if(!active(g))return null;const s=g.circuit,p=g.player;
  const choices=s.parts.filter(e=>e.state==='seated'||e.state==='locked').map(e=>({id:'ct-pad-'+e.id,x:e.padX,y:e.padY-30,label:e.state==='locked'?'クランプを外す':'部品を固定'}));
  choices.push(...g.level.circuit.controls.filter(c=>c.id!=='ct-transistor'||!s.transistor).map(c=>({...c,label:c.id==='ct-transistor'&&s.held?'トランジスタを戻す':c.label})));
@@ -15,17 +15,24 @@ export function towerControl(g){if(!active(g))return null;const s=g.circuit,p=g.
 function note(s,text){s.notice=text;s.noticeTime=3;s.idle=0;}
 function resetPart(e){Object.assign(e,{x:e.homeX,y:e.homeY,state:'roam',clock:0,stun:1,dead:0});}
 export function towerAction(g,id){if(!id?.startsWith('ct-')||!active(g))return false;const s=g.circuit;
+ if(id==='ct-diverter'){s.yardLoad=s.yardLoad==='lift'?'magnet':'lift';note(s,s.yardLoad==='lift'?'搬送側：リフトと充電器へ給電':'磁石側：リフト停止・C2で上層レールを保持');}
  if(id==='ct-source'){s.source=s.source==='ac'?'dc':'ac';note(s,s.source==='ac'?'AC：両半周期':'DC：L＋ / R−');}
  // Resistance is changed by stomping the actual resistor, never by a remote selector.
  if(id.startsWith('ct-diode')){const i=id==='ct-diode'?0:Number(id.split('-').at(-1));if(i>=0&&i<4)s.diodes[i]=!s.diodes[i];note(s,'D'+(i+1)+' 反転');}
  if(id==='ct-reset'||id==='ct-yard-reset'){for(const e of s.parts)if(e.state!=='locked')resetPart(e);if(!s.transistor)s.held=false;note(s,'部品を再供給');}
- if(id.startsWith('ct-pad-')){const e=s.parts.find(e=>id==='ct-pad-'+e.id);if(e?.state==='seated'){e.state='locked';note(s,e.id==='r'?'R 接続 ✓ — C の接続待ち':e.id==='c'?'C 接続 ✓ — 波形測定開始':e.id==='r2'?'R → 搬送リフト起動':e.id==='c2'?'C → スイッチ用レール通電':'SW → シャッター解除');e.flash=1;g.events.push({type:'relay',x:e.x,y:e.y});}else if(e?.state==='locked'){e.state='roam';e.x=e.padX-110;e.stun=2;note(s,'CLAMP OPEN');}}
+ if(id.startsWith('ct-pad-')){const e=s.parts.find(e=>id==='ct-pad-'+e.id);if(e?.state==='seated'){
+  if(e.id==='sw'){
+   const yard=relayYard(s);
+   if(!yard.magnet||!yard.rail){note(s,'接点の電圧不足。分岐器でC2を再充電');return true;}
+   s.contactLatched=true;
+  }
+  e.state='locked';note(s,e.id==='r'?'R 接続 ✓ — C の接続待ち':e.id==='c'?'C 接続 ✓ — 波形測定開始':e.id==='r2'?'R → 搬送リフト起動':e.id==='c2'?'C2 接続：蓄電計を確認':'SW → シャッター解除');e.flash=1;g.events.push({type:'relay',x:e.x,y:e.y});}else if(e?.state==='locked'){if(e.id==='sw')s.contactLatched=false;e.state='roam';e.x=e.padX-110;e.stun=2;note(s,'CLAMP OPEN');}}
  if(id==='ct-transistor'&&!s.transistor){s.held=!s.held;note(s,s.held?'3端子部品を運搬中':'部品を戻した');}
  if(id==='ct-socket'){if(s.held){s.held=false;s.transistor=true;note(s,'BASE → DRIVE');g.events.push({type:'relay',x:g.player.x,y:g.player.y});}else note(s,s.transistor?'PULSE → BASE':'3端子部品の輪郭');}
  if(id==='ct-hint'){s.hint=(s.hint+1)%3;s.hintTime=9;}
  return true;
 }
-export function towerSolid(g,a){if(!a.pcbRole?.startsWith('circuit-'))return null;return a.pcbRole==='circuit-arm'?g.circuit.arm>=.99:a.pcbRole==='circuit-charge-bridge'?relayYard(g.circuit).store:a.pcbRole==='circuit-shutter'?!relayYard(g.circuit).ready:true;}
+export function towerSolid(g,a){if(!a.pcbRole?.startsWith('circuit-'))return null;return a.pcbRole==='circuit-arm'?g.circuit.arm>=.99:a.pcbRole==='circuit-charge-bridge'?(relayYard(g.circuit).rail||relayYard(g.circuit).ready):a.pcbRole==='circuit-shutter'?!relayYard(g.circuit).ready:true;}
 export function moveCircuitTower(g,dt){const s=g.circuit;if(!s)return;s.dash=Math.max(0,s.dash-dt);if(!active(g))return;const p=g.player;
  s.forward=drivePower(s.diodes,s.signal.time,s.source);s.trail.push({x:p.x+14,y:p.y+20});if(s.trail.length>12)s.trail.shift();
  for(const e of s.guards){if(e.alive){e.clock+=dt;e.x=e.baseX+Math.sin(e.clock*1.8)*42;e.warning=e.clock%2.5<.7;e.attack=e.clock%2.5>=.7&&e.clock%2.5<1.5;}}
@@ -39,7 +46,10 @@ export function moveCircuitTower(g,dt){const s=g.circuit;if(!s)return;s.dash=Mat
   if(e.y>720||e.x<e.min-100||e.x>e.max+100){resetPart(e);continue;}
   e.clock+=dt;e.stun=Math.max(0,e.stun-dt);const phase=e.clock%2.4;
   e.warning=!e.stun&&phase<.65;e.attack=!e.stun&&phase>=.65&&phase<1.5;
-  if(e.id==='sw'&&!relayYard(s).store){e.attack=false;e.warning=true;}
+  if(e.id==='sw'){
+   const yard=relayYard(s);e.attack=false;e.warning=yard.magnet&&!yard.rail;
+   if(yard.magnet&&yard.rail)e.x+=clamp(e.padX-e.w/2-e.x,-82*dt,82*dt);
+  }
   if(phase<.65)e.dir=Math.sign(p.x+14-e.x-e.w/2)||1;
   if(e.id==='c2'&&!relayYard(s).power)e.attack=false;
   if(e.attack&&Math.abs(p.y-e.homeY)<190){e.x=clamp(e.x+e.dir*dt*(e.kind==='resistor'?155:100),e.min,e.max);}
@@ -56,7 +66,7 @@ export function moveCircuitTower(g,dt){const s=g.circuit;if(!s)return;s.dash=Mat
 }
 export function tickCircuitTower(g,input,activated,dt,hit){if(!active(g))return;const s=g.circuit,p=g.player,X=g.level.circuit.origin;
  for(const e of s.parts){if(e.state==='dead')continue;
-  if(e.kind==='resistor'&&!e.stompLock&&p.vy>30&&p.oldBottom<=e.y+12&&overlap(p,e)){if(e.id==='r')s.band=(s.band+1)%3;e.stompLock=.4;e.flash=1;e.stun=TOWER.stun;e.attack=false;p.vy=-400;p.jumps=1;note(s,RESISTORS[e.band??s.band].label+' · '+(e.id==='r'?'帯を変更':'固定抵抗'));g.events.push({type:'resistance',band:s.band,x:e.x,y:e.y});continue;}
+  if(e.kind==='resistor'&&!e.stompLock&&p.vy>30&&p.oldBottom<=e.y+12&&overlap(p,e)){if(e.id==='r')s.band=(s.band+1)%3;else e.band=(e.band+1)%RESISTORS.length;e.stompLock=.4;e.flash=1;e.stun=TOWER.stun;e.attack=false;p.vy=-400;p.jumps=1;note(s,RESISTORS[e.band??s.band].label+' · '+(e.id==='r'?'帯を変更':'C2 充放電速度を変更'));g.events.push({type:'resistance',band:e.band??s.band,x:e.x,y:e.y});continue;}
   if(e.state!=='roam')continue;
   if(toolHit(g,e,'ct-'+e.id)){e.state='dead';e.dead=TOWER.respawnDelay;g.events.push({type:'stomp',x:e.x,y:e.y});continue;}
   if(activated&&close(p,e.x+e.w/2,e.y+e.h/2,185)){e.stun=TOWER.stun;e.attack=false;g.events.push({type:'relay',x:e.x,y:e.y});}
@@ -78,7 +88,7 @@ export function resetCircuitTower(g){const s=g.circuit;if(!s)return;s.held=false
 export function towerGoal(g){if(!active(g))return null;const s=g.circuit;
  if(s.noticeTime>0)return s.notice;
  if(s.hintTime>0)return ["波形と、足場の揺れを見比べよう","R/Cを輪郭へ誘導して固定。抵抗を踏み、電圧とノイズを観察","L/Rが交代してもPが＋、Nが−になる向きを探そう"][s.hint];
- if(!s.complete&&g.player.x>19000){const y=relayYard(s);return !y.power?'電源パッド R：搬送リフト停止':!y.store?'蓄電パッド C：上層レール停止':!y.switch?'信号パッド SW：シャッター停止':'回路成立：上層出口へ';}
+ if(!s.complete&&g.player.x>19000){const y=relayYard(s);return !y.feed?'R2：搬送リフト停止':!y.store?'C2：搬送台から蓄電パッドへ':y.ready?'接点固定：上層出口へ':y.power?'搬送側 · C2 充電 '+Math.round(s.chargeLevel*100)+'%':y.rail?'磁石側 · C2 残量 '+Math.round(s.chargeLevel*100)+'%':'C2 電圧低下 · 搬送側で再充電';}
  if(!s.complete&&g.player.x>17100)return !s.signal.stable?'FILTER LIFT：'+filterStatus(s.signal,s.parts).reason:!s.forward?'整流試験：両半周期の＋出力を成立させる':!s.transistor?'3端子部品をソケットへ':'整流 ✓：PULSEで駆動 → コイルでJUMP';
- return s.complete?'回路試験完了：上層の出口へ':'回路試験塔 · '+s.parts.filter(e=>e.state==='locked').length+'/2 接続 · '+(s.signal.stable?'SIGNAL ✓':'SIGNAL ~');
+ return s.complete?'回路試験完了：上層の出口へ':'回路試験塔 · '+s.parts.slice(0,2).filter(e=>e.state==='locked').length+'/2 接続 · '+(s.signal.stable?'SIGNAL ✓':'SIGNAL ~');
 }

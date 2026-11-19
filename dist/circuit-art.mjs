@@ -1,5 +1,5 @@
 import {RESISTORS,bridgeState,filterStatus} from './circuit-model.mjs?v=4.11.0';
-import {relayYard} from './circuit-challenge.mjs?v=4.11.0';
+import {relayYard,HOLD_THRESHOLD} from './circuit-challenge.mjs?v=4.12.0';
 import {doorReady} from './rooms.mjs?v=4.11.0';
 const rect=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
 const line=(c,points,color,width=3)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();};
@@ -83,11 +83,24 @@ export function drawCircuitTower(c,g,reduced=false){const s=g.circuit,X=g.level.
  label(c,'JUMP ↑',X+1650,210,'#c9b4ee',15);
  for(let i=0;i<8;i++){const y=90-i*35;line(c,[[X+1710+i*29,y+9],[X+1718+i*29,y],[X+1726+i*29,y+9]],s.launched?'#cc9cf1':'#55627d',2);}
  label(c,s.complete?'✓ CIRCUIT VERIFIED':'RELAY EXIT',X+4360,-530,s.complete?green:'#dce9cd',17);
- const yard=relayYard(s);
- for(const [a,b,on] of [[[19450,-190],[19550,-190],yard.power],[[19750,-330],[20000,-470],yard.store],[[20170,-470],[20290,-470],yard.switch]]){line(c,[a,[b[0],a[1]],b],on?green:dim,5);if(on){const u=(t*.7)%1;rect(c,a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u-4,9,9,green);}}
+ const yard=relayYard(s),r2=s.parts.find(e=>e.id==='r2');
+ for(const [a,b,on] of [[[19450,-190],[19550,-190],yard.power],[[19750,-330],[20000,-470],yard.rail],[[20170,-470],[20290,-470],yard.switch]]){line(c,[a,[b[0],a[1]],b],on?green:dim,5);if(on){const u=(t*.7)%1;rect(c,a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u-4,9,9,green);}}
  rect(c,19230,-430,290,130,'#0b2532');label(c,'RELAY YARD',19245,-405,'#e9d7a3',20);
- label(c,'R → 搬送 '+(yard.power?'✓':'×'),19245,-378,green,16);label(c,'C → 上層 '+(yard.store?'✓':'×'),19245,-353,green,16);label(c,'SW → 出口 '+(yard.switch?'✓':'×'),19245,-328,green,16);
- label(c,'C：搬送台に乗る部品',19520,-450,'#c4dbd6',15);label(c,'SW：Cの電源で歩く',19980,-570,'#c4dbd6',15);
+ label(c,'R → 搬送 '+(yard.power?'✓':'×'),19245,-378,green,16);label(c,'C2 → 上層 '+Math.round(s.chargeLevel*100)+'%',19245,-353,green,16);label(c,'SW → 出口 '+(yard.switch?'✓':'×'),19245,-328,green,16);
+ label(c,'C：搬送台に乗る部品',19520,-450,'#c4dbd6',15);label(c,'R2 '+RESISTORS[r2.band].label+'  '+['短','中','長'][r2.band]+'保持',r2.x-12,r2.y-23,'#f3dfab',16);
+ label(c,'R2 踏んで充放電速度を変更',19245,-300,'#d8c19d',14);
+ const lever=g.level.circuit.controls.find(o=>o.id==='ct-diverter');
+ const x=lever.x,y=lever.y;
+ rect(c,x-30,y-27,60,45,'#284756');line(c,[[x,y+6],[x+(s.yardLoad==='magnet'?19:-19),y-24]],'#edc87f',7);
+ label(c,s.yardLoad==='magnet'?'磁石側':'搬送側',x-23,y-40,'#f4d69f',16);
+ for(const meterX of [x,20170]){
+  rect(c,meterX-53,-555,110,18,'#243d49');rect(c,meterX-51,-553,106*s.chargeLevel,14,yard.rail?green:'#de9a77');
+  rect(c,meterX-51+106*HOLD_THRESHOLD,-558,2,23,'#f6e9bc');
+  label(c,'C2  '+Math.round(100*s.chargeLevel)+'%',meterX-48,-566,'#d7eddb',15);
+ }
+ line(c,[[x+19,y-20],[x+58,y-20],[x+58,-600],[20170,-600],[20170,-537]],yard.magnet?'#e3a5dc':dim,3);
+ line(c,[[20150,-526],[20150,-545],[20190,-545],[20190,-526]],yard.magnet?'#e3a5dc':'#78687c',8);
+ label(c,yard.ready?'接点固定':'磁気接点 SW',20115,-420,'#d9d0e1',15);
  for(let i=0;i<4;i++){c.strokeStyle=s.forward&&s.signal.stable?'#edabff':'#6d697b';c.lineWidth=5;c.beginPath();c.ellipse(18270+i*25,-192,10,27,0,0,7);c.stroke();}label(c,'JUMP → 860',18235,-245,'#e4b7ff',18);
  line(c,[[18370,-190],[18410,-230],[18450,-230]],'#d4a9ee',3);label(c,'奈落',18700,20,'#e4b89a',18);
  const shutter=g.level.platforms.find(a=>a.pcbRole==='circuit-shutter');if(!yard.ready){rect(c,shutter.x,shutter.y,shutter.w,shutter.h,'#744e64');for(let y=shutter.y;y<shutter.y+shutter.h;y+=22)line(c,[[shutter.x,y],[shutter.x+40,y+15]],'#dfa5a0',3);}else label(c,'OPEN ✓',20230,-520,green,20);
