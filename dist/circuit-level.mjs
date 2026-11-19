@@ -28,7 +28,7 @@ export function addCircuitTower(L){
  {id:'sw',kind:'switch',x:X+4000,y:-506,w:46,h:36,min:X+3970,max:X+4210,padX:X+4170,padY:-470}
  ],controls:[
 
- {id:'ct-diverter',x:X+3860,y:-360,label:'給電先を切り替える'},
+ {id:'ct-diverter',fee:60,purpose:'磁石給電',x:X+3860,y:-360,label:'給電先を切り替える'},
  {id:'ct-yard-reset',x:X+3210,y:-220,label:'未固定部品を再供給'},
  {id:'ct-reset',x:X+720,y:620,label:'未固定部品を再供給'},
  {id:'ct-transistor',x:X+1030,y:620,label:'トランジスタを拾う'},

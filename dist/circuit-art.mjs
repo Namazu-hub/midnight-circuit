@@ -1,6 +1,7 @@
+import {feeLabel} from './facility-fees.mjs?v=4.12.1';
 import {RESISTORS,bridgeState,filterStatus} from './circuit-model.mjs?v=4.11.0';
 import {relayYard,HOLD_THRESHOLD} from './circuit-challenge.mjs?v=4.12.0';
-import {doorReady} from './rooms.mjs?v=4.11.0';
+import {doorReady} from './rooms.mjs?v=4.12.1';
 const rect=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
 const line=(c,points,color,width=3)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();};
 function label(c,text,x,y,color='#d1e7dc',size=15){c.fillStyle=color;c.font=`bold ${size}px monospace`;c.fillText(text,x,y);}
@@ -91,6 +92,7 @@ export function drawCircuitTower(c,g,reduced=false){const s=g.circuit,X=g.level.
  label(c,'R2 踏んで充放電速度を変更',19245,-300,'#d8c19d',14);
  const lever=g.level.circuit.controls.find(o=>o.id==='ct-diverter');
  const x=lever.x,y=lever.y;
+ label(c,feeLabel(lever),x-45,y-64,'#f4d69f',15);
  rect(c,x-30,y-27,60,45,'#284756');line(c,[[x,y+6],[x+(s.yardLoad==='magnet'?19:-19),y-24]],'#edc87f',7);
  label(c,s.yardLoad==='magnet'?'磁石側':'搬送側',x-23,y-40,'#f4d69f',16);
  for(const meterX of [x,20170]){

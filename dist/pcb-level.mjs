@@ -1,4 +1,4 @@
-import {addCircuitTower} from './circuit-level.mjs?v=4.12.0';
+import {addCircuitTower} from './circuit-level.mjs?v=4.12.1';
 // Stage 06: production creates the terrain; no player fabrication menu.
 export const PCB_ROOMS=[['A','停止したライン'],['B','ペースト印刷'],['C','部品実装'],['D','部品供給・電磁石'],['E','リフロー炉'],['F','外観検査 AOI'],['G','出荷ヤード'],['H','夜明けの研究室']];
 export function redesignPCB(L){
@@ -37,6 +37,7 @@ export function redesignPCB(L){
  const gaps=[[1220,1450],[2160,2320],[7520,7730],[10500,10720],[13690,13850]];
  L.pitSpans=gaps;for(const [start,end] of gaps){const floor=L.platforms.find(a=>a.h===200&&a.x<=start&&a.x+a.w>=end);if(!floor)throw Error('missing floor for pit '+start);const right=floor.x+floor.w;floor.w=start-floor.x;pad(end,510,right-end,200);}
  for(const a of L.platforms)if(a.h===200&&a.x>=6000&&a.x<8000)a.pcbMainFloor=true;
+ Object.assign(L.doors.find(d=>d.id==='pcb-F'),{fee:100,purpose:'ボス用電磁石',label:'電磁石の電源を確保して出荷ヤードへ'});
  addCircuitTower(L);
  L.tip='ACTIONで装置操作。製造工程とゲートのチェックを見よう。';L.mechanic='巨大PCB · 実装 · リフロー · AOI · PLACE-MASTER';
 }

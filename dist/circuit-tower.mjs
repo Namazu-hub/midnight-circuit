@@ -1,3 +1,4 @@
+import {payFacility} from './facility-fees.mjs?v=4.12.1';
 import {moveRelayYard,tickRelayYard,relayYard} from './circuit-challenge.mjs?v=4.12.0';
 import {createCircuit,stepCircuit,circuitPower,RESISTORS,bridgeState,filterStatus,drivePower} from './circuit-model.mjs?v=4.11.0';
 import {clamp,overlap} from './world.mjs?v=4.11.0';
@@ -15,7 +16,14 @@ export function towerControl(g){if(!active(g))return null;const s=g.circuit,p=g.
 function note(s,text){s.notice=text;s.noticeTime=3;s.idle=0;}
 function resetPart(e){Object.assign(e,{x:e.homeX,y:e.homeY,state:'roam',clock:0,stun:1,dead:0});}
 export function towerAction(g,id){if(!id?.startsWith('ct-')||!active(g))return false;const s=g.circuit;
- if(id==='ct-diverter'){s.yardLoad=s.yardLoad==='lift'?'magnet':'lift';note(s,s.yardLoad==='lift'?'搬送側：リフトと充電器へ給電':'磁石側：リフト停止・C2で上層レールを保持');}
+ if(id==='ct-diverter'){
+  const terminal=g.level.circuit.controls.find(c=>c.id===id);
+  if(!terminal.feePaid){
+   const yard=relayYard(s);
+   if(!yard.feed||!yard.store){note(s,'先にR2とC2をパッドへ固定');return true;}
+   if(!payFacility(g,terminal))return true;
+  }
+  s.yardLoad=s.yardLoad==='lift'?'magnet':'lift';note(s,s.yardLoad==='lift'?'搬送側：リフトと充電器へ給電':'磁石側：リフト停止・C2で上層レールを保持');}
  if(id==='ct-source'){s.source=s.source==='ac'?'dc':'ac';note(s,s.source==='ac'?'AC：両半周期':'DC：L＋ / R−');}
  // Resistance is changed by stomping the actual resistor, never by a remote selector.
  if(id.startsWith('ct-diode')){const i=id==='ct-diode'?0:Number(id.split('-').at(-1));if(i>=0&&i<4)s.diodes[i]=!s.diodes[i];note(s,'D'+(i+1)+' 反転');}

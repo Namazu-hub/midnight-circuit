@@ -23,7 +23,7 @@ test('relay yard R powers a physical moving carrier; C is transported with it',(
 test('a charged C2 powers the rail while the diverter brakes the lift and magnetically moves SW',()=>{
  const g=fixture(),s=g.circuit,sw=s.parts.find(e=>e.id==='sw');
  const gate=g.level.platforms.find(a=>a.pcbRole==='circuit-shutter'),bridge=g.level.platforms.find(a=>a.pcbRole==='circuit-charge-bridge');
- lock(g,'r2');lock(g,'c2');
+ lock(g,'r2');lock(g,'c2');g.research.funds=60;
  for(let i=0;i<600;i++)moveCircuitTower(g,1/120);
  assert.equal(sw.x,sw.homeX);assert.ok(s.chargeLevel>.98);assert.ok(platformSolid(g,gate));
  towerAction(g,'ct-diverter');const y=s.carrierY;
@@ -41,7 +41,7 @@ test('R2 stomp changes its own discharge time without detuning the upstream filt
  const g=fixture(),s=g.circuit,r=lock(g,'r2');lock(g,'c2');const upstream=s.band;
  Object.assign(g.player,{x:r.x+8,y:r.y-39,oldBottom:r.y-2,vy:90});
  tickCircuitTower(g,{},false,.01,()=>{});assert.equal(r.band,2);assert.equal(s.band,upstream);
- s.chargeLevel=1;towerAction(g,'ct-diverter');for(let i=0;i<1080;i++)moveCircuitTower(g,1/120);
+ g.research.funds=60;s.chargeLevel=1;towerAction(g,'ct-diverter');for(let i=0;i<1080;i++)moveCircuitTower(g,1/120);
  assert.ok(relayYard(s).rail);
 });
 test('boss prints only on a targeted footprint, exposes a bonus hit for one cycle, and resets on retry',()=>{
@@ -60,3 +60,15 @@ test('boss reuses installed RC supply, requires reverse drive and a nearby fresh
 
 import {traverseCircuit} from './circuit-route.mjs';
 test('actual input can use the DC maintenance path with an incorrect unused AC diode and finish',()=>{const {g}=traverseCircuit({alternative:true});assert.equal(g.circuit.source,'dc');assert.equal(g.circuit.diodes[1],false);assert.ok(g.circuit.complete);assert.equal(g.rooms.active,'D');assert.equal(g.deaths,0);});
+test('tower power charges exactly once, only when wired and affordable, including after recovery',()=>{
+ const g=fixture(),s=g.circuit;g.research.funds=60;
+ towerAction(g,'ct-diverter');assert.equal(g.research.funds,60);assert.equal(s.yardLoad,'lift');
+ lock(g,'r2');lock(g,'c2');g.research.funds=59;towerAction(g,'ct-diverter');
+ assert.equal(s.yardLoad,'lift');assert.equal(g.research.funds,59);
+ const enemy=s.guards.find(e=>e.x>19000);Object.assign(g.player,{x:enemy.x-60,y:enemy.y});
+ tickCircuitTower(g,{},true,.01,()=>{});assert.equal(g.research.funds,74);
+ towerAction(g,'ct-diverter');assert.equal(s.yardLoad,'magnet');assert.equal(g.research.funds,14);
+ g.research.funds=50;
+ respawn(g,'retry');towerAction(g,'ct-diverter');towerAction(g,'ct-diverter');
+ assert.equal(s.yardLoad,'magnet');assert.equal(g.research.funds,0);
+});

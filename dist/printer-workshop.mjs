@@ -1,4 +1,4 @@
-import {configurePrinterGates} from './printer-progress.mjs?v=4.11.0';
+import {configurePrinterGates} from './printer-progress.mjs?v=4.12.1';
 import {extendNozzle} from './printer-nozzle.mjs?v=4.11.0';
 import {extendPeeling} from './printer-peeling.mjs?v=4.11.0';
 // Stage-local v4.8 layout; preserves the old room graph and repair identities.

@@ -3,6 +3,7 @@ const valueAt=(root,path)=>path.split('.').reduce((v,k)=>v?.[k],root);
 export function gateStatus(g,door){
  const checks=(door.requires||[]).map(id=>({id,hint:door.gateHints?.[id],label:door.gateLabels?.[id]||g.level.relays.find(r=>r.id===id)?.label||id,done:!!g.level.relays.find(r=>r.id===id)?.on}));
  for(const spec of door.checks||[]){const value=valueAt(g,spec.path);checks.push({...spec,done:spec.when&&!valueAt(g,spec.when)?true:spec.equals===undefined?!!value:value===spec.equals});}
+ if(door.fee)checks.push({id:'fee',label:door.purpose+' ¥'+door.fee,done:!!door.feePaid||g.research.funds>=door.fee,hint:'あと¥'+Math.max(0,door.fee-g.research.funds)+'。検査室の部品敵を倒して調達'});
  if(door.requiresChase)checks.push({id:'chase',label:'巨大スプールを充填',done:!!g.printer?.chase.done});
  if(door.requiresBoss)checks.push({id:'boss',label:'コアを停止',done:!!g.printer?.boss.done});
  return {ready:checks.every(c=>c.done),checks,next:checks.find(c=>!c.done)};
