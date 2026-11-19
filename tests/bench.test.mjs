@@ -6,7 +6,7 @@ test('both service basements have an input-driven return to the surface without 
  for(const [i,x,y] of [[0,3340,1340],[1,6050,1060]]){const g=createGame(0);Object.assign(g.player,{x,y,vx:0,vy:0});for(let n=0;n<30;n++)step(g);for(const [x,y] of g.level.benchReturns[i])go(g,x+65,y);go(g,i===0?4800:7250,510);assert.equal(g.deaths,0);assert.ok(g.player.y<530);assert.equal(g.player.boost,0);}
 });
 test('shaft descent is safe and vertical camera follows while ordinary gaps retain fall damage',()=>{
- const g=createGame(0);Object.assign(g.player,{x:3340,y:600});for(let n=0;n<150;n++)step(g);assert.equal(g.deaths,0);assert.ok(g.cameraY>100);const pit=createGame(0);Object.assign(pit.player,{x:2200,y:820});step(pit);assert.equal(pit.deaths,1);assert.equal(pit.player.hp,5);
+ const g=createGame(0);Object.assign(g.player,{x:3340,y:600});for(let n=0;n<150;n++)step(g);assert.equal(g.deaths,0);assert.ok(g.cameraY>100);const pit=createGame(0);pit.research.funds=500;Object.assign(pit.player,{x:2200,y:820});step(pit);assert.equal(pit.deaths,1);assert.equal(pit.player.hp,6);
 });
 test('map changes are confined to the workbench and preserve three collectibles and required repair IDs',()=>{const g=createGame(0);assert.equal(g.level.gears.length,3);assert.equal(g.level.relays.length,1);assert.equal(g.level.relays[0].id,'bench-wire');assert.equal(g.level.benchRooms.length,2);assert.ok(new Set(g.level.platforms.filter(p=>p.type==='ground').map(p=>p.y)).size>=3);for(let i=1;i<8;i++)assert.equal(createGame(i).level.benchMap,undefined);});
 
@@ -35,7 +35,7 @@ test('supply box pays once, retains a can when full, and remains collected throu
  Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});updateGame(g,{});assert.equal(g.events.some(e=>e.type==='gear'),false);g.events=[];
  assert.equal(b.opened,true);assert.equal(b.drinkTaken,false);assert.equal(g.research.funds,50);
  step(g);assert.equal(g.research.funds,50);step(g,{drink:true});assert.equal(b.drinkTaken,true);assert.equal(g.equipment.drinks,3);
- respawn(g,'fall');Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});step(g);assert.equal(g.research.funds,40);assert.equal(g.equipment.drinks,3);
+ g.research.funds+=500;respawn(g,'fall');Object.assign(g.player,{x:b.x-14,y:b.y-40,vx:0,vy:0});step(g);assert.equal(g.research.funds,40);assert.equal(g.equipment.drinks,3);
 });
 test('continuous workbench undersides, merged shelves, and furniture clear of risers',()=>{
  const L=createGame(0).level,decks=L.platforms.filter(p=>p.benchDeck),trays=L.platforms.filter(p=>p.type==='platform'&&p.h===20);
@@ -68,7 +68,7 @@ test('expired trays retain a standing rider, then retract, and can be retriggere
  const g=fixture(1930,510),m=g.level.benchMachines.find(m=>m.id==='bridge');frames(g,5);go(g,2050,390);
  frames(g,1400);assert.equal(m.timer,0);assert.equal(m.extended,true);assert.ok(g.player.onGround);
  go(g,1930,510);frames(g,5);assert.ok(m.timer>8);
- respawn(g,'fall');assert.equal(m.extended,false);assert.equal(g.player.hp,5);assert.equal(m.timer,0);
+ g.research.funds+=500;respawn(g,'fall');assert.equal(m.extended,false);assert.equal(g.player.hp,6);assert.equal(m.timer,0);
  // Returning to the same apparatus after a checkpoint reset has no consumed resource.
  Object.assign(g.player,{x:1916,y:470,vx:0,vy:0});frames(g,5);assert.ok(m.timer>9);
 });
@@ -90,7 +90,7 @@ test('new controls work with the ordinary enemy population, with clear initial c
  }
 });
 test('carrier fall is lethal, resets all cars, and recovery plus boarding both cost funds',()=>{
- const g=fixture(7560,510);g.research.funds=100;frames(g,400);assert.equal(g.research.funds,90);
+ const g=fixture(7560,510);g.research.funds=550;frames(g,400);assert.equal(g.research.funds,540);
  Object.assign(g.player,{x:8000,y:710,vy:0});step(g);assert.equal(g.player.hp,6);assert.equal(g.deaths,1);assert.equal(g.research.funds,40);
  for(const m of g.level.benchMachines.filter(m=>m.kind==='shuttle')){const a=g.level.platforms.find(a=>a.benchMachine===m.id);assert.equal(a.x,m.x);assert.equal(a.y,m.y);assert.equal(m.phase,'idle');}
  Object.assign(g.player,{x:7545,y:470});frames(g,20);assert.equal(g.research.funds,30);
@@ -109,7 +109,7 @@ test('cabinet requires the paid lift, and a fall cannot charge its fare twice',(
  step(g);assert.equal(m.on,false);assert.equal(m.paid,false);
  g.research.funds=10;step(g,{jump:true});frames(g,100);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);
  assert.equal(m.on,true);assert.equal(m.paid,true);assert.equal(g.research.funds,0);
- respawn(g,'fall');assert.equal(m.paid,true);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);assert.equal(m.on,true);assert.equal(g.research.funds,0);
+ g.research.funds+=500;respawn(g,'fall');assert.equal(m.paid,true);Object.assign(g.player,{x:885,y:470,vx:0,vy:0,onGround:true,standing:null});step(g);assert.equal(m.on,true);assert.equal(g.research.funds,0);
 });
 test('Stage 1 drink consumes funds only on pickup and leaves a can if unaffordable',()=>{
  const g=createGame(0);g.level.enemies=[];g.level.drinks=[{x:104,y:490}];

@@ -110,13 +110,13 @@ test('a missed transfer swings back, a cleared wire works both ways, and jumping
  assert.equal(g.rooms.swing.b,run.points[0]);ride(false,.2,true);assert.equal(g.rooms.swing,null);assert.ok(g.player.vy<0);
 });
 
-test('full-health pit falls spend exactly 50 or end the run in stage two',()=>{
- for(const funds of [49,50]){
+test('full-health pit falls spend exactly 500 or end the run in stage two',()=>{
+ for(const funds of [499,500]){
   const g=createGame(1);g.rooms.active='pinch';g.research.funds=funds;
   g.player.x=16920;g.player.y=-655;
   updateGame(g,{},1/120);
-  assert.equal(g.gameOver,funds<50);assert.equal(g.research.funds,funds<50?49:0);
-  assert.equal(g.player.hp,funds<50?0:6);assert.equal(g.deaths,funds<50?0:1);
+  assert.equal(g.gameOver,funds<500);assert.equal(g.research.funds,funds<500?499:0);
+  assert.equal(g.player.hp,funds<500?0:6);assert.equal(g.deaths,funds<500?0:1);
   assert.equal(g.events.filter(e=>e.type==='fall').length,1);
  }
 });

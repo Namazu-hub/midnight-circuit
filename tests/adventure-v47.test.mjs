@@ -11,11 +11,11 @@ import {beginDefense,tickDefense,coreReady} from '../dist/printer-defense.mjs';
 import {dragonBoxes} from '../dist/dragon.mjs';
 import {tickPrinter} from '../dist/printer.mjs';
 import {beginDoor,doorReady,tickDoor} from '../dist/rooms.mjs';
-test('explicit printer abyss costs one HP while a lower recovery deck is safe',()=>{
+test('explicit printer abyss costs 500 while a lower recovery deck is safe',()=>{
  const g=createGame(3);g.rooms.active='B';Object.assign(g.player,{x:2200,y:640,vy:0});g.spawnGrace=0;
  for(let i=0;i<120;i++)updateGame(g,{});assert.equal(g.player.hp,6);assert.equal(g.player.y+40,680);
- Object.assign(g.player,{x:2200,y:760,vy:100});updateGame(g,{});assert.equal(g.player.hp,5);assert.equal(g.deaths,1);assert.ok(g.player.invul>1.9);
- g.research.funds=50;g.player.hp=1;g.rooms.active='B';Object.assign(g.player,{x:2200,y:760});updateGame(g,{});assert.equal(g.research.recoveries,1);assert.equal(g.player.hp,6);
+ g.research.funds=500;Object.assign(g.player,{x:2200,y:760,vy:100});updateGame(g,{});assert.equal(g.player.hp,6);assert.equal(g.deaths,1);assert.ok(g.player.invul>1.9);
+ g.research.funds=500;g.player.hp=1;g.rooms.active='B';Object.assign(g.player,{x:2200,y:760});updateGame(g,{});assert.equal(g.research.recoveries,2);assert.equal(g.player.hp,6);
 });
 test('keyboard retains C and adds F, with disjoint V and B item edges',()=>{
  assert.deepEqual(actionKeys,['KeyC','KeyF']);assert.equal(equipmentKeys.KeyV,'weapon');assert.equal(equipmentKeys.KeyB,'drink');
@@ -24,7 +24,7 @@ test('stored drinks cap at three, heal once and only explicit drinking can overl
  const g=createGame(0);g.player.hp=4;for(let i=0;i<3;i++)assert.ok(collectDrink(g,{}));assert.equal(collectDrink(g,{}),false);assert.equal(g.player.boost,0);
  updateGame(g,{drink:true});assert.equal(g.player.hp,5);assert.equal(g.player.boost,9);assert.equal(g.equipment.drinks,2);
  drink(g);assert.equal(g.player.hp,5);drink(g);assert.equal(g.player.hp,4);assert.equal(g.equipment.consumed,3);assert.equal(drink(g),false);
- const uses=g.equipment.consumed;respawn(g,'fall');assert.equal(g.equipment.consumed,uses);assert.equal(g.player.boost,0);
+ const uses=g.equipment.consumed;g.research.funds+=500;respawn(g,'fall');assert.equal(g.equipment.consumed,uses);assert.equal(g.player.boost,0);
  assert.equal(EQUIPMENT.speed,1.55);
 });
 test('overload at HP1 pays the recovery fee and the boost still expires',()=>{
@@ -43,7 +43,7 @@ test('paid fabrication charges only on start; emergency material is not spendabl
  journeyAction(g,'site-transfer');assert.equal(g.research.funds,30);journeyAction(g,'site-transfer');assert.equal(g.research.funds,30);tickJourney(g,3);assert.equal(g.research.funds,30);
  g.research.funds=0;journeyAction(g,'site-shelf');assert.equal(g.printer.journey.sites.shelf.active,false);
  journeyAction(g,'site-maze-stairs');assert.ok(g.printer.journey.sites['maze-stairs'].active);assert.equal(g.research.funds,0);assert.equal(g.printer.journey.sites['maze-stairs'].assistance,15);
- const a=g.level.platforms.find(a=>a.printSite==='maze-stairs');assert.equal(platformSolid(g,a),false);tickJourney(g,3);assert.equal(platformSolid(g,a),true);respawn(g,'fall');assert.equal(platformSolid(g,a),true);assert.equal(g.research.funds,0);
+ const a=g.level.platforms.find(a=>a.printSite==='maze-stairs');assert.equal(platformSolid(g,a),false);tickJourney(g,3);assert.equal(platformSolid(g,a),true);g.research.funds+=500;respawn(g,'fall');assert.equal(platformSolid(g,a),true);assert.equal(g.research.funds,0);
 });
 test('maze has three required print spans and does not remove the old room graph',()=>{
  const g=createGame(3),gate=g.level.platforms.find(a=>a.mazeLock);assert.ok(platformSolid(g,gate));

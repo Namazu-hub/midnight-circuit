@@ -1,8 +1,8 @@
-import {tickWireRun} from './bio-wire.mjs?v=4.15.0';
-import {tickSkeleton} from './wire-skeleton.mjs?v=4.15.0';
-import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.15.0';
+import {tickWireRun} from './bio-wire.mjs?v=4.15.1';
+import {tickSkeleton} from './wire-skeleton.mjs?v=4.15.1';
+import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.15.1';
 import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.11.0';
-import {payRecovery} from './recovery.mjs?v=4.11.0';
+import {payRecovery} from './recovery.mjs?v=4.15.1';
 import {setupEnemyRespawns,recycleEnemies} from './enemy-respawn.mjs?v=4.11.0';
 import {tickBenchRoom} from './bench-room.mjs?v=4.13.0';
 import {tickBenchWiring} from './bench-wiring.mjs?v=4.11.0';
@@ -21,9 +21,9 @@ import {setupRepairStations} from './repair-stations.mjs?v=4.13.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.13.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.13.0';
 import {tickLab} from './laboratory.mjs?v=4.13.0';
-import {LEVELS} from './levels.mjs?v=4.15.0';
+import {LEVELS} from './levels.mjs?v=4.15.1';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
-import {tickEnemies} from './enemies.mjs?v=4.15.0';
+import {tickEnemies} from './enemies.mjs?v=4.15.1';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
@@ -41,8 +41,8 @@ export function emit(g,type,data={}){g.events.push({type,...data});}
 export function respawn(g,cause='retry'){
  if(g.gameOver||g.fever)return;
  const p=g.player;
- if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=g.level.biomimetic?0:Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp=p.hurtTo;emit(g,'fall');}
- if(cause==='retry'||p.hp<=0){if(!payRecovery(g))return;p.hp=6;p.displayHP=6;p.hurtTimer=0;}
+ if(cause==='fall'||cause==='caught'){p.hurtFrom=p.hp;p.hurtTo=cause==='fall'?0:Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp=p.hurtTo;emit(g,cause);}
+ if(cause==='retry'||p.hp<=0){if(!payRecovery(g,cause))return;p.hp=6;p.displayHP=6;p.hurtTimer=0;}
  resetBenchMachines(g);resetCircuitTower(g);resetHandRide(g);
  resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;
  if(g.equipment){g.equipment.strike=null;g.equipment.shots=[];g.equipment.cooldown=0;}
@@ -155,13 +155,14 @@ function simulateGame(g,input={},dt=1/120){
  for(const l of g.level.lasers)if(laserActive(g,l)&&overlap(p,l))damage(g,l.x);
  for(const h of g.level.presses){const hit=pressState(g,h);if(hit.active&&overlap(p,hit))damage(g,h.x+h.w/2);}
  if(g.gameOver)return;
- const gap=g.level.carrierGap;if(gap&&p.x+p.w>gap.x&&p.x<gap.end&&p.y+p.h>gap.y){p.hp=0;respawn(g,'damage');return;}
+ const gap=g.level.carrierGap;if(gap&&p.x+p.w>gap.x&&p.x<gap.end&&p.y+p.h>gap.y){respawn(g,'fall');return;}
  tickBenchWiring(g,dt);tickBenchRoom(g);
  interactions(g,activated);
  tickActionRepairs(g,input,activated,dt);
  tickResearch(g);tickPrinterChat(g,dt);
  recycleEnemies(g,VIEW);
- if(g.printer?.forceFall||p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){if(g.printer)g.printer.forceFall=false;respawn(g,'fall');return;}
+ if(p.y>g.level.killY||g.level.fallZones?.some(z=>(!z.room||z.room===g.rooms?.active)&&overlap(p,z))){respawn(g,'fall');return;}
+ if(g.printer?.forceFall){g.printer.forceFall=false;respawn(g,'caught');return;}
  const room=currentRoom(g),left=room?.left||0,right=room?.right||g.level.width;const chase=g.printer?.chase;const cameraTarget=chase?.active&&VIEW.w>=900?Math.max(p.x+120-VIEW.w,Math.min(p.x-VIEW.w*.55,chase.x-165)):p.x-VIEW.w*(g.cart?.35:.32)+(g.circuit?.dash>0?180:g.feel?.lead||0);const tx=clamp(cameraTarget,left,Math.max(left,right-VIEW.w));const delta=p.y-310-g.cameraY;const ty=clamp(Math.abs(delta)>FEEL.deadZone?p.y-310-Math.sign(delta)*FEEL.deadZone:g.cameraY,room?.minY??g.level.minY,p.y>530?(room?.maxY??g.level.maxY??0):0);
  if(g.printer?.boss.active&&!g.printer.boss.done){g.camera=5400;g.cameraY=0;return;}
  const pcbFocus=pcbCameraTarget(g,VIEW.w);if(pcbFocus!==null){g.camera+=(pcbFocus-g.camera)*Math.min(1,dt*6);g.cameraY+=(0-g.cameraY)*Math.min(1,dt*4);return;}

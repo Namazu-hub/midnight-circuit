@@ -1,14 +1,14 @@
-import {installBioEnemies,drawBioSpecimen} from './bio-enemies.mjs?v=4.15.0';
-import {installWireRuns,drawWireRun} from './bio-wire.mjs?v=4.15.0';
+import {installBioEnemies,drawBioSpecimen} from './bio-enemies.mjs?v=4.15.1';
+import {installWireRuns,drawWireRun} from './bio-wire.mjs?v=4.15.1';
 import {doorReady} from './rooms.mjs?v=4.14.0';
-import {installSkeleton,drawSkeleton} from './wire-skeleton.mjs?v=4.15.0';
-import {installWorkshop,drawWorkshop} from './bio-workshop.mjs?v=4.15.0';
-import {installHandRigs,drawHandRigs} from './hand-machines.mjs?v=4.15.0';
+import {installSkeleton,drawSkeleton} from './wire-skeleton.mjs?v=4.15.1';
+import {installWorkshop,drawWorkshop} from './bio-workshop.mjs?v=4.15.1';
+import {installHandRigs,drawHandRigs} from './hand-machines.mjs?v=4.15.1';
 // Original Stage 2 geometry: topology inspired by the supplied branching map,
 // with no source artwork included in the game.
 export function redesignBiomimetic(L){
  const dialogue=L.students.flatMap(s=>s.lines);
- Object.assign(L,{name:'人体模倣研究室',en:'BIOMIMETIC HAND LAB',location:'02 / BIOMIMETIC HAND LAB',tagline:'腱と関節をつなぎ、もう一度つかむ。',theme:'biomimetic',biomimetic:true,width:18000,minY:-1580,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'緑の二重丸で X／PULSE。谷底への落下は即死、復帰は科研費 ¥50。扉は C／ACTION。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
+ Object.assign(L,{name:'人体模倣研究室',en:'BIOMIMETIC HAND LAB',location:'02 / BIOMIMETIC HAND LAB',tagline:'腱と関節をつなぎ、もう一度つかむ。',theme:'biomimetic',biomimetic:true,width:18000,minY:-1580,maxY:800,killY:1100,spawn:{x:90,y:470},mechanic:'腱ワイヤー・関節機構・把持',tip:'緑の二重丸で X／PULSE。谷底への落下は即死、復帰は科研費 ¥500。扉は C／ACTION。',platforms:[],enemies:[],chips:[],drinks:[],gears:[],winds:[],lasers:[],presses:[],gravityZones:[],portals:[],rain:[],sticky:[],signs:[],route:[],checkpoints:[],relays:[],sections:[]});
  const pad=(x,y,w=200,extra={})=>L.platforms.push({x,y,w,h:20,type:'platform',...extra});
  const floor=(x,y,w)=>L.platforms.push({x,y,w,h:y<0?20:100,type:y<0?'platform':'ground'});
  const route=(x,y)=>L.route.push({x,y,service:y!==510&&y!==-600});

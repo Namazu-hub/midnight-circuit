@@ -44,7 +44,7 @@ test('repair pauses physics, failed commit stays open, cancelled draft survives 
 });
 test('complete repair rewards and grades persist through death and cannot pay twice',()=>{
  const g=legacyRepairGame(),r=g.level.relays.find(r=>r.puzzleType);approach(g,r);beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);assert.equal(g.research.fullRepairs,1);
- beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);respawn(g,'fall');tickResearch(g);assert.equal(r.repairRank,2);assert.equal(g.research.funds,70);
+ beginRepair(g,r);solveSession(g);tickResearch(g);assert.equal(g.research.funds,70);g.research.funds+=500;respawn(g,'fall');tickResearch(g);assert.equal(r.repairRank,2);assert.equal(g.research.funds,70);
 });
 test('hand repair builds a bridge; lift calibration is idempotent; press and turret controls work',()=>{
  for(const [index,type] of [[4,'sensor'],[5,'joints'],[7,'logic']]){

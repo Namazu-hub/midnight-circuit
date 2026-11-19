@@ -1,8 +1,8 @@
 import {roomControl} from './rooms.mjs?v=4.14.0';
 import {gateStatus} from './gate-status.mjs?v=4.12.1';
-import {currentRun,wireHint} from './bio-wire.mjs?v=4.15.0';
-import {skeletonHint} from './wire-skeleton.mjs?v=4.15.0';
-import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.15.0';
+import {currentRun,wireHint} from './bio-wire.mjs?v=4.15.1';
+import {skeletonHint} from './wire-skeleton.mjs?v=4.15.1';
+import {nearbyWorkshop,operateWorkshop} from './bio-workshop.mjs?v=4.15.1';
 // Both rigs belong to a single attempt. A recovery keeps the paid rig available.
 export function installHandRigs(level){
  level.handRigs=[

@@ -1,6 +1,6 @@
-import {drawBone} from './bio-enemies.mjs?v=4.15.0';
-import {pendingHandTask} from './hand-machines.mjs?v=4.15.0';
-import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.15.0';
+import {drawBone} from './bio-enemies.mjs?v=4.15.1';
+import {pendingHandTask} from './hand-machines.mjs?v=4.15.1';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.15.1';
 import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
@@ -13,7 +13,7 @@ import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWor
 import {drawResearch} from './research.mjs?v=4.13.0';
 import {drawPrinter} from './printer-art.mjs?v=4.14.0';
 import {drawLab} from './laboratory.mjs?v=4.13.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.15.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.15.1';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},

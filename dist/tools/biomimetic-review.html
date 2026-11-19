@@ -1,6 +1,6 @@
 <!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stage 2 biomimetic review — MIDNIGHT CIRCUIT</title><style>body{margin:0;background:#0b1724;color:#cbdedb;font:15px system-ui}main{margin:auto;max-width:1200px;padding:12px}button{min-height:44px;padding:8px 18px;background:#28434e;color:#d8ede4;border:1px solid #67888b;border-radius:4px;margin:4px}button:focus{outline:2px solid #bcebd8}canvas{display:block;width:100%;height:auto;border:1px solid #35515c}p{margin:8px}</style><main><p>描画確認用fixture：科研費150円・各地点から開始。関節橋・把持試験は校正済み。通常プレイ・入力による完走ではありません。</p><nav><button id="start">開始地点</button><button id="steps">乗り継ぎ</button><button id="archive">拮抗ワイヤー室</button><button id="workshop">掌機構室</button><button id="open">精密ピンチ室</button><button id="lift">上のワイヤー</button><button id="bridge">関節橋</button><button id="shuttle">把持試験</button><button id="drum">関節校正</button><button id="thrower">投骨</button><button id="last">最後の吊り線</button><button id="boss">骨格試験機</button><button id="wiring">出口</button><button id="run">操作開始 / 停止</button><button id="narrow">狭い画面</button></nav><canvas id="view" width="1200" height="600"></canvas><p id="caption"></p></main><script type="module">
-import {createGame,updateGame,VIEW} from '../engine.mjs?v=4.15.0';
-import {drawWorld} from '../render.mjs?v=4.15.0';
+import {createGame,updateGame,VIEW} from '../engine.mjs?v=4.15.1';
+import {drawWorld} from '../render.mjs?v=4.15.1';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas=document.querySelector('canvas'),c=canvas.getContext('2d');let scene='start',small=false,game,running=false,previous=0;const keys=new Set();let jump=false,pulse=false,interact=false;

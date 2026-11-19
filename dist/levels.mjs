@@ -1,4 +1,4 @@
-import {redesignBiomimetic} from './biomimetic.mjs?v=4.15.0';
+import {redesignBiomimetic} from './biomimetic.mjs?v=4.15.1';
 import {redesignBench} from './bench-level.mjs?v=4.11.0';
 import {redesignPCB} from './pcb-level.mjs?v=4.12.1';
 import {redesignPrinter} from './printer-level.mjs?v=4.13.0';

@@ -1,4 +1,4 @@
-import {pulseRing} from './bio-wire.mjs?v=4.15.0';
+import {pulseRing} from './bio-wire.mjs?v=4.15.1';
 const CX=10600;
 const pins=[
  {x:10342,y:357,name:'左肩'},

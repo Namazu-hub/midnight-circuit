@@ -1,4 +1,4 @@
-import {stepBioEnemy} from './bio-enemies.mjs?v=4.15.0';
+import {stepBioEnemy} from './bio-enemies.mjs?v=4.15.1';
 import {clamp,overlap} from './world.mjs?v=4.11.0';
 export const ENEMY_GUIDE=[
  ['spring','横伸びバネ','縮んで予告した後、左右に伸びる。上から踏むかパルス。'],

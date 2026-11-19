@@ -9,19 +9,22 @@ import {killPrinterFoe} from '../dist/printer-enemies.mjs';
 import {tickPCBFoes} from '../dist/pcb-enemies.mjs';
 const step=(g,i={})=>{updateGame(g,i);g.events=[];};
 
-test('all eight stages recover for exactly 50, including at a zero remaining balance',()=>{
+test('all eight stages charge according to the cause of death, including at a zero remaining balance',()=>{
  assert.equal(RECOVERY_COST,50);
  for(let i=0;i<8;i++)for(const cause of ['damage','retry','fall']){
-  const g=createGame(i);g.research.funds=50;g.player.hp=cause==='damage'?0:1;
+  const g=createGame(i);g.research.funds=cause==='fall'?500:50;g.player.hp=cause==='damage'?0:6;
   respawn(g,cause);assert.equal(g.gameOver,false);assert.equal(g.research.funds,0);assert.equal(g.player.hp,6);
   assert.equal(g.research.recoveries,1);assert.equal(g.lives,undefined);
   respawn(g,'retry');assert.equal(g.gameOver,true);assert.equal(g.research.funds,0);
   const count=g.events.filter(e=>e.type==='gameOver').length;respawn(g,'retry');assert.equal(g.events.filter(e=>e.type==='gameOver').length,count);
  }
 });
-test('49 cannot buy recovery, but a nonfatal fall is still only one HP',()=>{
- const g=createGame();g.research.funds=49;respawn(g,'fall');assert.equal(g.player.hp,5);assert.equal(g.research.funds,49);assert.equal(g.gameOver,false);
- respawn(g,'retry');assert.equal(g.gameOver,true);assert.equal(g.research.funds,49);assert.equal(g.research.recoveries,undefined);
+test('499 cannot buy fall recovery on any stage',()=>{
+ for(let i=0;i<8;i++){
+  const g=createGame(i);g.research.funds=499;respawn(g,'fall');
+  assert.equal(g.player.hp,0);assert.equal(g.gameOver,true);assert.equal(g.research.funds,499);
+  assert.equal(g.events.find(e=>e.type==='gameOver').required,500);
+ }
 });
 test('funds replace remaining lives without minting money or dropping old records and fever',()=>{
  const old={runLives:2,funds:125,completed:[true],gears:[3],best:[42],sound:true,lap:{number:3,seen:[true],won:true},pending:{index:0,phase:'intro',result:{gears:3,chips:4,elapsed:42}}};
