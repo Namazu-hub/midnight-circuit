@@ -1,3 +1,4 @@
+import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.11.1';
 import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.11.0';
 import {payRecovery} from './recovery.mjs?v=4.11.0';
 import {setupEnemyRespawns,recycleEnemies} from './enemy-respawn.mjs?v=4.11.0';
@@ -18,7 +19,7 @@ import {setupRepairStations} from './repair-stations.mjs?v=4.11.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.11.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.11.0';
 import {tickLab} from './laboratory.mjs?v=4.11.0';
-import {LEVELS} from './levels.mjs?v=4.11.0';
+import {LEVELS} from './levels.mjs?v=4.11.1';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
 import {tickEnemies} from './enemies.mjs?v=4.11.0';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
@@ -40,7 +41,7 @@ export function respawn(g,cause='retry'){
  const p=g.player;
  if(cause==='fall'){p.hurtFrom=p.hp;p.hurtTo=Math.max(0,p.hp-1);p.hurtTimer=2.2;p.displayHP=p.hp;p.hp--;emit(g,'fall');}
  if(cause==='retry'||p.hp<=0){if(!payRecovery(g))return;p.hp=6;p.displayHP=6;p.hurtTimer=0;}
- resetBenchMachines(g);resetCircuitTower(g);
+ resetBenchMachines(g);resetCircuitTower(g);resetHandRide(g);
  resetTethers(g);if(g.pcb&&!g.pcb.power)g.pcb.battery.x=430;if(g.pcb?.boss.active&&!g.pcb.boss.done){g.pcb.boss={active:false,done:false,age:0,clock:0,phase:1,hp:6,headX:13000,target:13000,feed:0,parts:0,belt:1,magnet:false,fixed:false,temp:230,cool:false,ng:false};}resetPrinter(g);returnCarriedPart(g);g.repairSession=null;
  if(g.equipment){g.equipment.strike=null;g.equipment.shots=[];g.equipment.cooldown=0;}
  const hp=p.hp,displayHP=p.displayHP,hurtTimer=p.hurtTimer;
@@ -66,6 +67,7 @@ export function platformSolid(g,a){
  if(g.pcb){const solid=pcbSolid(g,a);if(solid!==null)return solid;}
  if(g.printer){const solid=printerSolid(g,a);if(solid!==null)return solid;}
  if(a.actionDevice)return actionPlatformSolid(g,a);
+ if(a.bioFinger)return g.level.handRigs[0].extension===1;
  if(a.requiresRepair){const r=g.level.relays.find(r=>r.id===a.group);return !!r?.on&&(!a.requiresRank||(r.repairRank||0)>=a.requiresRank);}
  if(a.type==='ghost')return g.pulse>0||!!(a.group&&g.level.relays.find(r=>r.id===a.group)?.on);
  if(a.type==='printed'&&g.level.relays.some(r=>r.mode==='timing'&&r.on))return true;
@@ -82,7 +84,7 @@ export function pressState(g,h){
 function updateMachinery(g,dt){
  const p=g.player,frozen=g.pulse>0;
  for(const a of g.level.platforms){
-  if(a.benchMachine||a.pcbManaged||a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
+  if(a.gripSpecimen||a.benchMachine||a.pcbManaged||a.printerEnemy||a.cargo||a.cargoSecond)continue;const oldX=a.x,oldY=a.y;const powered=!a.power||g.level.relays.find(r=>r.id===a.power)?.on;if(!frozen&&powered)a.clock+=dt;
   if((a.type==='moving'||a.type==='wave')&&!frozen&&powered){const v=Math.sin(a.clock/a.period*Math.PI*2+(a.phase||0))*a.range;a.x=a.baseX+(a.axis==='x'?v:0);a.y=a.baseY+(a.axis==='y'?v:0);}
   if(a.type==='orbit'&&!frozen&&powered){a.x=a.baseX+Math.cos(a.clock/a.period*Math.PI*2)*a.range;a.y=a.baseY+Math.sin(a.clock/a.period*Math.PI*2)*a.range;}
   if(a.type==='leaf'&&!frozen){if(a.missing>0){a.missing=Math.max(0,a.missing-dt);if(a.missing===0)a.crumble=0;}else if(a.crumble>0){a.crumble+=dt;if(a.crumble>.8){a.missing=3.2;a.crumble=0;}}}
@@ -128,7 +130,7 @@ function interactions(g,activated){
  if(activated){const portal=L.portals.find(r=>Math.hypot(p.x+14-r.x,p.y+20-r.y)<115);if(portal){portal.on=true;L.relays.find(r=>r.id===portal.id).on=true;p.x=portal.toX;p.y=portal.toY;p.vx=0;p.vy=0;p.onGround=false;p.standing=null;p.invul=1.5;g.respawn={x:p.x,y:p.y};g.checkpoint=true;g.warp=.6;g.camera=clamp(p.x-VIEW.w*.32,0,L.width-VIEW.w);g.cameraY=clamp(p.y-310,L.minY,0);emit(g,'portal',{x:p.x+14,y:p.y+20});}}
  for(const c of L.checkpoints)if(!c.active&&Math.abs(p.x-c.x)<60&&Math.abs(p.y+p.h-c.y)<70){c.active=true;g.checkpoint=true;g.respawn={x:c.x,y:c.y-40};p.hp=6;p.displayHP=6;p.hurtTimer=0;if(g.cart)g.cartCheckpoint=c.x;emit(g,'checkpoint',{x:c.x,y:c.y-50});}
  for(let i=0;i<L.route.length;i++){const r=L.route[i];if(Math.hypot(p.x+14-r.x,p.y+40-r.y)<150)g.progress=Math.max(g.progress,(i+1)/(L.route.length+1));}
- const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&(!g.printer||g.printer.ending.complete)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
+ const goal=L.goal;if(Math.abs(p.x+14-goal.x)<75&&Math.abs(p.y+p.h-goal.y)<100){if(L.relays.every(r=>r.optional||r.on)&&!pendingHandTask(g)&&(!g.printer||g.printer.ending.complete)&&(!L.boss||L.boss.repaired)){g.finished=true;g.progress=1;emit(g,'finish');}else if(!g.goalMessage||g.time-g.goalMessage>4){g.goalMessage=g.time;emit(g,'locked');}}
 }
 function simulateGame(g,input={},dt=1/120){
  if(g.finished||g.gameOver||g.repairSession)return;const p=g.player;if(tickDoor(g,input,dt,VIEW.w))return;g.time+=dt;g.elapsed+=dt;g.shake=Math.max(0,g.shake-dt);g.spawnGrace=Math.max(0,g.spawnGrace-dt);g.warp=Math.max(0,g.warp-dt);
@@ -137,7 +139,7 @@ function simulateGame(g,input={},dt=1/120){
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
- if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt);p.oldBottom=p.y+p.h;
+ if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt);tickHandRigs(g,input,dt);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else if(!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);

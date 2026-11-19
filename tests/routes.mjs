@@ -49,7 +49,22 @@ export function traverse(index,{limit=180,trace=false}={}){
    }else{const next=carriers.find(m=>p.x<m.x+140);tx=next?next.x+60:10535;jump=p.onGround;}
    left=p.x+14>tx+5;right=p.x+14<tx-5;pulse=g.cooldown<=0;
   }
-  updateGame(g,{left,right,jump,pulse},1/120);g.events=[];maxY=Math.min(maxY,p.y);
+  let interact=false;
+  if(L.handRigs){
+   const [tendon,grip]=L.handRigs;
+   const steer=x=>{left=p.x+14>x+4;right=p.x+14<x-4;jump=false;pulse=false;};
+   if(L.relays[0].on&&p.x>4100&&p.x<4410&&!tendon.locked&&Math.abs(p.y+40-tendon.y)<85){
+    steer(tendon.x);
+    const tension=(1-Math.cos(tendon.time*Math.PI))/2;
+    interact=Math.abs(p.x+14-tendon.x)<16&&(!tendon.paid||(tension>.45&&tension<.65));
+   }else if(tendon.locked&&tendon.extension<1&&p.x>4200&&p.x<4400)steer(tendon.x);
+   if(!L.relays[1].on&&p.x>7770&&p.x<8200){steer(L.relays[1].x);pulse=Math.abs(p.x+14-L.relays[1].x)<30&&Math.abs(p.y+20-L.relays[1].y)<70&&g.cooldown<=0;}
+   if(L.relays[1].on&&p.x>7850&&p.x<9000&&!grip.delivered){
+    if(!grip.paid){steer(grip.x);interact=Math.abs(p.x+14-grip.x)<16;}
+    else{const block=L.platforms.find(a=>a.gripSpecimen);steer(block.x+block.w/2);}
+   }
+  }
+  updateGame(g,{left,right,jump,pulse,interact},1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(wp===lastWP)stuck++;else{lastWP=wp;stuck=0;}
   if(trace&&f%1200===0)console.log(index+1,(f/120).toFixed(0),wp,Math.round(p.x),Math.round(p.y),p.hp,g.deaths,'target',target.x,target.y);
  }

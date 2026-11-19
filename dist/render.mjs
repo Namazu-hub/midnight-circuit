@@ -1,4 +1,4 @@
-import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.11.0';
+import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.11.1';
 import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
@@ -11,7 +11,7 @@ import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWor
 import {drawResearch} from './research.mjs?v=4.11.0';
 import {drawPrinter} from './printer-art.mjs?v=4.11.0';
 import {drawLab} from './laboratory.mjs?v=4.11.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.11.0';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.11.1';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -112,6 +112,7 @@ function background(c,theme,camera,t,width=VIEW.w,height=VIEW.h){
   for(let i=0;i<15;i++){const x=((i*179-camera*.12)%width+width)%width,y=90+(i*89)%390+Math.sin(t*.5+i)*8;rect(c,x,y,2,2,P.glow+'30');}
 }
 function platform(c,p,P,pulse,t,g=null){
+  if(p.gripSpecimen)return;
   const x=p.x,y=p.y,w=p.w;if(g?.pcb&&p.pcbManaged&&!platformSolid(g,p)){c.save();c.strokeStyle='#86afac66';c.setLineDash([5,7]);c.strokeRect(x,y,w,18);c.restore();return;}if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
   if(g?.level.benchMap&&['ground','platform'].includes(p.type)){if(platformSolid(g,p))benchSurface(c,p,g);return;}
   if(p.type==='ghost'){
