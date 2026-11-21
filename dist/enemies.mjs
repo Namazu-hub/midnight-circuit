@@ -67,7 +67,7 @@ export function tickEnemies(g,dt,hit){
  if(frozen)return;
  for(const q of g.projectiles){if(q.room&&q.room!==g.rooms?.active){q.life=0;continue;}
    q.life-=dt;if(q.gravity)q.vy+=q.gravity*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
-   if(q.kind==='bolt'&&g.level.platforms.some(a=>a.h>=60&&overlap(q,a)))q.life=0;
+   if(q.kind==='bolt'&&g.level.platforms.some(a=>a.h>=60&&!g.level.pulseGates?.[a.pulseGate]?.open&&overlap(q,a)))q.life=0;
    if(q.kind==='acid'&&g.level.relays.some(r=>r.mode==='titration'&&r.on))q.life=0;
    if(q.life>0&&overlap(p,q))hit(g,q.x);
  }

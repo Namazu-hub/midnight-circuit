@@ -1,8 +1,8 @@
-import {installBenchMachines} from './bench-machines.mjs?v=4.11.0';
+import {installBenchMachines} from './bench-machines.mjs?v=4.16.0';
 // Stage 1 only: stepped workbenches over two explorable service basements.
 export function redesignBench(L){
  L.relays=[{id:'bench-wire',x:7900,y:40,on:false,mode:'floor-sequence',worldRepair:true,step:0,contact:-1,label:'床ボタンの順序配線',effectText:'通電！ 光の橋が開通した'}];
- L.tip='床ボタンで配線。起動順序の記録は地下サーバールームに。';
+ L.tip='まず受信コイルのそばでパルス。敵が止まったら、開いた通路を進もう。';
  // Remove the introductory overhead tray and obsolete invisible repair stairs.
  L.platforms=L.platforms.filter(p=>!(p.x===260&&p.y===400));
  L.chips=L.chips.filter(p=>!(p.x===325&&p.y===365));
@@ -69,7 +69,9 @@ export function redesignBench(L){
  L.students.find(s=>s.name==='卒論中の学生').x=5490;
  L.students.find(s=>s.name==='卒論中の学生').y=surface(5490);
  L.students[0].x=160;
- Object.assign(L.enemies[0],{x:380,min:340,max:445});
+ Object.assign(L.enemies[0],{x:545,min:515,max:565});
+ const firstSpring=L.enemies.find(e=>e.kind==='spring'&&e.x===500);
+ if(firstSpring)Object.assign(firstSpring,{x:1860,min:1820,max:1880});
  L.chips.slice(0,4).forEach((c,i)=>{c.x=300+i*35;});
  L.vendorSites=[240,1350,3540,6360].map(x=>({x,y:surface(x)}));
  // Reward the descent without introducing an underground respawn trap.
@@ -77,7 +79,7 @@ export function redesignBench(L){
  // Structural walls have the same geometry in drawing and collision. Open tops
  // and the right-hand return shafts remain accessible.
  for(const [x,y,w,h] of [[3180,740,30,720],[4720,740,30,720],[5900,730,30,450],[7150,730,30,450]])L.platforms.push({x,y,w,h,type:'ground',benchSurface:true,benchWall:true});
- const extras=[[1500,510,'resistor'],[2800,450,'capacitor'],[3900,450,'resistor'],[5100,430,'resistor'],[6600,450,'capacitor'],[7350,510,'resistor'],[3800,1380,'resistor'],[6660,1100,'resistor']];
+ const extras=[[1240,510,'resistor'],[5690,510,'capacitor'],[1500,510,'resistor'],[2800,450,'capacitor'],[3900,450,'resistor'],[5100,430,'resistor'],[6600,450,'capacitor'],[7350,510,'resistor'],[3800,1380,'resistor'],[6660,1100,'resistor']];
  for(const [x,y,kind] of extras){const floor=y>700?y:surface(x);L.enemies.push({x,y:floor-28,baseY:floor-28,w:32,h:28,min:x-40,max:x+50,speed:42,dir:1,alive:true,kind,clock:0,state:'patrol',stateTime:0});}
  // Old shelves and expansion stairs used to occupy the same 10px band.
  // Merge intersecting surfaces at nearly equal heights, preserving the higher top.
@@ -91,6 +93,13 @@ export function redesignBench(L){
  L.platforms=other.concat(merged);
  extendCarrierCrossing(L);
  installBenchMachines(L);
+ // Both receivers sit on solid decking. The first latches; the second holds
+ // only for the pulse and waits for a robot in the doorway to clear it.
+ L.pulseGates=[{x:465,floor:510,timed:false},{x:3090,floor:510,timed:true}];
+ for(const [index,gate] of L.pulseGates.entries()){
+  Object.assign(gate,{receiver:gate.x-75,open:false});
+  L.platforms.push({x:gate.x,y:L.minY-100,w:28,h:800-L.minY+100,type:'ground',pulseGate:index});
+ }
  L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'サーバー記録室'},{x:5930,name:'夜勤の保守室'},{x:7500,name:'空中搬送・3台乗継'},{x:10500,name:'制御盤デッキ'}];
 }
 

@@ -35,6 +35,10 @@ export function traverse(index,{limit=180,trace=false}={}){
    const order=[1,0,2],b=L.wireButtons[order[L.relays[0].step]],tx=b.x+b.w/2;
    left=p.x+14>tx+5;right=p.x+14<tx-5;jump=L.relays[0].step===2&&p.onGround&&p.x<L.wireButtons[1].x+20;
   }
+  if(index===0){
+   const gate=L.pulseGates.find(gate=>!gate.open&&Math.abs(p.x+14-gate.receiver)<120);
+   if(gate){right=p.x+14<gate.receiver;left=false;jump=false;pulse=g.cooldown<=0;}
+  }
   // First cabinet cannot be cleared from the floor. Use the paid pressure
   // lift, wait for its ride, then jump its top; this remains ordinary input.
   if(index===0&&p.x>760&&p.x<1090&&wp>=1){

@@ -1,7 +1,7 @@
 import {drawBone} from './bio-enemies.mjs?v=4.15.1';
 import {pendingHandTask} from './hand-machines.mjs?v=4.15.1';
 import {drawBioLab,drawBioEnemy} from './biomimetic.mjs?v=4.15.1';
-import {drawBenchMachines} from './bench-machine-art.mjs?v=4.11.0';
+import {drawBenchMachines} from './bench-machine-art.mjs?v=4.16.0';
 import {drawBenchWiring} from './bench-wiring.mjs?v=4.11.0';
 import {benchSurface,drawBenchRooms,drawBenchBackdrop,drawBenchSupplies,drawBenchChat} from './bench-art.mjs?v=4.11.0';
 import {drawPCB,drawPCBOverlay,drawPCBBackdrop} from './pcb-art.mjs?v=4.14.0';
@@ -13,7 +13,7 @@ import {printerPlatform,drawPrinterChat,drawPrinterOverlay,drawPrinterStudentWor
 import {drawResearch} from './research.mjs?v=4.13.0';
 import {drawPrinter} from './printer-art.mjs?v=4.14.0';
 import {drawLab} from './laboratory.mjs?v=4.13.0';
-import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.15.1';
+import {VIEW,RULES,clamp,laserActive,laserPhase,lifeNotice,platformSolid,printedPhase,pressState} from './engine.mjs?v=4.16.0';
 const PALETTES={
   fever:{sky:'#190d2b',low:'#402843',line:'#85633e',deep:'#291b36',top:'#fff0b3',edge:'#c7a754',soil:'#453345',glow:'#ffdf89'},
   bench:{sky:'#111d30',low:'#1d3342',line:'#2a4657',deep:'#142331',top:'#71b7b1',edge:'#3b6e75',soil:'#223e4b',glow:'#75efce'},
@@ -116,6 +116,7 @@ function background(c,theme,camera,t,width=VIEW.w,height=VIEW.h){
 function platform(c,p,P,pulse,t,g=null){
   if(p.gripSpecimen)return;
   const x=p.x,y=p.y,w=p.w;if(g?.pcb&&p.pcbManaged&&!platformSolid(g,p)){c.save();c.strokeStyle='#86afac66';c.setLineDash([5,7]);c.strokeRect(x,y,w,18);c.restore();return;}if(g?.printer){printerPlatform(c,p,g,platformSolid(g,p));return;}
+  if(p.pulseGate!==undefined)return;
   if(g?.level.benchMap&&['ground','platform'].includes(p.type)){if(platformSolid(g,p))benchSurface(c,p,g);return;}
   if(p.type==='ghost'){
     c.save();if(g?!platformSolid(g,p):pulse<=0){c.globalAlpha=.45;c.setLineDash([7,6]);c.strokeStyle=P.glow;c.lineWidth=2;c.strokeRect(x+1,y+1,w-2,18);c.setLineDash([]);for(let j=12;j<w;j+=22)rect(c,x+j,y+8,3,3,P.glow);c.restore();return;}

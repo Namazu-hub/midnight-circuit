@@ -122,3 +122,25 @@ test('Stage 1 enemies return offscreen on a timer with a fresh defeat grant per 
  frames(g,2200);assert.equal(e.alive,true);assert.equal(g.research.earned,earned);
  e.alive=false;frames(g,5);assert.equal(g.research.earned,earned+15);
 });
+
+test('pulse shutters block walking, require local pulses and never close on PICO',()=>{
+ const g=createGame(0);
+ g.level.enemies=[];
+ const [first,timed]=g.level.pulseGates;
+ for(let n=0;n<160;n++)step(g,{right:true});
+ assert.equal(g.player.x+g.player.w,first.x);
+ step(g,{pulse:true});
+ for(let n=0;n<45;n++)step(g,{right:true});
+ assert.ok(first.open&&g.player.x>first.x);
+ assert.equal(timed.open,false);
+ Object.assign(g.player,{x:timed.receiver,y:timed.floor-40,vx:0,vy:0});
+ step(g,{pulse:true});
+ assert.equal(timed.open,false,'cooldown cannot trigger the second receiver');
+ for(let n=0;n<1200;n++)step(g);
+ step(g,{pulse:true});assert.equal(timed.open,true);
+ Object.assign(g.player,{x:timed.x,y:timed.floor-40});
+ for(let n=0;n<600;n++)step(g);
+ assert.equal(timed.open,true);
+ for(let n=0;n<60;n++)step(g,{right:true});
+ assert.equal(timed.open,false);assert.equal(first.open,true);
+});

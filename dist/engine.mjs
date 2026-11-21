@@ -1,7 +1,7 @@
 import {tickWireRun} from './bio-wire.mjs?v=4.15.1';
 import {tickSkeleton} from './wire-skeleton.mjs?v=4.15.1';
 import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.15.1';
-import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.11.0';
+import {moveBenchMachines,resetBenchMachines,benchMachineSolid,frameBenchPlayer} from './bench-machines.mjs?v=4.16.0';
 import {payRecovery} from './recovery.mjs?v=4.15.1';
 import {setupEnemyRespawns,recycleEnemies} from './enemy-respawn.mjs?v=4.11.0';
 import {tickBenchRoom} from './bench-room.mjs?v=4.13.0';
@@ -21,9 +21,9 @@ import {setupRepairStations} from './repair-stations.mjs?v=4.13.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.13.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.13.0';
 import {tickLab} from './laboratory.mjs?v=4.13.0';
-import {LEVELS} from './levels.mjs?v=4.15.1';
+import {LEVELS} from './levels.mjs?v=4.16.0';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
-import {tickEnemies} from './enemies.mjs?v=4.15.1';
+import {tickEnemies} from './enemies.mjs?v=4.16.0';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
 export {LEVELS,clamp,overlap,railAt};
 export const VIEW={w:1200,h:600};
@@ -141,7 +141,7 @@ function simulateGame(g,input={},dt=1/120){
  g.pulse=Math.max(0,g.pulse-dt);g.cooldown=Math.max(0,g.cooldown-dt);const activated=input.pulse&&g.cooldown<=0;
  if(activated&&nearbyRepair(g)&&!nearbyRepair(g).optional){beginRepair(g,nearbyRepair(g));emit(g,'repairOpen');return;}
  if(activated){g.pulse=g.fever?.pulseDuration||RULES.pulse;g.cooldown=g.fever?.attackCooldown||RULES.cooldown;g.projectiles=[];emit(g,'pulse',{x:p.x+14,y:p.y+20});}
- if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt);tickHandRigs(g,input,dt,activated);p.oldBottom=p.y+p.h;
+ if(g.printer)movePrinterFoes(g,dt);movePCB(g,dt);updateMachinery(g,dt);moveBenchMachines(g,dt,activated);tickHandRigs(g,input,dt,activated);p.oldBottom=p.y+p.h;
  if(g.cart)tickRail(g,input,dt);else if(!tickWireRun(g,input,activated,dt)&&!tickCable(g,input,dt))walk(g,input,dt);constrainRoom(g);constrainTethers(g);
  for(const [i,e] of g.level.enemies.entries())if(e.alive&&toolHit(g,e,'enemy-'+i)){e.alive=false;emit(g,'stomp',{x:e.x,y:e.y});}
  tickEnemies(g,dt,damage);tickSkeleton(g,activated,dt,damage);

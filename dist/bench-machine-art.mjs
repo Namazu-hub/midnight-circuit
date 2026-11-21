@@ -3,6 +3,18 @@ const box=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(
 const path=(c,points,col,w=3)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();};
 export function drawBenchMachines(c,g,reduced=false){
  if(!g.level.benchMachines)return;c.save();c.textAlign='center';
+ for(const gate of g.level.pulseGates||[]){
+  const {x,receiver,floor,open,timed}=gate, col=open?'#98f5cd':'#ffc677';
+  path(c,[[receiver,floor-38],[receiver,floor-8],[x+14,floor-8],[x+14,floor-195]],'#568c93',4);
+  box(c,receiver-14,floor-57,28,57,'#253e48');
+  for(let n=0;n<4;n++)box(c,receiver-19,floor-52+n*7,38,4,col);
+  // The shutter spans every reachable height; leave its guides when open.
+  box(c,x-3,-320,4,floor+320,'#385763');box(c,x+27,-320,4,floor+320,'#385763');
+  if(!open)for(let y=floor-16;y>-340;y-=18){box(c,x,y,28,16,'#51626a');box(c,x+3,y,22,3,'#97a8a5');}
+  c.fillStyle=col;c.font='bold 14px sans-serif';
+  c.fillText(open?(timed?Math.ceil(g.pulse)+' 秒 →':'開通 →'):(g.touchInput?'PULSE':'X / PULSE'),receiver,floor-75);
+  if(timed&&open)box(c,receiver-20,floor-67,40*Math.min(1,g.pulse/3),3,col);
+ }
  for(const m of g.level.benchMachines){
   const parts=g.level.platforms.filter(a=>a.benchMachine===m.id),a=parts[0],bridge=m.kind==='bridge',shuttle=m.kind==='shuttle',col=bridge?'#f2cb81':shuttle?'#a8dbea':'#98e8cc';
   const x=bridge?m.x:a.x,y=bridge?m.y:a.y,w=bridge?m.w:a.w;

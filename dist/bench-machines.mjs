@@ -20,14 +20,22 @@ export function installBenchMachines(L){
  L.drinks.push({x:2520,y:155});
 }
 export function benchMachineSolid(g,a){
+ if(a.pulseGate!==undefined)return !g.level.pulseGates[a.pulseGate].open;
  if(!a.benchMachine)return null;
  const m=g.level.benchMachines?.find(m=>m.id===a.benchMachine);
  return a.benchMachine!=='bridge'||!!m?.extended;
 }
 const pressed=(p,x,y,w)=>p.onGround&&Math.abs(p.y+p.h-y)<6&&p.x+p.w>x+8&&p.x<x+w-8;
-export function moveBenchMachines(g,dt){
+export function moveBenchMachines(g,dt,activated=false){
  if(!g.level.benchMachines)return;
  const p=g.player;
+ for(const gate of g.level.pulseGates||[]){
+  const near=Math.hypot(p.x+p.w/2-gate.receiver,p.y+p.h/2-(gate.floor-38))<160;
+  if(activated&&near&&(!gate.open||gate.timed)){
+   gate.open=true;
+   g.events.push({type:'actionStep',x:gate.receiver,y:gate.floor-42,text:gate.timed?'通電中！ シャッターを通過しよう':'通電！ シャッター開放'});
+  }else if(gate.timed&&g.pulse<=0&&(p.x+p.w<=gate.x||p.x>=gate.x+28))gate.open=false;
+ }
  for(const m of g.level.benchMachines){
   const parts=g.level.platforms.filter(a=>a.benchMachine===m.id),a=parts[0];
   const down=m.kind==='shuttle'?p.onGround&&p.standing===a.id:m.kind==='bridge'?pressed(p,m.x,m.y,m.w):pressed(p,a.x+a.w/2-27,a.y,54);
