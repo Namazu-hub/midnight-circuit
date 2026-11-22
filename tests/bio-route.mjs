@@ -49,6 +49,11 @@ export function traverseBio({limit=180,trace=false}={}){
    }
   }
   if(!g.rooms.transition&&['entry','grasp','link','extensor','pinch','palm'].includes(room)&&g.cooldown===0&&!input.interact&&L.enemies.some(e=>e.alive&&Math.abs(e.x-cx)<115&&Math.abs(e.y-p.y)<70))input.pulse=true;
+  const track=L.boostCourse;
+  if(room===track.room&&cx>=track.start-150&&cx<track.end+5){
+   steer(!p.boost&&!g.equipment.drinks?track.start-64:track.end+50);
+   input.drink=!p.boost&&g.equipment.drinks>0;
+  }
   updateGame(g,input,1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(g.repairSession)throw Error('Stage two opened a repair window');
   if(trace&&(last!==room||f%1200===0))console.log(f/120,room,Math.round(cx),Math.round(foot),g.research.funds,g.deaths);

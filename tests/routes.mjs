@@ -55,7 +55,14 @@ export function traverse(index,{limit=180,trace=false}={}){
    }else{const next=carriers.find(m=>p.x<m.x+140);tx=next?next.x+60:10535;jump=p.onGround;}
    left=p.x+14>tx+5;right=p.x+14<tx-5;pulse=g.cooldown<=0;
   }
-  updateGame(g,{left,right,jump,pulse},1/120);g.events=[];maxY=Math.min(maxY,p.y);
+  const track=L.boostCourse;
+  let drink=false;
+  if(track&&p.x+14>=track.start-155&&p.x+14<track.end+5){
+   jump=false;
+   const tx=!p.boost&&!g.equipment.drinks?track.start-64:track.end+50;
+   left=p.x+14>tx+4;right=p.x+14<tx-4;drink=!p.boost&&g.equipment.drinks>0;
+  }
+  updateGame(g,{left,right,jump,pulse,drink},1/120);g.events=[];maxY=Math.min(maxY,p.y);
   if(wp===lastWP)stuck++;else{lastWP=wp;stuck=0;}
   if(trace&&f%1200===0)console.log(index+1,(f/120).toFixed(0),wp,Math.round(p.x),Math.round(p.y),p.hp,g.deaths,'target',target.x,target.y);
  }

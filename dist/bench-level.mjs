@@ -100,6 +100,8 @@ export function redesignBench(L){
   Object.assign(gate,{receiver:gate.x-75,open:false});
   L.platforms.push({x:gate.x,y:L.minY-100,w:28,h:800-L.minY+100,type:'ground',pulseGate:index});
  }
+ L.boostCourse={start:4840,end:5000,floor:510,current:345,fee:10};
+ L.students.push({x:4765,y:510,name:'送風試験の学生',color:'#a6edba',lines:['今こそ！エナドリを決める時！']});
  L.sections=[{x:0,name:'研究机の稜線'},{x:3210,name:'サーバー記録室'},{x:5930,name:'夜勤の保守室'},{x:7500,name:'空中搬送・3台乗継'},{x:10500,name:'制御盤デッキ'}];
 }
 

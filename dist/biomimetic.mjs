@@ -20,6 +20,7 @@ export function redesignBiomimetic(L){
   ['extensor',11900,13400,-1580,0,'#31434e'],['palm',14000,15500,0,830,'#343246'],
   ['pinch',16300,17950,-1220,0,'#344653']
  ].map(([id,left,right,minY,maxY,ink])=>({id,left,right,minY,maxY,ink}));
+ L.boostCourse={room:'grasp',start:9220,end:9510,floor:510,current:355,fee:0};
  L.doors=[];
  const passage=(from,x,y,to,xx,yy,arrow,checks=[],backChecks=[])=>{
   const add=(room,x,y,to,toX,toY,arrow,checks)=>L.doors.push({id:room+'-'+to+'-'+x,room,x,y,to,toX,toY,arrow,checks,kind:'passage'});

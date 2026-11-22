@@ -1,3 +1,4 @@
+import {courseDrift} from './boost-course.mjs?v=4.17.0';
 import {tickWireRun} from './bio-wire.mjs?v=4.15.1';
 import {tickSkeleton} from './wire-skeleton.mjs?v=4.15.1';
 import {tickHandRigs,resetHandRide,pendingHandTask} from './hand-machines.mjs?v=4.15.1';
@@ -21,7 +22,7 @@ import {setupRepairStations} from './repair-stations.mjs?v=4.13.0';
 import {beginRepair,nearbyRepair} from './repairs.mjs?v=4.13.0';
 import {setupResearch,tickResearch} from './research.mjs?v=4.13.0';
 import {tickLab} from './laboratory.mjs?v=4.13.0';
-import {LEVELS} from './levels.mjs?v=4.16.0';
+import {LEVELS} from './levels.mjs?v=4.17.0';
 import {clamp,overlap,approach} from './world.mjs?v=4.11.0';
 import {tickEnemies} from './enemies.mjs?v=4.16.0';
 import {tickRail,resetRail,railAt} from './rail.mjs?v=4.11.0';
@@ -107,7 +108,7 @@ function walk(g,input,dt){
  if(input.jumpRelease&&p.vy<-220)p.vy*=.5;
  let windy=false;for(const w of L.winds)if(overlap(p,w)){windy=true;p.vy-=2430*dt;}
  p.vy=clamp(p.vy+RULES.gravity*(zone?.scale||1)*dt,windy?-360:-1000,900);
- const oldX=p.x;p.x=clamp(p.x+p.vx*dt,0,L.width-p.w);
+ const oldX=p.x;p.x=clamp(p.x+p.vx*dt+courseDrift(g,dt),0,L.width-p.w);
  for(const a of L.platforms){if(a.h<60||!platformSolid(g,a)||!overlap(p,a))continue;if(oldX+p.w<=a.x+1){p.x=a.x-p.w;p.vx=0;}else if(oldX>=a.x+a.w-1){p.x=a.x+a.w;p.vx=0;}}
  const oldBottom=p.y+p.h;p.oldBottom=oldBottom;p.y+=p.vy*dt;p.onGround=false;p.standing=null;let landing=null;
  for(const a of L.platforms){if(!platformSolid(g,a))continue;
@@ -122,6 +123,16 @@ function walk(g,input,dt){
 }
 function interactions(g,activated){
  const p=g.player,L=g.level;
+ const course=L.boostCourse;
+ if(course&&!g.equipment.drinks&&p.boost<=0){
+  const x=course.start-64;
+  if(Math.abs(p.x+14-x)<48&&Math.abs(p.y+p.h-course.floor)<75&&g.research.funds>=course.fee){
+   if(collectDrink(g,{x,y:course.floor-40})){
+    g.research.funds-=course.fee;
+    emit(g,'actionStep',{x,y:course.floor-60,text:course.fee?'試験缶 −¥'+course.fee:'試験缶を補給'});
+   }
+  }
+ }
  for(const c of L.chips)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<30){c.got=true;g.chips++;emit(g,'chip',c);}
  for(const c of L.drinks)if(!c.got&&Math.hypot(p.x+14-c.x,p.y+20-c.y)<36){
   const cost=L.benchMap?10:0;
